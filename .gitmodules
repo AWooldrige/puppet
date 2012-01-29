@@ -1,3 +1,0 @@
-[submodule "modules/puppet-users"]
-    path = modules/puppet-users
-    url = git://github.com/dcsobral/puppet-users.git
