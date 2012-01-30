@@ -1,0 +1,39 @@
+" Tabs as 4 spaces
+set tabstop=4
+set shiftwidth=4
+set expandtab
+
+" Line numbering
+set number
+
+" Long history
+set history=400
+
+" Syntax highlighting
+syntax on
+filetype on
+filetype plugin on
+au BufNewFile,BufRead *.spv set filetype=php
+au BufNewFile,BufRead *.vcl set filetype=c
+
+" Good to see the limit for line width
+set colorcolumn=80
+
+" Close the buffer when closing the tab
+set nohidden
+
+" Make trailing whitespace highlight red
+highlight SpecialKey ctermfg=White ctermbg=Red
+set listchars=tab:>-,trail:$,extends:>,precedes:<,nbsp:$
+set list
+
+" Code folding, use zm & zr, zM & zR
+set foldmethod=indent
+set foldnestmax=10
+set nofoldenable
+
+" Key Mappings
+noremap <D-n> :NERDTreeToggle<CR>
+noremap <D-T> :TlistToggle<CR>
+noremap <silent> <Space> :set hlsearch! hlsearch?<CR>
+map <Tab> <C-w>w
