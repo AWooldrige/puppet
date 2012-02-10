@@ -24,6 +24,8 @@ node default {
         mode    => '644',
         require => package['vim'],
     }
+
+
     package { 'tmux':
         ensure => latest,
     }
@@ -42,8 +44,9 @@ node default {
 }
 node "metis.woolie.co.uk" {
 }
-
 node "agw-netbook" inherits default {
 }
 node "dev.local" inherits default {
+}
+node "eros.woolie.co.uk" inherits default {
 }
