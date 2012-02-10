@@ -3,3 +3,15 @@ Puppet Configurations
 No puppetmaster is needed to apply these configurations, simply:
 
     puppet apply --modulepath=./modules manifests/sites.pp -vv
+
+
+Initial System Bootstrap
+--------------------------------
+Run the following if configuring a new system.
+
+    apt-get install puppet git;
+    mkdir /etc/puppet/git-distributed;
+    cd /etc/puppet/git-distributed;
+    git clone http://github.com/AWooldrige/puppet.git;
+    cd puppet;
+    puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
