@@ -1,0 +1,16 @@
+#!/bin/bash
+cd /etc/puppet/git-distributed/puppet/;
+NOTUPDATED=`git pull | grep 'Already up-to-date' | head -n 1 | sed 's/ *$//g'`;
+
+if /usr/bin/[ "$NOTUPDATED" = "Already up-to-date." ]; then
+    UPDATENEEDED=false
+else
+    UPDATENEEDED=true
+fi
+
+if $UPDATENEEDED ; then
+    /bin/echo 'We need an update'
+    /usr/bin/puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
+else
+    /bin/echo 'No update here'
+fi
