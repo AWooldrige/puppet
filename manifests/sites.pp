@@ -41,6 +41,8 @@ node default {
                     "strace",
                     "sudo" ]
     package { $enhancers: ensure => "installed" }
+
+    include puppet-auto-update
 }
 node "metis.woolie.co.uk" {
 }
