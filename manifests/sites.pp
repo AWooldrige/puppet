@@ -3,7 +3,7 @@ node default {
         ensure  => present,
         uid     => '1500',
         gid     => 'woolie',
-        groups  => 'woolie,sshallowedlogin',
+        groups  => ['woolie', 'sshallowedlogin'],
         shell   => '/bin/bash',
         home    => '/home/woolie',
         managehome => true,
