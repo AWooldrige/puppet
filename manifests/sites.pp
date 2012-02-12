@@ -19,6 +19,9 @@ node default {
         user => "woolie",
         require => Package['openssh-server']
     }
+    group { "sshallowedlogin":
+        ensure  => present,
+    }
     package { 'openssh-server':
         ensure => latest,
     }
@@ -27,7 +30,7 @@ node default {
         owner   => 'root',
         group   => 'root',
         mode    => '644',
-        require => Package['openssh-server'],
+        require => [Package['openssh-server'], Group['sshallowedlogin']]
     }
 
 
