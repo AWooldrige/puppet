@@ -63,6 +63,7 @@ node default {
     package { $enhancers: ensure => "installed" }
 
     include puppet-auto-update
+    include ntp
 }
 node "metis.woolie.co.uk" {
 }
