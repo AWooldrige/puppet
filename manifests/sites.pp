@@ -46,16 +46,6 @@ node default {
     }
 
 
-    package { 'tmux':
-        ensure => latest,
-    }
-    file { '/etc/tmux.conf':
-        source  => 'puppet:///modules/tmux/tmux.conf',
-        owner   => 'root',
-        group   => 'root',
-        mode    => '644',
-        require => package['tmux'],
-    }
 
     $enhancers = [  "tree",
                     "strace",
@@ -64,6 +54,7 @@ node default {
 
     include puppet-auto-update
     include ntp
+    include tmux
 }
 node "metis.woolie.co.uk" {
 }
