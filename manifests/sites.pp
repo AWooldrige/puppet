@@ -21,8 +21,7 @@ node default {
     }
 
     $enhancers = [  "tree",
-                    "strace",
-                    "sudo" ]
+                    "strace"]
     package { $enhancers: ensure => "installed" }
 
     include puppet-auto-update
@@ -30,6 +29,7 @@ node default {
     include tmux
     include vim
     include sshd
+    include sudo
 }
 node "metis.woolie.co.uk" {
 }
