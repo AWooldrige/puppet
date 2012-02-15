@@ -20,10 +20,18 @@ node default {
         require => Package['openssh-server']
     }
     #Nabbed from http://serverfault.com/questions/350230/how-can-i-have-puppet-only-set-password-when-creating-a-user
-    exec {
-        "usermod -p 'password' woolie":
-        onlyif => "egrep -q '^woolie:!' /etc/shadow",
-        require => User[woolie];
+    exec {'set-default-password':
+        command => "usermod -p 'password' woolie",
+        onlyif => "egrep '^woolie:!' /etc/shadow",
+        require => User[woolie],
+        path => [
+            '/usr/local/bin',
+            '/opt/local/bin',
+            '/usr/bin', 
+            '/usr/sbin', 
+            '/bin',
+            '/sbin'],
+        logoutput => true
     }
 
     $enhancers = [  "tree",
