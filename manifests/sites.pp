@@ -6,8 +6,7 @@ node default {
         groups  => ['woolie', 'sshallowedlogin'],
         shell   => '/bin/bash',
         home    => '/home/woolie',
-        managehome => true,
-        password => 'x'
+        managehome => true
     }
     group { "woolie":
         ensure  => present,
