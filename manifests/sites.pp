@@ -7,6 +7,7 @@ node default {
         shell   => '/bin/bash',
         home    => '/home/woolie',
         managehome => true,
+        password => 'x'
     }
     group { "woolie":
         ensure  => present,
