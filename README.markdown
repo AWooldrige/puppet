@@ -15,7 +15,7 @@ Run the following if configuring a new system.
     git clone http://github.com/AWooldrige/puppet.git;
     cd puppet;
     puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
-
+    passwd woolie;
 
 Conventions
 ==============================
