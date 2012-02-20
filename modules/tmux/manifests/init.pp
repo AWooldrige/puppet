@@ -7,6 +7,6 @@ class tmux {
         owner   => 'root',
         group   => 'root',
         mode    => '644',
-        require => package['tmux'],
+        require => Package['tmux'],
     }
 }
