@@ -1,5 +1,5 @@
 class gvim {
-    package { 'gvim-gnome':
+    package { 'vim-gnome':
         ensure => latest,
     }
     file { '/etc/vim/gvimrc.local':
@@ -7,6 +7,6 @@ class gvim {
         owner   => 'root',
         group   => 'root',
         mode    => '644',
-        require => Package['gvim-gnome'],
+        require => Package['vim-gnome'],
     }
 }
