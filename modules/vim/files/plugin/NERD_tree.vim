@@ -1,3 +1,6 @@
+"#########################################################################
+"##   This file is controlled by Puppet - changes will be overwritten   ##
+"#########################################################################
 " ============================================================================
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer

@@ -1,7 +1,6 @@
-###
-# This file is controlled by Puppet - do not edit
-###
-
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
 #
 # This file MUST be edited with the 'visudo' command as root.
 #

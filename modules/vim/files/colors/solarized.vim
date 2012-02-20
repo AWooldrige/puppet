@@ -1,3 +1,6 @@
+"#########################################################################
+"##   This file is controlled by Puppet - changes will be overwritten   ##
+"#########################################################################
 " Name:     Solarized vim colorscheme
 " Author:   Ethan Schoonover <es@ethanschoonover.com>
 " URL:      http://ethanschoonover.com/solarized

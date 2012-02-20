@@ -1,3 +1,6 @@
+"#########################################################################
+"##   This file is controlled by Puppet - changes will be overwritten   ##
+"#########################################################################
 " Maintainer:	Lars H. Nielsen (dengmao@gmail.com)
 " Last Change:	January 22 2007
 

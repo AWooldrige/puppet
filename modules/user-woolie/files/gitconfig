@@ -1,3 +1,7 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
 [user]
     name = Alistair Wooldrige
     email = agw@woolie.co.uk

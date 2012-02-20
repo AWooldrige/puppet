@@ -1,4 +1,8 @@
 #!/bin/bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
 cd /etc/puppet/git-distributed/puppet/;
 NOTUPDATED=`git pull | grep 'Fast-forward' | head -n 1 | sed 's/ *$//g'`;
 

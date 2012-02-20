@@ -1,3 +1,7 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
 Host glen
     Hostname melbourn.homeunix.net
     User glen
