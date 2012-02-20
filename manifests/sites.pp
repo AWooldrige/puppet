@@ -42,6 +42,7 @@ node default-desktop inherits default {
 node "agw-nc10" inherits default-desktop {
 }
 node "agw-inspiron-1720" inherits default-desktop {
+    include httpd
 }
 
 

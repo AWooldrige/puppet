@@ -37,7 +37,7 @@ set foldnestmax=10
 set nofoldenable
 
 " Key Mappings
-noremap <D-n> :NERDTreeToggle<CR>
-noremap <D-T> :TlistToggle<CR>
+noremap <A-n> :NERDTreeToggle<CR>
+noremap <A-T> :TlistToggle<CR>
 noremap <silent> <Space> :set hlsearch! hlsearch?<CR>
 map <Tab> <C-w>w
