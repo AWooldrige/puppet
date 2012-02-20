@@ -1,7 +1,6 @@
 node default {
     user {"woolie":
         ensure  => present,
-        uid     => '1500',
         gid     => 'woolie',
         groups  => ['woolie', 'sshallowedlogin'],
         shell   => '/bin/bash',
@@ -10,7 +9,6 @@ node default {
     }
     group { "woolie":
         ensure  => present,
-        gid => '1500',
     }
     ssh_authorized_key { "woolie":
         ensure => "present",
@@ -20,22 +18,34 @@ node default {
         require => Package['openssh-server']
     }
 
-    $enhancers = [  "tree",
-                    "strace"]
+    $enhancers = ["tree",
+                  "strace"]
     package { $enhancers: ensure => "installed" }
 
     include puppet-auto-update
     include ntp
     include tmux
     include vim
-    include sshd
     include sudo
 }
-node "metis.woolie.co.uk" {
+node default-server inherits default {
+    include sshd
 }
-node "agw-netbook" inherits default {
+
+node default-desktop inherits default {
 }
-node "dev.local" inherits default {
+
+
+
+node "agw-netbook" inherits default-desktop {
 }
-node "eros.woolie.co.uk" inherits default {
+node "agw-inspiron-1720" inherits default-desktop {
+}
+
+
+node "metis.woolie.co.uk" inherits default-server {
+}
+node "eros.woolie.co.uk" inherits default-server {
+}
+node "dev.local" inherits default-server {
 }
