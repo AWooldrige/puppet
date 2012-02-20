@@ -5,7 +5,7 @@ class user-woolie {
         ensure  => directory,
         owner   => 'woolie',
         group   => 'woolie',
-        mode    => '400',
+        mode    => '700',
     }
 
 
@@ -14,14 +14,14 @@ class user-woolie {
         ensure  => directory,
         owner   => 'woolie',
         group   => 'woolie',
-        mode    => '400',
+        mode    => '700',
         require => File['/home/woolie']
     }
     file { '/home/woolie/.ssh/config':
         source  => 'puppet:///modules/user-woolie/ssh/config',
         owner   => 'woolie',
         group   => 'woolie',
-        mode    => '400',
+        mode    => '600',
         require => File['/home/woolie/.ssh']
     }
 
@@ -31,7 +31,7 @@ class user-woolie {
         source  => 'puppet:///modules/user-woolie/gitconfig',
         owner   => 'woolie',
         group   => 'woolie',
-        mode    => '400',
+        mode    => '600',
         require => File['/home/woolie']
     }
 }
