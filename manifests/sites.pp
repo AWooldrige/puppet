@@ -39,7 +39,7 @@ node default-desktop inherits default {
 
 
 
-node "agw-netbook" inherits default-desktop {
+node "agw-nc10" inherits default-desktop {
 }
 node "agw-inspiron-1720" inherits default-desktop {
 }
