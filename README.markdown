@@ -9,7 +9,7 @@ Initial System Bootstrap
 --------------------------------
 Run the following if configuring a new system.
 
-    apt-get install puppet git;
+    apt-get install -y puppet git;
     mkdir /etc/puppet/git-distributed;
     cd /etc/puppet/git-distributed;
     git clone http://github.com/AWooldrige/puppet.git;
@@ -24,6 +24,6 @@ Files
 ------------------------------
 Each file should be prepended with the following text. Don't forget to change the comment specifier.
 
-    ###
-    # This file is controlled by Puppet - do not edit
-    ###
+    #########################################################################
+    ##   This file is controlled by Puppet - changes will be overwritten   ##
+    #########################################################################
