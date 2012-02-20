@@ -33,6 +33,7 @@ node default-server inherits default {
 }
 
 node default-desktop inherits default {
+    include user-woolie
 }
 
 
