@@ -27,9 +27,9 @@ node default {
     include tmux
     include vim
     include sudo
+    include sshd
 }
 node default-server inherits default {
-    include sshd
 }
 
 node default-desktop inherits default {
