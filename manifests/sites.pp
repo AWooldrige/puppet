@@ -19,7 +19,8 @@ node default {
     }
 
     $enhancers = ["tree",
-                  "strace"]
+                  "strace",
+                  "ack"]
     package { $enhancers: ensure => "installed" }
 
     include puppet-auto-update
@@ -30,11 +31,14 @@ node default {
     include sshd
 }
 node default-server inherits default {
+    include zend-framework
 }
 
 node default-desktop inherits default {
     include user-woolie
     include gvim
+    include devtools
+    include standard-desktop
 }
 
 
