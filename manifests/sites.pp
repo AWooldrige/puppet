@@ -39,6 +39,9 @@ node default-desktop inherits default {
     include gvim
     include devtools
     include standard-desktop
+
+
+    include zend-framework
 }
 
 
