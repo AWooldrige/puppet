@@ -1,4 +1,9 @@
 class devtools {
+
+    package { 'php-pear':
+        ensure => latest
+    }
+
     # PHPUnit can't be installed with apt, as it doesn't come
     # with all dependancies
     package { 'phpunit':
@@ -13,6 +18,8 @@ class devtools {
             '/usr/sbin',
             '/bin',
             '/sbin'],
-        require => Package['phpunit']
+        require => [ Package['phpunit'],
+                     Package['php-pear'] ],
+        unless => 'pear list -c phpunit | grep PHPUnit'
     }
 }
