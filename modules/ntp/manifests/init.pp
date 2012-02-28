@@ -18,7 +18,8 @@ class ntp {
             '/usr/bin',
             '/usr/sbin',
             '/bin',
-            '/sbin']
+            '/sbin'],
+        refreshonly => true
     }
 
     package { "ntp":
