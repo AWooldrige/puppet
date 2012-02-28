@@ -35,7 +35,8 @@ node "agw-nc10" inherits default-desktop {
 }
 node "agw-inspiron-1720" inherits default-desktop {
 }
-
+node "dev-vm" inherits default-desktop {
+}
 
 node "metis.woolie.co.uk" inherits default-server {
 }
