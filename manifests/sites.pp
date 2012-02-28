@@ -20,7 +20,8 @@ node default {
 
     $enhancers = ["tree",
                   "strace",
-                  "ack"]
+                  "ack",
+                  "iotop"]
     package { $enhancers: ensure => "installed" }
 
     include puppet-auto-update
