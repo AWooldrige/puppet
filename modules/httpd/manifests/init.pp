@@ -1,10 +1,9 @@
 class httpd {
-    package { "apache2":
+    package { [ "apache2", "apache2-mpm-prefork" ]:
         ensure => latest
     }
 
-/*
-    package { ["apache2-mpm-event", "apache2-mpm-perchild", "apache2-mpm-prefork"]:
+    package { ["apache2-mpm-event", "apache2-mpm-perchild", "apache2-mpm-worker"]:
         ensure => absent,
     }
     file { "/etc/apache2/conf.d/fqdn":
@@ -47,6 +46,8 @@ class httpd {
 
 
 
+    /**
+     * The following grabbed from:
     define module ( $ensure = 'present') {
         case $ensure {
             'enabled' : {
@@ -66,5 +67,5 @@ class httpd {
             default: { err ( "Unknown ensure value: '$ensure'" ) }
         }
   }
-*/
+     */
 }
