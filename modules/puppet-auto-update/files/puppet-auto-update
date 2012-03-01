@@ -2,20 +2,22 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+# TODO
+# Improve return codes
+# Add git submodule update
 
 cd /etc/puppet/git-distributed/puppet/;
-NOTUPDATED=`git pull | grep 'Fast-forward' | head -n 1 | sed 's/ *$//g'`;
+NOTUPDATED=`/usr/bin/git pull | /bin/grep 'Fast-forward' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g'`;
 
 if /usr/bin/[ "$NOTUPDATED" = "Fast-forward" ]; then
     UPDATENEEDED=true
+
 else
     UPDATENEEDED=false
 fi
 
 TIMENOW=`/bin/date`
 if $UPDATENEEDED ; then
-    /bin/echo $TIMENOW" - New files found from git pull, running puppet apply" >> /var/log/puppet-auto-update;
+    /bin/echo $TIMENOW" - New files found from git pull, running puppet apply" >> /var/log/puppet/git-distributed-auto-update;
     /usr/bin/puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
-#else
-#    /bin/echo $TIMENOW" - No new files from git pull, not running puppet apply" >> /var/log/puppet-auto-update;
 fi
