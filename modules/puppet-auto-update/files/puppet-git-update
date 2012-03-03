@@ -1,0 +1,27 @@
+#!/bin/bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+cd /etc/puppet/git-distributed/puppet/;
+
+# Update main repo, check that all submodules are initialised and updated
+MAIN=`/usr/bin/git pull origin master` || exit $?
+TRIGGER=`/bin/echo $MAIN | /bin/grep 'Fast-forward' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g'` || echo $?
+
+/usr/bin/git submodule init || exit $?
+/usr/bin/git submodule sync || exit $?
+/usr/bin/git submodule update || exit $?
+
+# Do we need to run puppet?
+if /usr/bin/[ "$TRIGGER" = "Fast-forward" ]; then
+    UPDATENEEDED=true
+else
+    UPDATENEEDED=false
+fi
+
+TIMENOW=`/bin/date`
+if $UPDATENEEDED ; then
+    /bin/echo $TIMENOW" - New files found from git pull, running puppet apply" >> /var/log/puppet/git-distributed-auto-update;
+    /usr/bin/puppet-run || exit $?
+fi

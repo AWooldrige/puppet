@@ -1,0 +1,10 @@
+#!/bin/bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+if /usr/bin/[ `ps a | grep puppe[t] | wc -l` = 0 ]; then
+    exit 1;
+fi
+
+/usr/bin/puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp;

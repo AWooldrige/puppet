@@ -7,7 +7,11 @@ No puppetmaster is needed to apply these configurations, simply:
 
 Initial System Bootstrap
 --------------------------------
-Run the following if configuring a new system.
+Firstly, set the hostname.
+
+    hostname agw-nc10.woolie.co.uk
+
+Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) to `/etc/hosts`. Run the following if configuring a new system.
 
     apt-get install -y puppet git;
     mkdir /etc/puppet/git-distributed;
@@ -16,6 +20,7 @@ Run the following if configuring a new system.
     cd puppet;
     puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
     passwd woolie;
+
 
 Conventions
 ==============================
@@ -27,3 +32,15 @@ Each file should be prepended with the following text. Don't forget to change th
     #########################################################################
     ##   This file is controlled by Puppet - changes will be overwritten   ##
     #########################################################################
+
+Notes
+==============================
+
+Updating Submodule Versions
+------------------------------
+ * Clone this master repo
+ * `cd` into submodule directory
+ * `git pull origin master`
+ * `cd` back to main repo
+ * `git st` should show new commits
+ * `git commit`
