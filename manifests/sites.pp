@@ -1,10 +1,14 @@
 node default {
 
-    $enhancers = ["tree",
-                  "strace",
-                  "ack",
-                  "iotop"]
-    package { $enhancers: ensure => "installed" }
+    $enhancers = [
+        "tree",
+        "strace",
+        "ack",
+        "iotop"
+    ]
+    package { $enhancers:
+        ensure => "installed"
+    }
 
     include user-woolie
     include puppet-auto-update
@@ -20,16 +24,25 @@ node default-server inherits default {
         http_port => 80,
         https_port => 443
     }
-    $enabled = [ 'rewrite',
-                 'authz_groupfile',
-                 'ssl']
-    $disabled = [ 'auth_basic',
-                  'authz_default',
-                  'authz_host',
-                  'authz_user',
-                  'autoindex',
-                  'cgi',
-                  'authn_file' ]
+
+    /**
+     * authz_groupfile and authz_host are needed otherwise the Order statement
+     * isn't available
+     */
+    $enabled = [
+        'rewrite',
+        'authz_groupfile',
+        'authz_host',
+        'ssl'
+    ]
+    $disabled = [
+        'cgi',
+        'authz_default',
+        'auth_basic',
+        'authz_user',
+        'autoindex',
+        'authn_file'
+    ]
     httpd::module { $enabled:
         ensure => enabled
     }
@@ -42,23 +55,34 @@ node default-desktop inherits default {
     include gvim
     include devtools
     include standard-desktop
-
+}
+node development-desktop inherits default-desktop {
 
     include zend-framework
+
     class { 'httpd' :
         http_port => 80,
         https_port => 443
     }
-    $enabled = [ 'rewrite',
-                 'authz_groupfile',
-                 'ssl']
-    $disabled = [ 'auth_basic',
-                  'authz_default',
-                  'authz_host',
-                  'authz_user',
-                  'autoindex',
-                  'cgi',
-                  'authn_file' ]
+
+    /**
+     * authz_groupfile and authz_host are needed otherwise the Order statement
+     * isn't available
+     */
+    $enabled = [
+        'rewrite',
+        'authz_groupfile',
+        'authz_host',
+        'ssl'
+    ]
+    $disabled = [
+        'cgi',
+        'authz_default',
+        'auth_basic',
+        'authz_user',
+        'autoindex',
+        'authn_file'
+    ]
     httpd::module { $enabled:
         ensure => enabled
     }
@@ -68,10 +92,9 @@ node default-desktop inherits default {
 }
 
 
-
-node "agw-nc10" inherits default-desktop {
+node "agw-nc10" inherits development-desktop {
 }
-node "agw-inspiron-1720" inherits default-desktop {
+node "agw-inspiron-1720" inherits development-desktop {
 }
 node "dev-vm" inherits default-desktop {
 }
