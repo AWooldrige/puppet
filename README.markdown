@@ -9,7 +9,8 @@ Initial System Bootstrap
 --------------------------------
 Firstly, set the hostname.
 
-    hostname agw-nc10.woolie.co.uk
+    echo agw-nc10.woolie.co.uk > /etc/hostname
+    service hostname start
 
 Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) to `/etc/hosts`. Run the following if configuring a new system.
 

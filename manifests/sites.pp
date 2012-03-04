@@ -16,7 +16,15 @@ node default {
 }
 node default-server inherits default {
     include zend-framework
-    include httpd
+    class { 'httpd' :
+        http_port => 80,
+        https_port => 443
+    }
+
+    $modules = ['rewrite', 'ssl']
+    httpd::module { $modules:
+        ensure => enabled
+    }
 }
 
 node default-desktop inherits default {
@@ -26,7 +34,28 @@ node default-desktop inherits default {
 
 
     include zend-framework
-    include httpd
+    class { 'httpd' :
+        http_port => 80,
+        https_port => 443
+    }
+
+    $enabled = [ 'rewrite',
+                 'authz_groupfile',
+                 'ssl']
+    httpd::module { $enabled:
+        ensure => enabled
+    }
+
+    $disabled = [ 'auth_basic',
+                  'authz_default',
+                  'authz_host',
+                  'authz_user',
+                  'autoindex',
+                  'cgi',
+                  'authn_file' ]
+    httpd::module { $disabled:
+        ensure => disabled
+    }
 }
 
 
