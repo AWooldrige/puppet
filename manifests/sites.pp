@@ -20,10 +20,21 @@ node default-server inherits default {
         http_port => 80,
         https_port => 443
     }
-
-    $modules = ['rewrite', 'ssl']
-    httpd::module { $modules:
+    $enabled = [ 'rewrite',
+                 'authz_groupfile',
+                 'ssl']
+    $disabled = [ 'auth_basic',
+                  'authz_default',
+                  'authz_host',
+                  'authz_user',
+                  'autoindex',
+                  'cgi',
+                  'authn_file' ]
+    httpd::module { $enabled:
         ensure => enabled
+    }
+    httpd::module { $disabled:
+        ensure => disabled
     }
 }
 
@@ -38,14 +49,9 @@ node default-desktop inherits default {
         http_port => 80,
         https_port => 443
     }
-
     $enabled = [ 'rewrite',
                  'authz_groupfile',
                  'ssl']
-    httpd::module { $enabled:
-        ensure => enabled
-    }
-
     $disabled = [ 'auth_basic',
                   'authz_default',
                   'authz_host',
@@ -53,6 +59,9 @@ node default-desktop inherits default {
                   'autoindex',
                   'cgi',
                   'authn_file' ]
+    httpd::module { $enabled:
+        ensure => enabled
+    }
     httpd::module { $disabled:
         ensure => disabled
     }
