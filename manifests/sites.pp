@@ -3,11 +3,17 @@ node default {
     $enhancers = [
         "tree",
         "strace",
-        "ack",
+        "ack-grep",
         "iotop"
     ]
     package { $enhancers:
-        ensure => "installed"
+        ensure => installed
+    }
+    $notneeded = [
+        "ack",
+    ]
+    package { $notneeded:
+        ensure => purged
     }
 
     include user-woolie
@@ -17,6 +23,7 @@ node default {
     include vim
     include sudo
     include sshd
+    include bash
 }
 node default-server inherits default {
     include zend-framework

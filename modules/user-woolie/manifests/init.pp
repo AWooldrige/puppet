@@ -52,4 +52,10 @@ class user-woolie {
         require => File['/home/woolie']
     }
 
+    file { "/home/woolie/.bashrc":
+        owner   => 'woolie',
+        group   => 'woolie',
+        mode    => '600',
+        content => template("bash/bashrc"),
+    }
 }
