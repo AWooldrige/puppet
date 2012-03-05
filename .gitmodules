@@ -1,3 +1,3 @@
-[submodule "modules/puppet-module-apt"]
-	path = modules/puppet-module-apt
+[submodule "modules/apt"]
+	path = modules/apt
 	url = http://github.com/AWooldrige/puppet-module-apt
