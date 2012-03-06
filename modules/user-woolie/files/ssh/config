@@ -1,14 +1,21 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+Host *
+    Compression yes
+    CompressionLevel 9
+    ForwardAgent yes
 
+
+
+#########################################################################
+# Personal Machines
+#########################################################################
 Host glen
     Hostname melbourn.homeunix.net
     User glen
     Port 12345
     IdentityFile /home/woolie/.ssh/id_rsa_glen
-    Compression yes
-    CompressionLevel 9
     LocalForward 5900  localhost:5900
     LocalForward 5800  localhost:5800
 
@@ -17,61 +24,30 @@ Host glen-local
     User glen
     Port 12345
     IdentityFile /home/woolie/.ssh/id_rsa_glen
-    Compression yes
-    CompressionLevel 9
     LocalForward 5900  localhost:5900
     LocalForward 5800  localhost:5800
 
 Host apollo
     Hostname apollo.woolie.co.uk
     User woolie
-    Port 22
-    Compression yes
-    CompressionLevel 9
     IdentityFile /home/woolie/.ssh/id_rsa_apollo
 
-Host apollo-local
-    Hostname 192.168.0.199
-    User woolie
-    Port 22
-    IdentityFile /home/woolie/.ssh/id_rsa_apollo
 
-Host erida
-    Hostname 87.239.22.220
-    User woolie
-    Port 22
-    IdentityFile /home/woolie/.ssh/id_rsa_erida
-    Compression yes
-    CompressionLevel 9
 
-Host bakop
-    Hostname host1.bakop.com
-    User woolie
-    Port 22
-    IdentityFile /home/woolie/.ssh/id_rsa_bakop
-    Compression yes
-    CompressionLevel 9
-
-Host aws
-    Hostname ec2-46-137-40-51.eu-west-1.compute.amazonaws.com
-    User ubuntu
-    Port 22
-    Compression yes
-    CompressionLevel 9
-    IdentityFile /home/woolie/.ssh/agwawskey.pem
-
+#########################################################################
+# Production
+#########################################################################
 Host metis
     Hostname metis.woolie.co.uk
     User woolie
-    Port 22
     IdentityFile /home/woolie/.ssh/id_rsa_metis
-    Compression yes
-    CompressionLevel 9
 
 Host eros
     Hostname eros.woolie.co.uk
     User woolie
-    Port 22
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
-    Compression yes
-    CompressionLevel 9
+
+Host bakop
+    Hostname host1.bakop.com
+    User woolie
+    IdentityFile /home/woolie/.ssh/id_rsa_bakop
