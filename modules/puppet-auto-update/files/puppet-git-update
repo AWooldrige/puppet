@@ -2,6 +2,9 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+LOGFILE="/var/log/puppet/puppet-git-update"
+
+/bin/echo `/bin/date`" === RUNNING puppet-git-update ===" >> $LOGFILE
 
 cd /etc/puppet/git-distributed/puppet/;
 
@@ -15,13 +18,14 @@ TRIGGER=`/bin/echo $MAIN | /bin/grep 'Fast-forward' | /usr/bin/head -n 1 | /bin/
 
 # Do we need to run puppet?
 if /usr/bin/[ "$TRIGGER" = "Fast-forward" ]; then
+/bin/echo `/bin/date`" - update needed, 'Fast-foward' found in git pull" >> $LOGFILE
     UPDATENEEDED=true
 else
+/bin/echo `/bin/date`" - nothing found in git pull of main repo" >> $LOGFILE
     UPDATENEEDED=false
 fi
 
-TIMENOW=`/bin/date`
 if $UPDATENEEDED ; then
-    /bin/echo $TIMENOW" - New files found from git pull, running puppet apply" >> /var/log/puppet/git-distributed-auto-update;
-    /usr/bin/puppet-run || exit $?
+    /bin/echo `/bin/date`" - calling puppet-git-run" >> $LOGFILE
+    /usr/bin/puppet-git-run || exit $?
 fi
