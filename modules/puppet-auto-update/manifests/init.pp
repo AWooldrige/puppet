@@ -38,7 +38,12 @@ class puppet-auto-update {
         group   => 'root',
         mode    => '440',
     }
-    file 
+    file { '/etc/logrotate.d/puppet-git':
+        source => 'puppet:///modules/puppet-auto-update/etc/logrotate.d/puppet-git',
+        owner => 'root',
+        group => 'root',
+        mode => '644'
+    }
 
     ####
     # Remove old cron jobs, scripts and log files

@@ -1,0 +1,12 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+/var/log/puppet-git/*.log {
+    weekly
+    rotate 52
+
+    compress
+    copytruncate
+    missingok
+}
