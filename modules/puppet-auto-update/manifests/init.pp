@@ -4,7 +4,7 @@ class puppet-auto-update {
         user    => root,
         ensure => present,
         minute  => [0, 10, 20, 30, 40, 50],
-        require => [ File['/usr/bin/puppet-run'],
+        require => [ File['/usr/bin/puppet-git-run'],
                      File['/usr/bin/puppet-git-update'] ]
     }
     cron { 'puppet-git-run':
@@ -12,12 +12,12 @@ class puppet-auto-update {
         user    => root,
         ensure => present,
         minute  => [55],
-        require => [ File['/usr/bin/puppet-run'],
+        require => [ File['/usr/bin/puppet-git-run'],
                      File['/usr/bin/puppet-git-update'] ]
     }
 
     file { '/usr/bin/puppet-git-run':
-        source => 'puppet:///modules/puppet-auto-update/puppet-run',
+        source => 'puppet:///modules/puppet-auto-update/puppet-git-run',
         owner => 'root',
         group => 'root',
         mode => '744'
