@@ -2,7 +2,7 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
-LOGFILE="/var/log/puppet/puppet-git-update"
+LOGFILE="/var/log/puppet-git/puppet-git-update"
 
 /bin/echo `/bin/date`" === RUNNING puppet-git-update ===" >> $LOGFILE
 
