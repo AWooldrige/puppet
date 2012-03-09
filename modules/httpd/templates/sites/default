@@ -1,6 +1,10 @@
 <VirtualHost *:80>
 
-    DocumentRoot /var/www/default/
+    DocumentRoot /var/www/
+    <Directory /var/www/>
+        Order deny,allow
+        Allow from all
+    </Directory>
 
     ErrorLog ${APACHE_LOG_DIR}/error.default.log
     CustomLog ${APACHE_LOG_DIR}/access.default.log combined

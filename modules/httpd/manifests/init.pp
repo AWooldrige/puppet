@@ -52,6 +52,15 @@ class httpd ($http_port, $https_port) {
         refreshonly => true,
         before => Service["apache2"],
     }
+
+
+    file { "/etc/apache2/sites-available/default":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '644',
+        content => template("httpd/sites/default"),
+        notify  => Service['apache2']
+    }
 }
 
 define httpd::module($ensure = 'enabled') {
