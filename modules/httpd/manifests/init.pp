@@ -73,3 +73,21 @@ define httpd::module($ensure = 'enabled') {
         default: { err ( "Unknown ensure value: '$ensure'" ) }
     }
 }
+define httpd::site($ensure = 'enabled') {
+    case $ensure {
+        'enabled' : {
+            exec { "/usr/sbin/a2ensite $title":
+                unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${name} ]'",
+                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-available/${name} ]'",
+                notify => Exec["force-reload-apache2"],
+            }
+        }
+        'disabled': {
+            exec { "/usr/sbin/a2dissite $title":
+                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${name} ]'",
+                notify => Exec["force-reload-apache2"],
+            }
+        }
+        default: { err ( "Unknown ensure value: '$ensure'" ) }
+    }
+}
