@@ -58,15 +58,15 @@ define httpd::module($ensure = 'enabled') {
     case $ensure {
         'enabled' : {
             exec { "/usr/sbin/a2enmod $title":
-                unless => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${name}.load ] \\
-                    && [ /etc/apache2/mods-enabled/${name}.load -ef /etc/apache2/mods-available/${name}.load ]'",
+                unless => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
+                    && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
                 notify => Exec["force-reload-apache2"],
             }
         }
         'disabled': {
             exec { "/usr/sbin/a2dismod $title":
-                onlyif => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${name}.load ] \\
-                    && [ /etc/apache2/mods-enabled/${name}.load -ef /etc/apache2/mods-available/${name}.load ]'",
+                onlyif => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
+                    && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
                 notify => Exec["force-reload-apache2"],
             }
         }
@@ -74,17 +74,22 @@ define httpd::module($ensure = 'enabled') {
     }
 }
 define httpd::site($ensure = 'enabled') {
+    if $title == 'default' {
+        $enabled = '000-default'
+    } else {
+        $enabled = $title
+    }
+
     case $ensure {
         'enabled' : {
             exec { "/usr/sbin/a2ensite $title":
-                unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${name} ]'",
-                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-available/${name} ]'",
+                unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify => Exec["force-reload-apache2"],
             }
         }
         'disabled': {
             exec { "/usr/sbin/a2dissite $title":
-                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${name} ]'",
+                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify => Exec["force-reload-apache2"],
             }
         }
