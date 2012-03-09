@@ -56,6 +56,10 @@ node default-server inherits default {
     httpd::module { $disabled:
         ensure => disabled
     }
+
+    httpd::site { 'default':
+        ensure => enabled
+    }
 }
 
 node default-desktop inherits default {
@@ -95,6 +99,10 @@ node development-desktop inherits default-desktop {
     }
     httpd::module { $disabled:
         ensure => disabled
+    }
+
+    httpd::site { 'default':
+        ensure => enabled
     }
 }
 
