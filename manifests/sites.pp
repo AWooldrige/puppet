@@ -26,6 +26,19 @@ node default {
         require => Package['ack-grep']
     }
 
+    file { '/root/extlookup':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '400',
+    }
+    file { '/root/extlookup/common.csv':
+        ensure  => present,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '400',
+    }
+
     include user-woolie
     include puppet-auto-update
     include ntp
