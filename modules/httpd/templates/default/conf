@@ -1,6 +1,7 @@
 <VirtualHost *:80>
 
     DocumentRoot /var/www/default/
+
     <Directory /var/www/default/>
         Order deny,allow
         Allow from all
@@ -8,9 +9,5 @@
 
     ErrorLog ${APACHE_LOG_DIR}/error.default.log
     CustomLog ${APACHE_LOG_DIR}/access.default.log combined
-
-    # Possible values include: debug, info, notice, warn, error, crit,
-    # alert, emerg.
-    LogLevel warn
 
 </VirtualHost>
