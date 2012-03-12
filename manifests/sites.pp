@@ -4,7 +4,8 @@ node default {
         "tree",
         "strace",
         "ack-grep",
-        "iotop"
+        "iotop",
+        "man-db"
     ]
     package { $enhancers:
         ensure => installed
@@ -14,6 +15,12 @@ node default {
     ]
     package { $notneeded:
         ensure => purged
+    }
+
+    # Alias ack to ack-grep
+    exec { "/bin/ln -sf /usr/bin/ack-grep /usr/local/bin/ack":
+        unless => "/bin/sh -c '[ -L /usr/local/bin/ack ]'",
+        require => Package['ack-grep']
     }
 
     include user-woolie
