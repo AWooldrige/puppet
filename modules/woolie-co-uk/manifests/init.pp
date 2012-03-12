@@ -1,0 +1,2 @@
+class woolie-co-uk () {
+}
