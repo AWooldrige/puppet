@@ -10,7 +10,7 @@ class httpd ($http_port, $https_port) {
     file { "/etc/apache2/conf.d/fqdn":
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '644',
+        mode    => '400',
         require => Package['apache2'],
         content => template("httpd/conf.d/fqdn"),
         notify  => Service['apache2']
@@ -18,7 +18,7 @@ class httpd ($http_port, $https_port) {
     file { "/etc/apache2/apache2.conf":
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '644',
+        mode    => '400',
         require => Package['apache2'],
         content => template("httpd/apache2.conf"),
         notify  => Service['apache2']
@@ -29,7 +29,7 @@ class httpd ($http_port, $https_port) {
     file { "/etc/apache2/conf.d/ports.conf":
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '644',
+        mode    => '400',
         require => Package['apache2'],
         content => template("httpd/conf.d/ports.conf"),
         notify  => Service['apache2']
@@ -61,12 +61,11 @@ class httpd ($http_port, $https_port) {
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '700',
-        require => File['/home/woolie']
     }
     file { "/etc/apache2/sites-available/default":
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '644',
+        mode    => '400',
         content => template("httpd/default/conf"),
         notify  => Service['apache2'],
         require => File['/var/www/default/index.html']
@@ -74,9 +73,12 @@ class httpd ($http_port, $https_port) {
     file { '/var/www/default/index.html':
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '444',
+        mode    => '400',
         content => template("httpd/default/index.html"),
         require => File['/var/www/default']
+    }
+    httpd::site { 'default':
+        ensure => enabled
     }
 
 }
