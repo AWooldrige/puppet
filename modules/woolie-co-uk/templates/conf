@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+
+    DocumentRoot /var/www/woolie-co-uk
+
+    ServerName woolie.co.uk
+    ServerName www.woolie.co.uk
+
+    <Directory /var/www/woolie-co-uk/>
+        Order deny,allow
+        Allow from all
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.woolie-co-uk.log
+    CustomLog ${APACHE_LOG_DIR}/access.woolie-co-uk.log combined
+
+</VirtualHost>
