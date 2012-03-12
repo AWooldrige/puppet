@@ -1,11 +1,14 @@
-node default {
+$extlookup_datadir = "/root/extlookup/"
+$extlookup_precedence = ["nodes/%{hostname}", "common"]
 
+node default {
     $enhancers = [
         "tree",
         "strace",
         "ack-grep",
         "iotop",
-        "man-db"
+        "man-db",
+        "makepasswd"
     ]
     package { $enhancers:
         ensure => installed
@@ -34,6 +37,7 @@ node default {
 }
 node default-server inherits default {
     include zend-framework
+    include mysql
     class { 'httpd' :
         http_port => 80,
         https_port => 443
@@ -77,6 +81,7 @@ node default-desktop inherits default {
 node development-desktop inherits default-desktop {
 
     include zend-framework
+    include mysql
 
     class { 'httpd' :
         http_port => 80,
