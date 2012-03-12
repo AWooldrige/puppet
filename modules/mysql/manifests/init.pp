@@ -8,9 +8,8 @@ class mysql () {
     exec { "mysql_root_password":
         subscribe => Package["mysql-server"],
         refreshonly => true,
-        unless => "mysqladmin -uroot -p$mysql_root_password status",
-        path => "/bin:/usr/bin",
-        command => "mysqladmin -uroot password $mysql_root_password",
+        unless => "/usr/bin/mysqladmin -uroot -p$mysql_root_password status",
+        command => "/usr/bin/mysqladmin -uroot password $mysql_root_password",
     }
 
     file { "/etc/mysql/my.cnf":
