@@ -54,13 +54,31 @@ class httpd ($http_port, $https_port) {
     }
 
 
+
+    # Default site
+    file { '/var/www/default':
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '700',
+        require => File['/home/woolie']
+    }
     file { "/etc/apache2/sites-available/default":
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '644',
-        content => template("httpd/sites/default"),
-        notify  => Service['apache2']
+        content => template("httpd/default/conf"),
+        notify  => Service['apache2'],
+        require => File['/var/www/default/index.html']
     }
+    file { '/var/www/default/index.html':
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '444',
+        content => template("httpd/default/index.html"),
+        require => File['/var/www/default']
+    }
+
 }
 
 define httpd::module($ensure = 'enabled') {

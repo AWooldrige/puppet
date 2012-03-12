@@ -1,7 +1,7 @@
 <VirtualHost *:80>
 
-    DocumentRoot /var/www/
-    <Directory /var/www/>
+    DocumentRoot /var/www/default/
+    <Directory /var/www/default/>
         Order deny,allow
         Allow from all
     </Directory>
