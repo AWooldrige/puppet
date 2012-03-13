@@ -8,7 +8,8 @@ node default {
         "ack-grep",
         "iotop",
         "man-db",
-        "makepasswd"
+        "makepasswd",
+        "curl"
     ]
     package { $enhancers:
         ensure => installed
@@ -66,7 +67,8 @@ node default-server inherits default {
         'rewrite',
         'authz_groupfile',
         'authz_host',
-        'ssl'
+        'ssl',
+        'alias'
     ]
     $disabled = [
         'cgi',
@@ -109,7 +111,8 @@ node development-desktop inherits default-desktop {
         'rewrite',
         'authz_groupfile',
         'authz_host',
-        'ssl'
+        'ssl',
+        'alias'
     ]
     $disabled = [
         'cgi',
