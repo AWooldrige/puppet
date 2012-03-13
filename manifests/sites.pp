@@ -55,8 +55,6 @@ node default-server inherits default {
     include woolie-co-uk
 
     class { 'httpd' :
-        http_port => 80,
-        https_port => 443
     }
 
     /**
@@ -99,8 +97,6 @@ node development-desktop inherits default-desktop {
     include woolie-co-uk
 
     class { 'httpd' :
-        http_port => 80,
-        https_port => 443
     }
 
     /**

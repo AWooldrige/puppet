@@ -1,4 +1,8 @@
 class woolie-co-uk () {
+
+    $http_port = extlookup('httpd/http_port')
+    $https_port = extlookup('httpd/https_port')
+
     file { '/var/www/woolie-co-uk':
         ensure  => directory,
         owner   => 'www-data',

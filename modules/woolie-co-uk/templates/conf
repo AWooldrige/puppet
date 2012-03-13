@@ -1,4 +1,4 @@
-<VirtualHost *:80>
+<VirtualHost *:<%= http_port %>>
 
     DocumentRoot /var/www/woolie-co-uk
 
@@ -14,7 +14,7 @@
 
 </VirtualHost>
 
-<VirtualHost *:80>
+<VirtualHost *:<%= http_port %>>
         ServerName www.woolie.co.uk
         Redirect permanent / http://woolie.co.uk/
 </VirtualHost>

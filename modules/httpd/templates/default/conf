@@ -1,4 +1,4 @@
-<VirtualHost *:80>
+<VirtualHost *:<%= http_port %>>
 
     DocumentRoot /var/www/default/
 
