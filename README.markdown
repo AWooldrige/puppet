@@ -22,6 +22,13 @@ Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) t
     puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
     passwd woolie;
 
+Populate the file `/root/extlookup/common.csv` with the following:
+
+    mysql/mysql_root_password,<PASS>
+    httpd/http_port,80
+    httpd/https_port,443
+    varnish/port,8080
+
 
 Conventions
 ==============================
@@ -37,8 +44,6 @@ Each file should be prepended with the following text. Don't forget to change th
 Notes
 ==============================
 
-Updating Submodule Versions
-------------------------------
  * Clone this master repo
  * `cd` into submodule directory
  * `git pull origin master`
