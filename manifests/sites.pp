@@ -138,5 +138,7 @@ node "metis.woolie.co.uk" inherits default-server {
 }
 node "eros.woolie.co.uk" inherits default-server {
 }
+node "devvm.woolie.co.uk" inherits default-server {
+}
 node "dev.local" inherits default-server {
 }
