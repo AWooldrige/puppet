@@ -11,4 +11,4 @@ if /usr/bin/[ `ps a | grep puppe[t] | wc -l` = 0 ]; then
     exit 1;
 fi
 
-/usr/bin/puppet apply --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp;
+/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
