@@ -4,7 +4,6 @@
 Host *
     Compression yes
     CompressionLevel 9
-    ForwardAgent yes
 
 
 
@@ -32,6 +31,10 @@ Host apollo
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_apollo
 
+Host devvm
+    Hostname devvm.woolie.co.uk
+    User woolie
+    IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
 
 #########################################################################
@@ -44,6 +47,11 @@ Host metis
 
 Host eros
     Hostname eros.woolie.co.uk
+    User woolie
+    IdentityFile /home/woolie/.ssh/id_rsa_woolie
+
+Host hera
+    Hostname hera.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
