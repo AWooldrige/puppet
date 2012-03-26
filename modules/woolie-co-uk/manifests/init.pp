@@ -18,6 +18,7 @@ class woolie-co-uk () {
         group   => 'www-data',
         mode    => '400',
         content => template("woolie-co-uk/conf"),
+        require => Package['apache2'],
         notify  => Service['apache2'],
     }
 
