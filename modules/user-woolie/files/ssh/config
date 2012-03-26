@@ -6,6 +6,14 @@ Host *
     CompressionLevel 9
 
 
+#########################################################################
+# Misc
+#########################################################################
+Host github
+    Hostname github.com
+    User git
+    IdentityFile /home/woolie/.ssh/id_rsa_github
+
 
 #########################################################################
 # Personal Machines
