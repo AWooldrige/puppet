@@ -1,3 +1,24 @@
+if ! $::osfamily {
+  case $::operatingsystem {
+    'RedHat', 'Fedora', 'CentOS', 'Scientific', 'SLC', 'Ascendos', 'CloudLinux', 'PSBM', 'OracleLinux', 'OVS', 'OEL': {
+      $osfamily = 'RedHat'
+    }
+    'ubuntu', 'debian': {
+      $osfamily = 'Debian'
+    }
+    'SLES', 'SLED', 'OpenSuSE', 'SuSE': {
+      $osfamily = 'Suse'
+    }
+    'Solaris', 'Nexenta': {
+      $osfamily = 'Solaris'
+    }
+    default: {
+      $osfamily = $::operatingsystem
+    }
+  }
+}
+
+
 $extlookup_datadir = "/root/extlookup/"
 $extlookup_precedence = ["nodes/%{hostname}", "common"]
 
@@ -51,7 +72,6 @@ node default {
 }
 node default-server inherits default {
     include zend-framework
-    include mysql
     include woolie-co-uk
 
     class { 'httpd' :
@@ -81,6 +101,13 @@ node default-server inherits default {
     }
     httpd::module { $disabled:
         ensure => disabled
+    }
+
+
+    class { 'mysql::server':
+        config_hash => {
+            'root_password' => extlookup('mysql/mysql_root_password')
+        }
     }
 
 }
