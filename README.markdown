@@ -11,13 +11,14 @@ Firstly, set the hostname.
 
     echo agw-nc10.woolie.co.uk > /etc/hostname
     service hostname start
-    
+
 Populate the file `/root/extlookup/common.csv` with the following:
 
     mysql/mysql_root_password,<PASS>
     httpd/http_port,80
     httpd/https_port,443
     varnish/port,8080
+    woolie-co-uk/password,<PASS>
 
 Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) to `/etc/hosts`.
 
