@@ -62,7 +62,7 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '700',
-    }
+    }a
     file { "/etc/apache2/sites-available/default":
         owner   => 'www-data',
         group   => 'www-data',
@@ -91,6 +91,7 @@ define httpd::module($ensure = 'enabled') {
                 unless => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
                     && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
                 notify => Exec["force-reload-apache2"],
+                require => Package['apache2']
             }
         }
         'disabled': {
@@ -98,6 +99,7 @@ define httpd::module($ensure = 'enabled') {
                 onlyif => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
                     && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
                 notify => Exec["force-reload-apache2"],
+                require => Package['apache2']
             }
         }
         default: { err ( "Unknown ensure value: '$ensure'" ) }
@@ -115,12 +117,14 @@ define httpd::site($ensure = 'enabled') {
             exec { "/usr/sbin/a2ensite $title":
                 unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify => Exec["force-reload-apache2"],
+                require => Package['apache2']
             }
         }
         'disabled': {
             exec { "/usr/sbin/a2dissite $title":
                 onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify => Exec["force-reload-apache2"],
+                require => Package['apache2']
             }
         }
         default: { err ( "Unknown ensure value: '$ensure'" ) }
