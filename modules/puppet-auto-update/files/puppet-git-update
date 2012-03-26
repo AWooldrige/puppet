@@ -10,7 +10,7 @@ cd /etc/puppet/git-distributed/puppet/;
 
 # Update main repo, check that all submodules are initialised and updated
 MAIN=`/usr/bin/git pull origin master` || exit $?
-TRIGGER=`/bin/echo $MAIN | /bin/grep 'Fast-forward' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g'` || exit $?
+TRIGGER=`/bin/echo $MAIN | /bin/grep 'Unpacking objects' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g'` || exit $?
 
 /usr/bin/git submodule init || exit $?
 /usr/bin/git submodule sync || exit $?
@@ -18,7 +18,7 @@ TRIGGER=`/bin/echo $MAIN | /bin/grep 'Fast-forward' | /usr/bin/head -n 1 | /bin/
 
 # Do we need to run puppet?
 if /usr/bin/[ "$TRIGGER" = "Fast-forward" ]; then
-/bin/echo `/bin/date`" - update needed, 'Fast-foward' found in git pull" >> $LOGFILE
+/bin/echo `/bin/date`" - update needed, 'Unpacking objects' found in git pull" >> $LOGFILE
     UPDATENEEDED=true
 else
 /bin/echo `/bin/date`" - nothing found in git pull of main repo" >> $LOGFILE
