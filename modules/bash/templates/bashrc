@@ -2,6 +2,8 @@ alias ll='ls -alh'
 alias la='ls -A'
 alias l='ls -CFlh'
 
+set -o vi
+
 extract () {
    if [ -f $1 ] ; then
        case $1 in
@@ -44,10 +46,11 @@ DEFAULT_COLOR="\[\033[00m\]"
 
 export PS1="\`if [ \$? = 0 ];
     then
-        echo -e '\n$GREEN--[$LIGHT_CYAN\u$LIGHT_GREEN@$LIGHT_CYAN\h$GREEN]-[$LIGHT_CYAN\w$GREEN]\n--\$$DEFAULT_COLOR ';
+        echo -e '\n$GREEN[$LIGHT_GRAY\u$GREEN@$LIGHT_GRAY\h$GREEN] [$LIGHT_GRAY\w$GREEN]\n\\$ $DEFAULT_COLOR';
     else
-        echo -e '\n$RED--[$LIGHT_CYAN\u$LIGHT_RED@$LIGHT_CYAN\h$RED]-[$LIGHT_CYAN\w$RED]\n--\$$DEFAULT_COLOR ';
-    fi; \`"
+        echo -e '\n$RED[$LIGHT_GRAY\u$RED@$LIGHT_GRAY\h$RED] [$LIGHT_GRAY\w$RED]\n\\$ $DEFAULT_COLOR';
+    fi;
+     \`"
 
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
