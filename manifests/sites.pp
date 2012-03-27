@@ -117,46 +117,10 @@ node default-desktop inherits default {
     include devtools
     include standard-desktop
 }
-node development-desktop inherits default-desktop {
 
-    include zend-framework
-    include mysql
-    include woolie-co-uk
-
-    class { 'httpd' :
-    }
-
-    /**
-     * authz_groupfile and authz_host are needed otherwise the Order statement
-     * isn't available
-     */
-    $enabled = [
-        'rewrite',
-        'authz_groupfile',
-        'authz_host',
-        'ssl',
-        'alias'
-    ]
-    $disabled = [
-        'cgi',
-        'authz_default',
-        'auth_basic',
-        'authz_user',
-        'autoindex',
-        'authn_file'
-    ]
-    httpd::module { $enabled:
-        ensure => enabled
-    }
-    httpd::module { $disabled:
-        ensure => disabled
-    }
+node "agw-nc10" inherits default-desktop {
 }
-
-
-node "agw-nc10" inherits development-desktop {
-}
-node "agw-inspiron-1720" inherits development-desktop {
+node "agw-inspiron-1720" inherits default-desktop {
 }
 node "dev-vm" inherits default-desktop {
 }
