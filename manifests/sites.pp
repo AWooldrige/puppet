@@ -24,23 +24,19 @@ $extlookup_precedence = ["nodes/%{hostname}", "common"]
 
 node default {
     $enhancers = [
-        "tree",
-        "strace",
-        "ack-grep",
-        "iotop",
-        "man-db",
-        "makepasswd",
-        "curl"
+        'tree',
+        'strace',
+        'ack-grep',
+        'iotop',
+        'man-db',
+        'makepasswd',
+        'curl'
     ]
-    package { $enhancers:
-        ensure => installed
-    }
     $notneeded = [
-        "ack",
+        'ack'
     ]
-    package { $notneeded:
-        ensure => purged
-    }
+    package { $enhancers: ensure => installed }
+    package { $notneeded: ensure => purged }
 
     # Alias ack to ack-grep
     exec { "/bin/ln -sf /usr/bin/ack-grep /usr/local/bin/ack":
@@ -70,18 +66,36 @@ node default {
     include sshd
     include bash
 }
+
+
+
+
+#########################################################################
+##                             Desktop Nodes                           ##
+#########################################################################
+node default-desktop inherits default {
+    include gvim
+    include devtools
+    include standard-desktop
+}
+node "agw-nc10" inherits default-desktop {
+}
+node "agw-inspiron-1720" inherits default-desktop {
+}
+
+
+#########################################################################
+##                           Production Nodes                          ##
+#########################################################################
 node default-server inherits default {
     include zend-framework
     include woolie-co-uk
 
-    class { 'httpd' :
-    }
+    class { 'httpd': }
 
-    /**
-     * authz_groupfile and authz_host are needed otherwise the Order statement
-     * isn't available
-     */
-    $enabled = [
+    # authz_groupfile and authz_host are needed otherwise the Order statement
+    # isn't available
+    $enabled =  [
         'rewrite',
         'authz_groupfile',
         'authz_host',
@@ -96,12 +110,9 @@ node default-server inherits default {
         'autoindex',
         'authn_file'
     ]
-    httpd::module { $enabled:
-        ensure => enabled
-    }
-    httpd::module { $disabled:
-        ensure => disabled
-    }
+
+    httpd::module { $enabled: ensure => enabled }
+    httpd::module { $disabled: ensure => disabled }
 
 
     class { 'mysql::server':
@@ -109,29 +120,41 @@ node default-server inherits default {
             'root_password' => extlookup('mysql/mysql_root_password')
         }
     }
-
-}
-
-node default-desktop inherits default {
-    include gvim
-    include devtools
-    include standard-desktop
-}
-
-node "agw-nc10" inherits default-desktop {
-}
-node "agw-inspiron-1720" inherits default-desktop {
-}
-node "dev-vm" inherits default-desktop {
-}
-
-node "metis.woolie.co.uk" inherits default-server {
-}
-node "eros.woolie.co.uk" inherits default-server {
-}
-node "devvm.woolie.co.uk" inherits default-server {
 }
 node "hera.woolie.co.uk" inherits default-server {
 }
-node "dev.local" inherits default-server {
+node "metis.woolie.co.uk" inherits default-server {
+}
+node "devvm.woolie.co.uk" inherits default-server {
+}
+
+#########################################################################
+##                             Utility Nodes                           ##
+#########################################################################
+node default-utility-server inherits default {
+
+    class { 'httpd': }
+
+    # authz_groupfile and authz_host are needed otherwise the Order statement
+    # isn't available
+    $enabled =  [
+        'rewrite',
+        'authz_groupfile',
+        'authz_host',
+        'ssl',
+        'alias'
+    ]
+    $disabled = [
+        'cgi',
+        'authz_default',
+        'auth_basic',
+        'authz_user',
+        'autoindex',
+        'authn_file'
+    ]
+
+    httpd::module { $enabled: ensure => enabled }
+    httpd::module { $disabled: ensure => disabled }
+}
+node "eros.woolie.co.uk" inherits default-utility-server {
 }
