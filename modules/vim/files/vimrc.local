@@ -4,9 +4,6 @@
 
 set nocompatible
 
-colorscheme solarized
-set background=dark
-
 " ================ General Config ====================
 
 set number                      "Line numbers are good
