@@ -36,15 +36,14 @@ define wordpress::instance (
     $db_user    = "wp_${safe_domain}"
     $db_host    = "localhost"
 
-    file { $path:
-        ensure => directory,
-        purge => false,
-        recurse => false,
-        owner => "www-data",
-        group => "www-data",
-        mode => 0640
-    }
 
+    # TODO: Exec to set permissions for wordpress files
+    # TODO: Need to manage the wp conf
+
+    exec { "wp-set-permissions":
+        command => "/usr/bin/find ${path} -type d -exec /bin/chmod 750 {} \\;; /usr/bin/find ${path} -type d -exec /bin/chmod 640 {} \\;; /bin/chown -R www-data:www-data ${path}",
+        onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]"
+    }
 
     if $ensure == 'purged' {
 
@@ -62,7 +61,8 @@ define wordpress::instance (
             command => "/usr/bin/svn checkout http://core.svn.wordpress.org/tags/${ensure} ${path}",
             creates => "${path}/wp-includes/version.php",
             require => [ Package['subversion'],
-                         File[$path] ]
+                         File[$path] ],
+            notify  => Exec["wp-set-permissions"]
         }
 
         mysql::db { $db_name:
@@ -81,7 +81,8 @@ define wordpress::instance (
             onlyif  => [ "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
                          "/bin/bash -c \"/usr/bin/[ `/bin/grep 'wp_version =' ${path}/wp-includes/version.php | cut -d\' -f2` != ${ensure} ]\"" ],
             require => [ Package['subversion'],
-                         File[$path] ]
+                         File[$path] ],
+            notify  => Exec["wp-set-permissions"]
         }
 
     }
