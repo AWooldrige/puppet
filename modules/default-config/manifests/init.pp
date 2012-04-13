@@ -38,7 +38,8 @@ class default-config {
         owner => 'root',
         group => 'root',
         mode => '700',
-        require => Package['pwgen']
+        require => [ Package['pwgen'],
+                     File['/root/extlookup'] ]
     }
 
     include user-woolie

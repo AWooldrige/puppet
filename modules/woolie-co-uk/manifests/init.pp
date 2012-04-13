@@ -3,16 +3,6 @@ class woolie-co-uk () {
     $http_port = extlookup('httpd/http_port')
     $https_port = extlookup('httpd/https_port')
 
-    $db = 'woolie_co_uk_wp'
-    $user = 'woolie_co_uk_wp'
-    $pass = extlookup('woolie-co-uk/password')
-
-    file { '/var/www/woolie-co-uk':
-        ensure  => directory,
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '700',
-    }
     file { "/etc/apache2/sites-available/woolie-co-uk":
         owner   => 'www-data',
         group   => 'www-data',
@@ -27,11 +17,11 @@ class woolie-co-uk () {
     }
 
 
-    mysql::db { $db:
-        user     => $user,
-        password => $pass,
-        host     => 'localhost',
-        grant    => ['select', 'insert', 'update', 'delete', 'create', 'index',
-                     'alter', 'show_db', 'create_tmp_table', 'lock_tables'],
+    wordpress::instance {'woolie.co.uk':
+        ensure  => "3.3.1",
+        path    => "/var/www/woolie-co-uk",
+        domain  => "woolie.co.uk",
+        backups => false,
+        require => Httpd::Site['woolie-co-uk']
     }
 }
