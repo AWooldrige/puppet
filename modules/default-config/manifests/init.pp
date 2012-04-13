@@ -33,7 +33,7 @@ class default-config {
         group   => 'root',
         mode    => '400',
     }
-    file { "/root/getpassword:
+    file { "/root/getpassword":
         source => 'puppet:///modules/default-config/getpassword',
         owner => 'root',
         group => 'root',
