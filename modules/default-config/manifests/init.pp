@@ -6,6 +6,7 @@ class default-config {
         'ack-grep',
         'iotop',
         'man-db',
+        'pwgen',
         'curl'
     ]
     $notneeded = [
@@ -31,6 +32,13 @@ class default-config {
         owner   => 'root',
         group   => 'root',
         mode    => '400',
+    }
+    file { "/root/getpassword:
+        source => 'puppet:///modules/default-config/getpassword',
+        owner => 'root',
+        group => 'root',
+        mode => '700',
+        require => Package['pwgen']
     }
 
     include user-woolie
