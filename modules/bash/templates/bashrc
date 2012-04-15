@@ -3,6 +3,7 @@ alias la='ls -A'
 alias l='ls -CFlh'
 
 set -o vi
+export EDITOR=vim
 
 extract () {
    if [ -f $1 ] ; then
