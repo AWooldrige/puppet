@@ -20,13 +20,13 @@ class puppet-auto-update {
         source => 'puppet:///modules/puppet-auto-update/puppet-git-run',
         owner => 'root',
         group => 'root',
-        mode => '744'
+        mode => '540'
     }
     file { '/usr/bin/puppet-git-update':
         source => 'puppet:///modules/puppet-auto-update/puppet-git-update',
         owner => 'root',
         group => 'root',
-        mode => '744'
+        mode => '540'
     }
 
     ####
