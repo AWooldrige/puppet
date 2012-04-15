@@ -94,16 +94,24 @@ define wordpress::instance (
 
         # Ensure permissions are set correctly for files
         exec { "wp-set-permissions":
-            command => "/usr/bin/find ${path} -type d -exec /bin/chmod 750 {} \\;; /usr/bin/find ${path} -type d -exec /bin/chmod 640 {} \\;; /bin/chown -R www-data:www-data ${path}",
-            onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]"
+            command => "/usr/bin/wp-set-permissions ${path}",
+            onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
+            require => File['/usr/bin/wp-set-permissions'],
+            refreshonly => true
+        }
+
+        file { '/usr/bin/wp-set-permissions':
+            source => 'puppet:///modules/wordpress/wp-set-permissions',
+            owner => 'root',
+            group => 'root',
+            mode => '540'
         }
 
         file { "${path}/wp-config.php":
             owner   => 'www-data',
             group   => 'www-data',
-            mode    => '400',
+            mode    => '440',
             content => template("wordpress/wp-config.php")
         }
-
     }
 }
