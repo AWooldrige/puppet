@@ -32,9 +32,20 @@ define wordpress::instance (
     }
 
     $safe_domain = regsubst($domain, '\.', '_', 'G')
-    $db_name    = "wp_${safe_domain}"
-    $db_user    = "wp_${safe_domain}"
-    $db_host    = "localhost"
+    $wp_db_prefix  = "wp_"
+    $wp_db_name    = "${wp_db_prefix}${safe_domain}"
+    $wp_db_user    = "wp_${safe_domain}"
+    $wp_db_host    = "localhost"
+    $wp_db_pass    = generate("/root/getpassword", "wp_${safe_domain}")
+    $wp_unique_auth_key         = generate("/root/getpassword", "wp_${safe_domain}_unique_auth_key")
+    $wp_unique_secure_auth_key  = generate("/root/getpassword", "wp_${safe_domain}_unique_secure_auth_key")
+    $wp_unique_logged_in_key    = generate("/root/getpassword", "wp_${safe_domain}_unique_logged_in_key")
+    $wp_unique_nonce_key        = generate("/root/getpassword", "wp_${safe_domain}_unique_nonce_key")
+    $wp_unique_auth_salt        = generate("/root/getpassword", "wp_${safe_domain}_unique_auth_salt")
+    $wp_unique_secure_auth_salt = generate("/root/getpassword", "wp_${safe_domain}_unique_secure_auth_salt")
+    $wp_unique_logged_in_salt   = generate("/root/getpassword", "wp_${safe_domain}_unique_logged_in_salt")
+    $wp_unique_nonce_salt       = generate("/root/getpassword", "wp_${safe_domain}_unique_nonce_salt")
+
 
 
     # TODO: Exec to set permissions for wordpress files
@@ -56,15 +67,15 @@ define wordpress::instance (
         exec { "wp-install":
             command => "/usr/bin/svn checkout http://core.svn.wordpress.org/tags/${ensure} ${path}",
             creates => "${path}/wp-includes/version.php",
-            require => [ Package['subversion'],
-                         File[$path] ],
-            notify  => Exec["wp-set-permissions"]
+            require => Package['subversion'],
+            notify  => [ Exec["wp-set-permissions"],
+                         File["${path}/wp-config.php"] ]
         }
 
-        mysql::db { $db_name:
-            user     => $db_user,
-            password => generate("/root/getpassword", "wp_${safe_domain}"),
-            host     => $db_host,
+        mysql::db { $wp_db_name:
+            user     => $wp_db_user,
+            password => $wp_db_pass,
+            host     => $wp_db_host,
             grant    => ['select_priv', 'insert_priv', 'update_priv',
                          'delete_priv', 'create_priv', 'index_priv',
                          'alter_priv', 'create_tmp_table_priv',
@@ -76,15 +87,22 @@ define wordpress::instance (
             command => "/usr/bin/svn sw http://core.svn.wordpress.org/tags/${ensure} ${path}",
             onlyif  => [ "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
                          "/bin/bash -c \"/usr/bin/[ `/bin/grep 'wp_version =' ${path}/wp-includes/version.php | cut -d\' -f2` != ${ensure} ]\"" ],
-            require => [ Package['subversion'],
-                         File[$path] ],
-            notify  => Exec["wp-set-permissions"]
+            require => Package['subversion'],
+            notify  => [ Exec["wp-set-permissions"],
+                         File["${path}/wp-config.php"] ]
         }
 
         # Ensure permissions are set correctly for files
         exec { "wp-set-permissions":
             command => "/usr/bin/find ${path} -type d -exec /bin/chmod 750 {} \\;; /usr/bin/find ${path} -type d -exec /bin/chmod 640 {} \\;; /bin/chown -R www-data:www-data ${path}",
             onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]"
+        }
+
+        file { "${path}/wp-config.php":
+            owner   => 'www-data',
+            group   => 'www-data',
+            mode    => '400',
+            content => template("wordpress/wp-config.php")
         }
 
     }
