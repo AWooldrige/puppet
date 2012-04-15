@@ -47,11 +47,6 @@ define wordpress::instance (
     $wp_unique_nonce_salt       = generate("/root/getpassword", "wp_${safe_domain}_unique_nonce_salt")
 
 
-
-    # TODO: Exec to set permissions for wordpress files
-    # TODO: Need to manage the wp conf
-
-
     if $ensure == 'purged' {
 
         # rm -rf the $path only if a wordpress file is there
