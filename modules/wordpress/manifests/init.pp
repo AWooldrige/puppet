@@ -40,10 +40,6 @@ define wordpress::instance (
     # TODO: Exec to set permissions for wordpress files
     # TODO: Need to manage the wp conf
 
-    exec { "wp-set-permissions":
-        command => "/usr/bin/find ${path} -type d -exec /bin/chmod 750 {} \\;; /usr/bin/find ${path} -type d -exec /bin/chmod 640 {} \\;; /bin/chown -R www-data:www-data ${path}",
-        onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]"
-    }
 
     if $ensure == 'purged' {
 
@@ -83,6 +79,12 @@ define wordpress::instance (
             require => [ Package['subversion'],
                          File[$path] ],
             notify  => Exec["wp-set-permissions"]
+        }
+
+        # Ensure permissions are set correctly for files
+        exec { "wp-set-permissions":
+            command => "/usr/bin/find ${path} -type d -exec /bin/chmod 750 {} \\;; /usr/bin/find ${path} -type d -exec /bin/chmod 640 {} \\;; /bin/chown -R www-data:www-data ${path}",
+            onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]"
         }
 
     }
