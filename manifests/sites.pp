@@ -48,6 +48,7 @@ node default-server inherits default {
     include woolie-co-uk
 
     class { 'httpd': }
+    include php
 
     # authz_groupfile and authz_host are needed otherwise the Order statement
     # isn't available
