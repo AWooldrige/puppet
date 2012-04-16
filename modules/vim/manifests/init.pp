@@ -1,6 +1,6 @@
 class vim {
     package { 'vim':
-        ensure => latest,
+        ensure => installed,
     }
     file { '/etc/vim/vimrc.local':
         source  => 'puppet:///modules/vim/vimrc.local',

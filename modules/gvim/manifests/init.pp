@@ -1,10 +1,10 @@
 class gvim {
 
     package { 'exuberant-ctags':
-        ensure  => latest
+        ensure  => installed
     }
     package { 'vim-gnome':
-        ensure  => latest,
+        ensure  => installed,
         require => Package['exuberant-ctags']
     }
     file { '/etc/vim/gvimrc.local':

@@ -3,7 +3,7 @@ class sshd {
         ensure  => present,
     }
     package { 'openssh-server':
-        ensure => latest,
+        ensure => installed,
     }
     file { '/etc/ssh/sshd_config':
         source  => 'puppet:///modules/sshd/sshd_config',

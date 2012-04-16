@@ -1,6 +1,6 @@
 class sudo {
     package { sudo:
-        ensure => latest,
+        ensure => installed,
     }
 
     file { "/etc/sudoers":

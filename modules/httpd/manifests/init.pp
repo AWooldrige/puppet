@@ -2,7 +2,7 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
               $https_port = extlookup('httpd/https_port') ) {
 
     package { [ "apache2", "apache2-mpm-prefork" ]:
-        ensure => latest
+        ensure => installed
     }
     package { ["apache2-mpm-event", "apache2-mpm-perchild", "apache2-mpm-worker"]:
         ensure => absent,

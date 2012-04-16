@@ -1,6 +1,6 @@
 class tmux {
     package { 'tmux':
-        ensure => latest,
+        ensure => installed,
     }
     file { '/etc/tmux.conf':
         source  => 'puppet:///modules/tmux/tmux.conf',

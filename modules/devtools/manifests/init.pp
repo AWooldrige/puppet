@@ -1,7 +1,7 @@
 class devtools {
 
     package { 'php-pear':
-        ensure => latest
+        ensure => installed
     }
 
     # PHPUnit can't be installed with apt, as it doesn't come

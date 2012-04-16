@@ -16,7 +16,7 @@ class standard-desktop {
     }
 
     package { 'google-chrome-unstable' :
-        ensure => latest,
+        ensure => installed,
         require => Apt::Key['Quqp']
     }
 */

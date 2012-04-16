@@ -28,7 +28,7 @@ define wordpress::instance (
     $backups = 'false') {
 
     package{ 'subversion':
-        ensure => 'latest'
+        ensure => 'installed'
     }
 
     $underscore_domain = regsubst($domain, '\.', '_', 'G')

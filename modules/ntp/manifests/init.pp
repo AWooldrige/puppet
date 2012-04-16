@@ -1,6 +1,6 @@
 class ntp {
     package { "tzdata":
-        ensure => latest
+        ensure => installed
     }
     file { "/etc/timezone":
         owner   => 'root',
@@ -23,7 +23,7 @@ class ntp {
     }
 
     package { "ntp":
-        ensure => latest
+        ensure => installed
     }
     file { "/etc/ntp.conf":
         owner   => 'root',
