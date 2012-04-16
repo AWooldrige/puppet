@@ -31,21 +31,23 @@ define wordpress::instance (
         ensure => 'latest'
     }
 
-    $safe_domain = regsubst($domain, '\.', '_', 'G')
+    $underscore_domain = regsubst($domain, '\.', '_', 'G')
     $wp_db_prefix  = "wp_"
-    $wp_db_name    = "${wp_db_prefix}${safe_domain}"
-    $wp_db_user    = "wp_${safe_domain}"
+    $wp_db_name    = "${wp_db_prefix}${underscore_domain}"
+    $wp_db_user    = "wp_${underscore_domain}"
     $wp_db_host    = "localhost"
-    $wp_db_pass    = generate("/root/getpassword", "wp_${safe_domain}")
-    $wp_unique_auth_key         = generate("/root/getpassword", "wp_${safe_domain}_unique_auth_key")
-    $wp_unique_secure_auth_key  = generate("/root/getpassword", "wp_${safe_domain}_unique_secure_auth_key")
-    $wp_unique_logged_in_key    = generate("/root/getpassword", "wp_${safe_domain}_unique_logged_in_key")
-    $wp_unique_nonce_key        = generate("/root/getpassword", "wp_${safe_domain}_unique_nonce_key")
-    $wp_unique_auth_salt        = generate("/root/getpassword", "wp_${safe_domain}_unique_auth_salt")
-    $wp_unique_secure_auth_salt = generate("/root/getpassword", "wp_${safe_domain}_unique_secure_auth_salt")
-    $wp_unique_logged_in_salt   = generate("/root/getpassword", "wp_${safe_domain}_unique_logged_in_salt")
-    $wp_unique_nonce_salt       = generate("/root/getpassword", "wp_${safe_domain}_unique_nonce_salt")
+    $wp_db_pass    = generate("/root/getpassword", "wp_${underscore_domain}")
+    $wp_unique_auth_key         = generate("/root/getpassword", "wp_${underscore_domain}_unique_auth_key")
+    $wp_unique_secure_auth_key  = generate("/root/getpassword", "wp_${underscore_domain}_unique_secure_auth_key")
+    $wp_unique_logged_in_key    = generate("/root/getpassword", "wp_${underscore_domain}_unique_logged_in_key")
+    $wp_unique_nonce_key        = generate("/root/getpassword", "wp_${underscore_domain}_unique_nonce_key")
+    $wp_unique_auth_salt        = generate("/root/getpassword", "wp_${underscore_domain}_unique_auth_salt")
+    $wp_unique_secure_auth_salt = generate("/root/getpassword", "wp_${underscore_domain}_unique_secure_auth_salt")
+    $wp_unique_logged_in_salt   = generate("/root/getpassword", "wp_${underscore_domain}_unique_logged_in_salt")
+    $wp_unique_nonce_salt       = generate("/root/getpassword", "wp_${underscore_domain}_unique_nonce_salt")
 
+    $http_port = extlookup('httpd/http_port')
+    $https_port = extlookup('httpd/https_port')
 
     if $ensure == 'purged' {
 
@@ -57,6 +59,28 @@ define wordpress::instance (
 
     }
     else {
+
+        file {"/var/log/apache2/${underscore_domain}":
+            ensure  => directory,
+            owner   => 'www-data',
+            group   => 'www-data',
+            mode    => '750',
+            require => Package['apache2']
+        }
+        file {"/etc/apache2/sites-available/${underscore_domain}":
+            owner   => 'www-data',
+            group   => 'www-data',
+            mode    => '400',
+            content => template("wordpress/apache-virtualhost"),
+            require => [ Package['apache2'],
+                         File["/var/log/apache2/${underscore_domain}"] ],
+            notify  => Service['apache2'],
+        }
+
+        httpd::site { $underscore_domain:
+            ensure => enabled,
+            require => File["/etc/apache2/sites-available/${underscore_domain}"]
+        }
 
         # exec svn checkout onlyif wordpress file doesn't exist
         exec { "wp-install":

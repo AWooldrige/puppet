@@ -1,0 +1,24 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+<VirtualHost *:<%= http_port %>>
+
+    DocumentRoot <%= path %>
+
+    ServerName <%= domain %>
+
+    <Directory <%= path %>>
+        Order deny,allow
+        Allow from all
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
+    CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access.log combined
+
+</VirtualHost>
+
+<VirtualHost *:<%= http_port %>>
+        ServerName www.<%= domain %>
+        Redirect permanent / http://<%= domain %>/
+</VirtualHost>
