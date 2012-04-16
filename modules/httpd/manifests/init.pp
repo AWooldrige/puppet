@@ -16,6 +16,14 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
         content => template("httpd/conf.d/fqdn"),
         notify  => Service['apache2']
     }
+    file { "/etc/apache2/conf.d/security":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        content => template("httpd/conf.d/security"),
+        notify  => Service['apache2']
+    }
     file { "/etc/apache2/apache2.conf":
         owner   => 'www-data',
         group   => 'www-data',
