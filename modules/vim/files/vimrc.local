@@ -89,9 +89,9 @@ set wildignore+=*.png,*.jpg,*.gif
 
 " ================ Scrolling ========================
 
-set scrolloff=8         "Start scrolling when we're 8 lines away from margins
-set sidescrolloff=15
-set sidescroll=1
+"set scrolloff=8         "Start scrolling when we're 8 lines away from margins
+"set sidescrolloff=15
+"set sidescroll=1
 
 
 " ================ PHPDoc Plugin Settings ========================
@@ -123,7 +123,7 @@ set colorcolumn=80
 
 
 " ================ Misc Key mappings ========================
-noremap <A-o> :CommandT<CR>
-noremap <A-n> :NERDTreeToggle<CR>
-noremap <A-T> :TlistToggle<CR>
+noremap <leader>t :CommandT<CR>
+noremap <leader>n :NERDTreeToggle<CR>
+noremap <leader>l :TlistToggle<CR>
 map <Tab> <C-w>w
