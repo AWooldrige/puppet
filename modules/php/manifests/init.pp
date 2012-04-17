@@ -9,6 +9,7 @@ class php {
         group => "root",
         mode  => '400',
         require => Package["libapache2-mod-php5"],
-        notify  => Service['apache2']
+        notify  => Service['apache2'],
+        content => template("php/php.ini")
     }
 }
