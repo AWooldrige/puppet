@@ -4,44 +4,43 @@ backend default {
 }
 
 sub vcl_recv {
-  if (req.http.Accept-Encoding) {
-#revisit this list
-    if (req.url ~ "\.(gif|jpg|jpeg|swf|flv|mp3|mp4|pdf|ico|png|gz|tgz|bz2)(\?.*|)$") {
-      remove req.http.Accept-Encoding;
-    } elsif (req.http.Accept-Encoding ~ "gzip") {
-      set req.http.Accept-Encoding = "gzip";
-    } elsif (req.http.Accept-Encoding ~ "deflate") {
-      set req.http.Accept-Encoding = "deflate";
-    } else {
-      remove req.http.Accept-Encoding;
+
+    set req.grace = 6h;
+
+    # Always cache these types
+    if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
+        unset req.http.Cookie;
+        set req.url = regsub(req.url, "\?.*$", "");
     }
-  }
-  if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
-    unset req.http.cookie;
-    set req.url = regsub(req.url, "\?.*$", "");
-  }
-  if (req.url ~ "\?(utm_(campaign|medium|source|term)|adParams|client|cx|eid|fbid|feed|ref(id|src)?|v(er|iew))=") {
-    set req.url = regsub(req.url, "\?.*$", "");
-  }
-  if (req.http.cookie) {
-    if (req.http.cookie ~ "(wordpress_|wp-settings-)") {
-      return(pass);
-    } else {
-      unset req.http.cookie;
+
+
+    if (req.url ~ "\?(utm_(campaign|medium|source|term)|adParams|client|cx|eid|fbid|feed|ref(id|src)?|v(er|iew))=") {
+        set req.url = regsub(req.url, "\?.*$", "");
     }
-  }
+
+    if (req.http.cookie) {
+        if (req.http.cookie ~ "(wordpress_|wp-settings-)") {
+            return(pass);
+        } else {
+            unset req.http.cookie;
+        }
+    }
 }
 
 sub vcl_fetch {
-  if (req.url ~ "wp-(login|admin)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
-    return (hit_for_pass);
-  }
-  if ( (!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
-    unset beresp.http.set-cookie;
-  }
-  if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
-    set beresp.ttl = 365d;
-  }
+
+    set req.grace = 6h;
+
+    # Don't cache the admin section, post previews or xmlrpc
+    if (req.url ~ "wp-(login|admin)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
+        return (hit_for_pass);
+    }
+    if ( (!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
+        unset beresp.http.set-cookie;
+    }
+    if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
+        set beresp.ttl = 365d;
+    }
 }
 
 sub vcl_deliver {
