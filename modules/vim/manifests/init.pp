@@ -91,4 +91,11 @@ class vim {
         mode   => '644',
         require => File['/etc/vim/plugin']
     }
+    file { '/etc/vim/plugin/php-doc.vim':
+        source  => 'puppet:///modules/vim/plugin/php-doc.vim',
+        owner   => 'root',
+        group   => 'root',
+        mode   => '644',
+        require => File['/etc/vim/plugin']
+    }
 }

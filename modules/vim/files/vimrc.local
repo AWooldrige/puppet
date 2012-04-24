@@ -60,9 +60,6 @@ filetype indent on
 set list!
 set listchars=tab:>-,trail:$,extends:>,precedes:<,nbsp:_
 
-set nowrap       "Don't wrap lines
-set linebreak    "Wrap lines at convenient points
-
 
 " ================ Folds ============================
 
@@ -105,10 +102,10 @@ let g:pdv_cfg_License = ""
 
 
 " ================ Set spelling! ========================
-:setlocal spell spelllang=en_gb
-:set spell
+setlocal spell spelllang=en_gb
+set nospell
 " Press Ctrl-Shift-s to toggle spellcheck on/off, and show current value.
-:noremap <silent> <C-S> :set spell! spell?<CR>
+noremap <silent> <C-S> :set spell! spell?<CR>
 
 
 " ================ Syntax highlighting ========================
@@ -126,4 +123,5 @@ set colorcolumn=80
 noremap <leader>t :CommandT<CR>
 noremap <leader>n :NERDTreeToggle<CR>
 noremap <leader>l :TlistToggle<CR>
+noremap <leader>r :TName '
 map <Tab> <C-w>w
