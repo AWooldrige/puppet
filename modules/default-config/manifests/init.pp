@@ -7,6 +7,7 @@ class default-config {
         'ack-grep',
         'iotop',
         'man-db',
+        'rdiff-backup',
         'pwgen',
         'curl'
     ]
@@ -41,6 +42,24 @@ class default-config {
         mode => '700',
         require => [ Package['pwgen'],
                      File['/root/extlookup'] ]
+    }
+    file { "/root/.ssh":
+        ensure => directory,
+        owner => 'root',
+        group => 'root',
+        mode => '700'
+    }
+    file { "/root/.ssh/id_rsa_backup8":
+        owner => 'root',
+        group => 'root',
+        mode => '400'
+    }
+    file { "/etc/ssh/ssh_config":
+        source => 'puppet:///modules/default-config/ssh_config',
+        owner => 'root',
+        group => 'root',
+        mode => '400',
+        require => Package['openssh-server']
     }
 
     include user-woolie
