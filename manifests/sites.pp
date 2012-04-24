@@ -73,9 +73,11 @@ node default-server inherits default {
     httpd::module { $disabled: ensure => disabled }
 
 
+    $mysql_root_password = generate("/root/getpassword", "mysql_root_password")
+
     class { 'mysql::server':
         config_hash => {
-            'root_password' => extlookup('mysql/mysql_root_password')
+            'root_password' => $mysql_root_password
         }
     }
 }
