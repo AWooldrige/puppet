@@ -9,7 +9,7 @@ class sshd {
         source  => 'puppet:///modules/sshd/sshd_config',
         owner   => 'root',
         group   => 'root',
-        mode    => '600',
+        mode    => '400',
         require => [Package['openssh-server'], Group['sshallowedlogin']],
         notify  => Service['ssh']
     }
