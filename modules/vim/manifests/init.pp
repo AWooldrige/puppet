@@ -98,4 +98,21 @@ class vim {
         mode   => '644',
         require => File['/etc/vim/plugin']
     }
+
+    ####
+    ## SYNTAX
+    ####
+    file { '/etc/vim/syntax':
+        ensure  => directory,
+        owner   => 'woolie',
+        group   => 'woolie',
+        mode    => '400'
+    }
+    file { '/etc/vim/syntax/php.vim':
+        source  => 'puppet:///modules/vim/syntax/php.vim',
+        owner   => 'root',
+        group   => 'root',
+        mode   => '644',
+        require => File['/etc/vim/syntax']
+    }
 }
