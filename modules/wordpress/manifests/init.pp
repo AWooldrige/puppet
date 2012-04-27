@@ -132,5 +132,51 @@ define wordpress::instance (
             mode    => '440',
             content => template("wordpress/wp-config.php")
         }
+
+
+        if $backups == true {
+            $incr_bkp_host = extlookup('backup/host')
+            $incr_bkp_location = extlookup('backup/location')
+            $tmp_path = "/tmp/puppet/wordpress"
+            $mysql_tmp_path = "${tmpPath}/wordpress/${underscore_domain}/mysql"
+
+            if($incr_bkp_host == 'filesystem') {
+                $command =  "/usr/bin/rdiff-backup ${path}/wp-content ${incr_bkp_location}/wordpress/${underscore_domain}/wp-content"
+            }
+            else {
+                $command =  "/usr/bin/rdiff-backup ${path}/wp-content ${incr_bkp_host}:${incr_bkp_location}/wordpress/${underscore_domain}/wp-content"
+            }
+
+            cron {"incremental_backup_wp_content_${underscore_domain}":
+                ensure => present,
+                command => $command,
+                user => root,
+                hour => 4
+            }
+
+            if($incr_bkp_host == 'filesystem') {
+                $command2 = "/bin/rm -rf ${mysql_tmp_path};\
+/bin/mkdir -p ${mysql_tmp_path};\
+/usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
+/bin/mkdir -p ${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
+/usr/bin/rdiff-backup ${mysql_tmp_path} ${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
+/bin/rm -rf ${mysql_tmp_path};"
+            }
+            else {
+                $command2 = "/bin/rm -rf ${mysql_tmp_path};\
+/bin/mkdir -p ${mysql_tmp_path};\
+/usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
+/usr/bin/ssh ${incr_bkp_host} \"/bin/mkdir -p ${incr_bkp_location}/wordpress/${underscore_domain}/mysql\";\
+/usr/bin/rdiff-backup ${mysql_tmp_path} ${incr_bkp_host}:${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
+/bin/rm -rf ${mysql_tmp_path};"
+            }
+
+            cron {"incremental_backup_wp_mysql_${underscore_domain}":
+                ensure => present,
+                command => $command2,
+                user => root,
+                hour => 3
+            }
+        }
     }
 }
