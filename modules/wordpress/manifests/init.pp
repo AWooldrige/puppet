@@ -57,6 +57,21 @@ define wordpress::instance (
             onlyif  => "/usr/bin/[ -e ${path}/wp-includes/version.php ]",
         }
 
+        # ensure apache entries are removed
+        file {"/etc/apache2/sites-available/${underscore_domain}":
+            ensure  => absent
+        }
+        httpd::site { $underscore_domain:
+            ensure => disabled
+        }
+
+        # remove the cron jobs
+        cron {"incremental_backup_wp_content_${underscore_domain}":
+            ensure => absent
+        }
+        cron {"incremental_backup_wp_mysql_${underscore_domain}":
+            ensure => absent
+        }
     }
     else {
 
@@ -68,6 +83,7 @@ define wordpress::instance (
             require => Package['apache2']
         }
         file {"/etc/apache2/sites-available/${underscore_domain}":
+            ensure  => present,
             owner   => 'www-data',
             group   => 'www-data',
             mode    => '400',
