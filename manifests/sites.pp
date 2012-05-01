@@ -49,6 +49,7 @@ node default-server inherits default {
 
     class { 'httpd': }
     include php
+    include ssmtp
     include varnish
 
     # authz_groupfile and authz_host are needed otherwise the Order statement

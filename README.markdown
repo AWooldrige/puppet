@@ -19,6 +19,9 @@ Populate the file `/root/extlookup/common.csv` with the following:
     varnish/port,80
     backup/host,backup8
     backup/location,/usr/home/alistairwool
+    ssmtp/mailhub,smtp.gmail.com:587
+    ssmtp/user,noreply@woolie.co.uk
+    ssmtp/pass,greatpassword
 
 Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) to `/etc/hosts`.
 
