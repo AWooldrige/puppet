@@ -152,15 +152,18 @@ define wordpress::instance (
 
         if $backups == true {
             $incr_bkp_host = extlookup('backup/host')
-            $incr_bkp_location = extlookup('backup/location')
+            $incr_bkp_startlocation = extlookup('backup/location')
+            $incr_bkp_location = "${incr_bkp_startlocation}/${fqdn}"
             $tmp_path = "/tmp/puppet/wordpress"
             $mysql_tmp_path = "${tmpPath}/wordpress/${underscore_domain}/mysql"
 
             if($incr_bkp_host == 'filesystem') {
-                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_location}/wordpress/${underscore_domain}/wp-content"
+                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;\
+/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;"
             }
             else {
-                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_host}:${incr_bkp_location}/wordpress/${underscore_domain}/wp-content"
+                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;\
+/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;"
             }
 
             cron {"incremental_backup_wp_content_${underscore_domain}":
@@ -175,14 +178,16 @@ define wordpress::instance (
 /bin/mkdir -p ${mysql_tmp_path};\
 /usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
 /usr/bin/rdiff-backup --create-full-path ${mysql_tmp_path} ${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
-/bin/rm -rf ${mysql_tmp_path};"
+/bin/rm -rf ${mysql_tmp_path};\
+/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_location}/wordpress/${underscore_domain}/mysql"
             }
             else {
                 $command2 = "/bin/rm -rf ${mysql_tmp_path};\
 /bin/mkdir -p ${mysql_tmp_path};\
 /usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
-/usr/bin/rdiff-backup --create-full-path ${mysql_tmp_path} ${incr_bkp_host}:${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
-/bin/rm -rf ${mysql_tmp_path};"
+/usr/bin/rdiff-backup --create-full-path ${mysql_tmp_path} ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
+/bin/rm -rf ${mysql_tmp_path};\
+/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/mysql"
             }
 
             cron {"incremental_backup_wp_mysql_${underscore_domain}":
