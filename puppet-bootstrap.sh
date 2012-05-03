@@ -7,6 +7,7 @@ extlookupcsvfile='/root/extlookup/common.csv'
 
 fields=( "httpd/http_port,<port for apache to list on - e.g. 81>"
          "httpd/https_port,<port for SSL apache to listen on - e.g. 443>"
+         "varnish/httpd_http_host,<host to retrieve content - e.g. 127.0.0.1>"
          "varnish/port,<port for varnish to listen on - e.g. 80>"
          "backup/host,<ssh host address of backup server - e.g. backup8>"
          "backup/location,<root path for backups - e.g. /usr/home/alistairwool>"

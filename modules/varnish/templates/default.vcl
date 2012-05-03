@@ -1,6 +1,6 @@
 backend default {
-    .host = "127.0.0.1";
-    .port = "<%= http_port %>";
+    .host = "<%= httpd_http_host %>";
+    .port = "<%= httpd_http_port %>";
 }
 
 sub vcl_recv {
@@ -29,7 +29,7 @@ sub vcl_recv {
 
 sub vcl_fetch {
 
-    set req.grace = 6h;
+    set beresp.grace = 6h;
 
     # Don't cache the admin section, post previews or xmlrpc
     if (req.url ~ "wp-(login|admin)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {

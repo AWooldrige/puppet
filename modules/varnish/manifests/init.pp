@@ -1,5 +1,6 @@
 class varnish {
-    $http_port = extlookup('httpd/http_port')
+    $httpd_http_host = extlookup('varnish/httpd_http_host')
+    $httpd_http_port = extlookup('httpd/http_port')
     $varnish_port = extlookup('varnish/port')
 
     package { "varnish":
