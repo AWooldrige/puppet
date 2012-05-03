@@ -7,36 +7,15 @@ No puppetmaster is needed to apply these configurations, simply:
 
 Initial System Bootstrap
 --------------------------------
-Firstly, set the hostname.
 
     echo agw-nc10.woolie.co.uk > /etc/hostname
     service hostname start
 
-Populate the file `/root/extlookup/common.csv` with the following:
-
-    httpd/http_port,81
-    httpd/https_port,443
-    varnish/port,80
-    backup/host,backup8
-    backup/location,/usr/home/alistairwool
-    ssmtp/mailhub,smtp.gmail.com:587
-    ssmtp/user,noreply@woolie.co.uk
-    ssmtp/pass,greatpassword
-
 Add the hostname and hostname+domain (e.g. agw-nc10 and agw-nc10.woolie.co.uk) to `/etc/hosts`.
 
-Run the following if configuring a new system.
+Run the puppet-bootstrap.sh script which installs git and puppet, clones this repository and runs puppet with those manifests
 
-    apt-get install -y puppet git;
-    mkdir /etc/puppet/git-distributed;
-    cd /etc/puppet/git-distributed;
-    git clone http://github.com/AWooldrige/puppet.git;
-    cd puppet;
-    git submodule init;
-    git submodule update;
-    puppet apply --modulepath=modules ./manifests/sites.pp -vv;
-    passwd woolie;
-
+    bash <(curl -s https://raw.github.com/AWooldrige/puppet/master/puppet-bootstrap.sh)
 
 
 
