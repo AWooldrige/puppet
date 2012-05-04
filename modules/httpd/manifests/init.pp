@@ -70,6 +70,7 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '700',
+        require => Package['apache2']
     }
     file { "/etc/apache2/sites-available/default":
         owner   => 'www-data',
