@@ -22,10 +22,10 @@ echo 'Git Distributed Puppet Bootstrap Script'
 echo '---------------------------------------'
 
 echo ' * Checking if git is installed'
-dpkg -s git &> /dev/null || apt-get install -y -qq git || exit !$
+dpkg -s git &> /dev/null || apt-get install -y -qq git || exit $?
 
 echo ' * Checking if puppet is installed'
-dpkg -s puppet &> /dev/null || apt-get install -y -qq puppet || exit !$
+dpkg -s puppet &> /dev/null || apt-get install -y -qq puppet || exit $?
 
 echo ' * Checking if the extlookup csv file is present'
 [ -d /root/extlookup ] || mkdir -p /root/extlookup
@@ -52,21 +52,21 @@ fi
 echo ' * Checking if github puppet manifests are checked out'
 if [ ! -d /etc/puppet/git-distributed/puppet/.git ]; then
     echo '   ** No manifests found, cloning github repo'
-    #mkdir -p /etc/puppet/git-distributed
+    mkdir -p /etc/puppet/git-distributed
     cd /etc/puppet/git-distributed
-    git clone http://github.com/AWooldrige/puppet.git || exit !$
+    git clone http://github.com/AWooldrige/puppet.git || exit $?
 
     echo '   ** Updating submodules'
     cd /etc/puppet/git-distributed/puppet
-    git submodule init || exit !$
-    git submodule update || exit !$
+    git submodule init || exit $?
+    git submodule update || exit $?
 
 
     echo '   ** Running puppet'
-    puppet apply --modulepath=modules ./manifests/sites.pp || exit !$
+    puppet apply --modulepath=modules ./manifests/sites.pp || exit $?
 
     echo '   ** Set password for woolie'
-    passwd woolie || exit !$
+    passwd woolie || exit $?
 fi
 
 echo 'Finished'
