@@ -62,6 +62,11 @@ if [ ! -d /etc/puppet/git-distributed/puppet/.git ]; then
     git submodule update || exit $?
 
 
+    echo '   ** Adding getpassword'
+    dpkg -s pwgen &> /dev/null || apt-get install -y -qq pwgen || exit $?
+    curl https://raw.github.com/AWooldrige/puppet/master/modules/default-config/files/getpassword > /root/getpassword
+    chmod 500 /root/getpassword
+
     echo '   ** Running puppet'
     puppet apply --modulepath=modules ./manifests/sites.pp || exit $?
 
