@@ -45,6 +45,8 @@ DAEMON_OPTS="-a :<%= varnish_port %> \
              -T localhost:6082 \
              -f /etc/varnish/default.vcl \
              -S /etc/varnish/secret \
+             -l 10m \
+             -t 1800 \
              -p thread_pools=<%= @processorcount %> \
              -s malloc,300m"
 
