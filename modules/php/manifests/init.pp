@@ -12,4 +12,12 @@ class php {
         notify  => Service['apache2'],
         content => template("php/php.ini")
     }
+
+    file { "/usr/share/php/convert-varnish-headers.php":
+        owner => "www-data",
+        group => "www-data",
+        mode  => '400',
+        require => File["/etc/php5/apache2/php.ini"],
+        content => template("php/convert-varnish-headers.php")
+    }
 }
