@@ -48,7 +48,7 @@
 ##  Secure HTTPS
 #########################################################################
 <IfModule mod_ssl.c>
-    <VirtualHost <%= @ipaddress %>:<%= https_port %>
+    <VirtualHost <%= @ipaddress %>:<%= https_port %>>
 
         DocumentRoot <%= path %>
         ServerName <%= domain %>
