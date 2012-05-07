@@ -9,8 +9,9 @@
 # Requires:
 #
 # Sample Usage:
-# wordpress { 'woolie.co.uk':
-#    ensure  =>  "3.3.1",
+# Title should be a short name
+# wordpress { 'wooliecouk':
+#    ensure  =>  "3.3.2",
 #    path    => "/var/www/woolie-co-uk/",
 #    domain  => "woolie.co.uk",
 #    backups => false
@@ -31,15 +32,15 @@ class wordpress {
 }
 
 define wordpress::instance (
-    $ensure = '3.3.1',
+    $ensure = '3.3.2',
     $path,
     $domain,
     $backups = 'false') {
 
     $underscore_domain = regsubst($domain, '\.', '_', 'G')
     $wp_db_prefix  = "wp_"
-    $wp_db_name    = "${wp_db_prefix}${underscore_domain}"
-    $wp_db_user    = "wp_${underscore_domain}"
+    $wp_db_name    = "${wp_db_prefix}${title}"
+    $wp_db_user    = "${wp_db_prefix}${title}"
     $wp_db_host    = "localhost"
     $wp_db_pass    = generate("/root/getpassword", "wp_${underscore_domain}")
     $wp_unique_auth_key         = generate("/root/getpassword", "wp_${underscore_domain}_unique_auth_key")
@@ -57,7 +58,7 @@ define wordpress::instance (
     if $ensure == 'purged' {
 
         # rm -rf the $path only if a wordpress file is there
-        exec { "wp-purge":
+        exec { "wp-purge-${underscore_domain}":
             command => "/bin/rm -rf ${path}",
             onlyif  => "/usr/bin/[ -e ${path}/wp-includes/version.php ]",
         }
