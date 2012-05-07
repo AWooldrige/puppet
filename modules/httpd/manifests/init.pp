@@ -1,7 +1,7 @@
 class httpd ( $http_port = extlookup('httpd/http_port'),
               $https_port = extlookup('httpd/https_port') ) {
 
-    package { [ "apache2", "apache2-mpm-prefork" ]:
+    package { [ "apache2", "apache2-mpm-prefork", "ssl-cert" ]:
         ensure => installed
     }
     package { ["apache2-mpm-event", "apache2-mpm-perchild", "apache2-mpm-worker"]:
@@ -62,6 +62,12 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
         before => Service["apache2"],
     }
 
+
+    exec { 'regenerate-snakeoil-certs':
+        command => "/usr/sbin/make-ssl-cert generate-default-snakeoil --force-overwrite",
+        refreshonly => true,
+        before => Package["apache2"]
+    }
 
 
     # Default site

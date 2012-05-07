@@ -2,6 +2,9 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+#########################################################################
+##  Normal HTTP
+#########################################################################
 <VirtualHost *:<%= http_port %>>
 
     DocumentRoot <%= path %>
@@ -36,6 +39,64 @@
 </VirtualHost>
 
 <VirtualHost *:<%= http_port %>>
-        ServerName www.<%= domain %>
-        Redirect permanent / http://<%= domain %>/
+    ServerName www.<%= domain %>
+    Redirect permanent / http://<%= domain %>/
 </VirtualHost>
+
+
+#########################################################################
+##  Secure HTTPS
+#########################################################################
+<IfModule mod_ssl.c>
+    <VirtualHost <%= @ipaddress %>:<%= https_port %>
+
+        DocumentRoot <%= path %>
+        ServerName <%= domain %>
+
+        <Directory <%= path %>>
+            Order deny,allow
+            Allow from all
+
+            Options +FollowSymLinks +SymLinksIfOwnerMatch
+
+            <IfModule !rewrite_module>
+                LoadModule rewrite_module modules/mod_rewrite.so
+            </IfModule>
+
+            # WordPress rewrite rules
+            <IfModule mod_rewrite.c>
+                RewriteEngine On
+                RewriteBase /
+                RewriteRule ^index\.php$ - [L]
+                RewriteCond %{REQUEST_FILENAME} !-f
+                RewriteCond %{REQUEST_FILENAME} !-d
+                RewriteRule . /index.php [L]
+            </IfModule>
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error_ssl.log
+        CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access_ssl.log combined
+
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+
+        BrowserMatch "MSIE [2-6]" \
+            nokeepalive ssl-unclean-shutdown \
+            downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+
+    <VirtualHost <%= @ipaddress %>:<%= https_port %>>
+        ServerName www.<%= domain %>
+        Redirect permanent / https://<%= domain %>/
+
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    </VirtualHost>
+</IfModule>
