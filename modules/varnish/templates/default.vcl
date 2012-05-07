@@ -27,7 +27,7 @@ sub vcl_recv {
         }
 
         # Only pay attention to wordpress_ cookie
-        if (req.http.cookie ~ "(wordpress_|wp-settings-)") {
+        if (req.http.cookie ~ "(wordpress_)") {
             return(pass);
         } else {
             unset req.http.cookie;
