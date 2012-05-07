@@ -46,6 +46,7 @@ node "agw-inspiron-1720" inherits default-desktop {
 node default-server inherits default {
     include zend-framework
     include woolie-co-uk
+    include onmyplate-co-uk
 
     class { 'httpd': }
     include php
