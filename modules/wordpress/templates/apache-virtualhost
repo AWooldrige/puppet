@@ -11,6 +11,21 @@
     <Directory <%= path %>>
         Order deny,allow
         Allow from all
+
+        <IfModule !rewrite_module>
+            LoadModule rewrite_module modules/mod_rewrite.so
+        </IfModule>
+
+        # WordPress rewrite rules
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.php$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.php [L]
+        </IfModule>
+
     </Directory>
 
     ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
