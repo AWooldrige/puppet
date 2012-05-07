@@ -12,6 +12,8 @@
         Order deny,allow
         Allow from all
 
+        Options +FollowSymLinks +SymLinksIfOwnerMatch
+
         <IfModule !rewrite_module>
             LoadModule rewrite_module modules/mod_rewrite.so
         </IfModule>
