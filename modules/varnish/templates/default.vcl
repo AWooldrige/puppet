@@ -19,6 +19,14 @@ sub vcl_recv {
     }
 
     if (req.http.cookie) {
+
+        # Replace wordpress_test_cookie with wptestcookie to avoid preventing
+        # cache
+        if (req.http.Cookie ~ "wordpress_test_cookie") {
+            set req.http.Cookie = regsuball(req.http.Cookie, "wordpress_test_cookie=", "; wptestcookie=");
+        }
+
+        # Only pay attention to wordpress_ cookie
         if (req.http.cookie ~ "(wordpress_|wp-settings-)") {
             return(pass);
         } else {
