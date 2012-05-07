@@ -19,6 +19,15 @@
 # [Remember: No empty lines between comments and class definition]
 
 class wordpress {
+    package{ 'subversion':
+        ensure => 'installed'
+    }
+    file { '/usr/bin/wp-set-permissions':
+        source => 'puppet:///modules/wordpress/wp-set-permissions',
+        owner => 'root',
+        group => 'root',
+        mode => '540'
+    }
 }
 
 define wordpress::instance (
@@ -26,10 +35,6 @@ define wordpress::instance (
     $path,
     $domain,
     $backups = 'false') {
-
-    package{ 'subversion':
-        ensure => 'installed'
-    }
 
     $underscore_domain = regsubst($domain, '\.', '_', 'G')
     $wp_db_prefix  = "wp_"
@@ -99,11 +104,11 @@ define wordpress::instance (
         }
 
         # exec svn checkout onlyif wordpress file doesn't exist
-        exec { "wp-install":
+        exec { "wp-install-${underscore_domain}":
             command => "/usr/bin/svn checkout http://core.svn.wordpress.org/tags/${ensure} ${path}",
             creates => "${path}/wp-includes/version.php",
             require => Package['subversion'],
-            notify  => [ Exec["wp-set-permissions"],
+            notify  => [ Exec["wp-set-permissions-${underscore_domain}"],
                          File["${path}/wp-config.php"] ]
         }
 
@@ -118,29 +123,23 @@ define wordpress::instance (
         }
 
         # exec svn update only if the file exists and the version number doesn't match $ensure
-        exec { "wp-update":
+        exec { "wp-update-${underscore_domain}":
             command => "/usr/bin/svn sw http://core.svn.wordpress.org/tags/${ensure} ${path}",
             onlyif  => [ "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
                          "/bin/bash -c \"/usr/bin/[ `/bin/grep 'wp_version =' ${path}/wp-includes/version.php | cut -d\' -f2` != ${ensure} ]\"" ],
             require => Package['subversion'],
-            notify  => [ Exec["wp-set-permissions"],
+            notify  => [ Exec["wp-set-permissions-${underscore_domain}"],
                          File["${path}/wp-config.php"] ]
         }
 
         # Ensure permissions are set correctly for files
-        exec { "wp-set-permissions":
+        exec { "wp-set-permissions-${underscore_domain}":
             command => "/usr/bin/wp-set-permissions ${path}",
             onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
             require => File['/usr/bin/wp-set-permissions'],
             refreshonly => true
         }
 
-        file { '/usr/bin/wp-set-permissions':
-            source => 'puppet:///modules/wordpress/wp-set-permissions',
-            owner => 'root',
-            group => 'root',
-            mode => '540'
-        }
 
         file { "${path}/wp-config.php":
             owner   => 'www-data',
