@@ -170,7 +170,8 @@ define wordpress::instance (
                 ensure => present,
                 command => $command,
                 user => root,
-                hour => 4
+                hour => 4,
+                minute => 0
             }
 
             if($incr_bkp_host == 'filesystem') {
@@ -194,7 +195,8 @@ define wordpress::instance (
                 ensure => present,
                 command => $command2,
                 user => root,
-                hour => 3
+                hour => 3,
+                minute => 0
             }
         }
     }

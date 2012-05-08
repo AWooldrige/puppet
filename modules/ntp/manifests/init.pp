@@ -43,7 +43,7 @@ class ntp {
         command => "/usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /etc/init.d/ntp restart )",
         user    => 'root',
         ensure  => present,
-        minute  => [0],
+        minute  => 0,
         require => Package['ntp']
     }
 }

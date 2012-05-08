@@ -3,7 +3,8 @@ class puppet-auto-update {
         command => '/usr/bin/puppet-git-update',
         user    => root,
         ensure => present,
-        hour  => [2],
+        hour  => 2,
+        minute => 0,
         require => [ File['/usr/bin/puppet-git-run'],
                      File['/usr/bin/puppet-git-update'] ]
     }
@@ -11,7 +12,8 @@ class puppet-auto-update {
         command => '/usr/bin/puppet-git-run',
         user    => root,
         ensure => present,
-        hour  => [2],
+        hour  => 2,
+        minute => 0,
         require => [ File['/usr/bin/puppet-git-run'],
                      File['/usr/bin/puppet-git-update'] ]
     }
