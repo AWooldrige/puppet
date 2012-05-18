@@ -5,21 +5,38 @@
 
 import argparse
 import subprocess
+import socket
 import tempfile
 import textwrap
 import shutil
+import pprint
 
 class WordpressBackup(object):
 
-    def __init__(self, bkp_type, dest_path, wp_path, domain, identifier):
-        self._bkp_type   = bkp_type
-        self._dest_path  = dest_path
+    def __init__(self, dest_path, wp_path, domain, no_op, identifier):
+        self._dest_path  = dest_path + '/' +  socket.gethostname()
         self._wp_path    = wp_path
         self._domain     = domain
-        self._identifier  = identifier
+        self._no_op      = no_op
+        self._identifier = identifier
 
-        self._db_prfx = 'wp_'
-        self._db_name = self._db_prfx + self._identifier
+        self._db_prfx    = 'wp_'
+        self._db_name    = self._db_prfx + self._identifier
+
+        if self._no_op:
+            tmpfile = '/tmp/randomtmpdir'
+        else:
+            tmpfile = tempfile.mkdtemp()
+
+        for output in self.shell_execute(self.mysql_bkp_cmd(tmpfile)):
+            if output['return_code'] != 0:
+                print '   - FAILURE'
+                pprint.pprint(output)
+
+        for output in self.shell_execute(self.wpcontent_bkp_cmd()):
+            if output['return_code'] != 0:
+                print '   - FAILURE'
+                pprint.pprint(output)
 
 
     def build_transfer_command(self):
@@ -27,53 +44,73 @@ class WordpressBackup(object):
 
     def mysql_bkp_cmd(self, tmp_path):
 
+        cmds = []
         # Dump the MySQL table to a file
-        cmd = '/usr/bin/mysqldump %s > %s/%s.sql;' % \
-        (self._db_name, tmp_path, self._db_name)
+        cmds.append('/usr/bin/mysqldump %s > %s/%s.sql' % \
+        (self._db_name, tmp_path, self._db_name))
 
         # rdiff to backup location
-        cmd += '/usr/bin/rdiff-backup --create-full-path %s %s/%s/mysql;' % \
-        (tmp_path, self._dest_path, self._identifier)
+        cmds.append('/usr/bin/rdiff-backup --create-full-path %s %s/%s/mysql' % \
+        (tmp_path, self._dest_path, self._identifier))
 
         # remove the temporary files
-        cmd += '/bin/rm -rf %s;' % \
-        (tmp_path)
+        cmds.append('/bin/rm -rf %s' % \
+        (tmp_path))
 
         # remove old backups
-        cmd += '/usr/bin/rdiff-backup --remove-older-than 2W %s %s/%s/mysql;' % \
-        (tmp_path, self._dest_path, self._identifier)
+        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/mysql' % \
+        (self._dest_path, self._identifier))
 
-        return cmd
+        return cmds
 
 
     def wpcontent_bkp_cmd(self):
-        return False
+
+        cmds = []
+        # rdiff to backup location
+        cmds.append('/usr/bin/rdiff-backup --create-full-path %s/wp-content %s/%s/wp-content' % \
+        (self._wp_path, self._dest_path, self._identifier))
+
+        # remove old backups
+        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/wp-content' % \
+        (self._dest_path, self._identifier))
+
+        return cmds
 
 
-    def shell_execute(self, command):
+    def shell_execute(self, cmds):
+        if self._no_op:
+            print "\nShell commands that would have ran:"
+        else:
+            print "\nExecuting shell commands:"
 
-        process = subprocess.Popen(
-            ['/bin/bash', '-c', command],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=False
-        )
+        for cmd in cmds:
+            print('  ' + cmd)
 
-        stderr_buffer = ""
-        stdout_buffer = ""
+            if not self._no_op:
+                process = subprocess.Popen(
+                    ['/bin/bash', '-c', cmd],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False
+                )
 
-        # retcode will return 'None' whilst the subprocess is running, sit in a
-        # while loop whilst it's running, returning the output at the end
-        while(True):
-            retcode = process.poll()
-            stdout_buffer += process.stdout.readline()
-            stderr_buffer += process.stderr.readline()
-            if(retcode is not None):
-                return {
-                    'return_code' : retcode,
-                    'stdout' : stdout_buffer,
-                    'stderr' : stderr_buffer
-                }
+                stderr_buffer = ""
+                stdout_buffer = ""
+
+                # retcode will return 'None' whilst the subprocess is running, sit in a
+                # while loop whilst it's running, returning the output at the end
+                while(True):
+                    retcode = process.poll()
+                    stdout_buffer += process.stdout.readline()
+                    stderr_buffer += process.stderr.readline()
+                    if(retcode is not None):
+                        yield {
+                            'return_code' : retcode,
+                            'stdout' : stdout_buffer,
+                            'stderr' : stderr_buffer
+                        }
+                        break
 
 
 if __name__ == "__main__":
@@ -90,6 +127,13 @@ if __name__ == "__main__":
         'identifier',
         type=str,
         help='Identifier used for the WordPress instance.'
+    )
+    argparser.add_argument(
+        '-n',
+        '--no-op',
+        action='store_true',
+        help='If no-op is flagged, no operations will occur, the script will ' +
+             'just dump the commands it would have ran'
     )
     argparser.add_argument(
         '-m',
@@ -127,11 +171,9 @@ if __name__ == "__main__":
 
 
     bkp = WordpressBackup(
-        bkp_type=args.method,
         dest_path=args.destination_path,
         wp_path=args.wordpress_path,
         domain=args.domain,
+        no_op=args.no_op,
         identifier=args.identifier
     )
-    #tmp_path = tempfile.mkdtemp()
-    print bkp.mysql_bkp_cmd('/tmp/test')
