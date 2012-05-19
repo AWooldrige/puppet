@@ -13,7 +13,8 @@ import pprint
 
 class WordpressBackup(object):
 
-    def __init__(self, dest_path, wp_path, domain, no_op, identifier):
+    def __init__(self, method, dest_path, wp_path, domain, no_op, identifier):
+        self._method     = method
         self._dest_path  = dest_path + '/' +  socket.gethostname()
         self._wp_path    = wp_path
         self._domain     = domain
@@ -49,17 +50,25 @@ class WordpressBackup(object):
         cmds.append('/usr/bin/mysqldump %s > %s/%s.sql' % \
         (self._db_name, tmp_path, self._db_name))
 
-        # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup --create-full-path %s %s/%s/mysql' % \
-        (tmp_path, self._dest_path, self._identifier))
+        if self._method == 'incremental':
+            # rdiff to backup location
+            cmds.append('/usr/bin/rdiff-backup --create-full-path %s %s/%s/mysql' % \
+            (tmp_path, self._dest_path, self._identifier))
+
+            # remove old backups
+            cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/mysql' % \
+            (self._dest_path, self._identifier))
+        else:
+            #TODO
+
+            # remove old backups
+            cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/mysql' % \
+            (self._dest_path, self._identifier))
 
         # remove the temporary files
         cmds.append('/bin/rm -rf %s' % \
         (tmp_path))
 
-        # remove old backups
-        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/mysql' % \
-        (self._dest_path, self._identifier))
 
         return cmds
 
@@ -139,18 +148,19 @@ if __name__ == "__main__":
         '-m',
         '--method',
         type=str,
-        default='filesystem',
-        choices=['rdiff', 'filesystem'],
-        help='Method of backup, copy to local fileystem, rdiff-backup?'
+        default='full',
+        choices=['full', 'incremental'],
+        help='Full or incremental backup?'
     )
     argparser.add_argument(
         '-dp',
         '--destination-path',
         required=True,
         type=str,
-        help='The full path to the destination directory. ' +
+        help='The full path to the destination directory/email address. ' +
              'E.g. if using filesystem "/var/backups. " ' +
-             'E.g. if using rdiff-backup -  backup8::/var/backups'
+             'E.g. if using rdiff-backup -  backup8::/var/backups' +
+             'E.g. if performing full backup - email@address.com'
     )
     argparser.add_argument(
         '-p',
@@ -171,6 +181,7 @@ if __name__ == "__main__":
 
 
     bkp = WordpressBackup(
+        method=args.method,
         dest_path=args.destination_path,
         wp_path=args.wordpress_path,
         domain=args.domain,
