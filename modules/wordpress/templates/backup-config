@@ -1,0 +1,4 @@
+[<%= identifier %>]
+destination_path = <%= destination_path %>
+local_wp_path = <%= local_wp_path %>
+domain = <%= domain %>

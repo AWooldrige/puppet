@@ -29,6 +29,20 @@ class wordpress {
         group => 'root',
         mode => '540'
     }
+
+    file { '/etc/wp-backup':
+        ensure => 'directory',
+        owner => 'root',
+        group => 'root'
+    }
+    file { '/usr/bin/wp-backup':
+        source => 'puppet:///modules/wordpress/wp-backup',
+        owner => 'root',
+        group => 'root',
+        mode => '540'
+    }
+
+
 }
 
 define wordpress::instance (
@@ -141,7 +155,6 @@ define wordpress::instance (
             refreshonly => true
         }
 
-
         file { "${path}/wp-config.php":
             owner   => 'www-data',
             group   => 'www-data',
@@ -149,54 +162,31 @@ define wordpress::instance (
             content => template("wordpress/wp-config.php")
         }
 
+        $identifier       = $title
+        $destination_path = extlookup('backup/path')
+        $local_wp_path    = $path
+
+        file {"/etc/wp-backup/${title}":
+            ensure  => present,
+            owner   => 'root',
+            group   => 'root',
+            mode    => '440',
+            content => template("wordpress/backup-config"),
+            require => File['/etc/wp-backup']
+        }
 
         if $backups == true {
-            $incr_bkp_host = extlookup('backup/host')
-            $incr_bkp_startlocation = extlookup('backup/location')
-            $incr_bkp_location = "${incr_bkp_startlocation}/${fqdn}"
-            $tmp_path = "/tmp/puppet/wordpress"
-            $mysql_tmp_path = "${tmpPath}/wordpress/${underscore_domain}/mysql"
-
-            if($incr_bkp_host == 'filesystem') {
-                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;\
-/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;"
-            }
-            else {
-                $command =  "/usr/bin/rdiff-backup --create-full-path ${path}/wp-content ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;\
-/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/wp-content;"
-            }
-
-            cron {"incremental_backup_wp_content_${underscore_domain}":
+            cron {"incremental_backup_${title}":
                 ensure => present,
-                command => $command,
+                command => "/usr/bin/wp-backup -i incremental ${title}",
                 user => root,
                 hour => 4,
                 minute => 0
             }
-
-            if($incr_bkp_host == 'filesystem') {
-                $command2 = "/bin/rm -rf ${mysql_tmp_path};\
-/bin/mkdir -p ${mysql_tmp_path};\
-/usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
-/usr/bin/rdiff-backup --create-full-path ${mysql_tmp_path} ${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
-/bin/rm -rf ${mysql_tmp_path};\
-/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_location}/wordpress/${underscore_domain}/mysql"
-            }
-            else {
-                $command2 = "/bin/rm -rf ${mysql_tmp_path};\
-/bin/mkdir -p ${mysql_tmp_path};\
-/usr/bin/mysqldump ${wp_db_name} > ${mysql_tmp_path}/${wp_db_name}.sql;\
-/usr/bin/rdiff-backup --create-full-path ${mysql_tmp_path} ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/mysql;\
-/bin/rm -rf ${mysql_tmp_path};\
-/usr/bin/rdiff-backup --remove-older-than 2W ${incr_bkp_host}::${incr_bkp_location}/wordpress/${underscore_domain}/mysql"
-            }
-
-            cron {"incremental_backup_wp_mysql_${underscore_domain}":
-                ensure => present,
-                command => $command2,
-                user => root,
-                hour => 3,
-                minute => 0
+        }
+        else {
+            cron {"incremental_backup_${title}":
+                ensure => absent
             }
         }
     }
