@@ -92,6 +92,11 @@ define wordpress::instance (
         cron {"incremental_backup_wp_mysql_${underscore_domain}":
             ensure => absent
         }
+
+        # Remove logrotate
+        file {"/etc/logrotate.d/wp_${title}":
+            ensure  => absent
+        }
     }
     else {
 
@@ -111,6 +116,14 @@ define wordpress::instance (
             require => [ Package['apache2'],
                          File["/var/log/apache2/${underscore_domain}"] ],
             notify  => Service['apache2'],
+        }
+
+        file {"/etc/logrotate.d/wp_${title}":
+            ensure  => present,
+            owner   => 'root',
+            group   => 'root',
+            mode    => '400',
+            content => template("wordpress/logrotate-template")
         }
 
         httpd::site { $underscore_domain:

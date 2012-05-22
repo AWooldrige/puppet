@@ -1,0 +1,13 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+/var/log/apache2/<%= underscore_domain %>/*.log {
+    weekly
+    rotate 52
+
+    compress
+    copytruncate
+    missingok
+    dateext
+}
