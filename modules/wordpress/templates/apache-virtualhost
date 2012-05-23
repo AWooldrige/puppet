@@ -12,14 +12,14 @@
     ServerName <%= domain %>
 
     <Directory <%= path %>>
+        <IfModule !rewrite_module>
+            LoadModule rewrite_module modules/mod_rewrite.so
+        </IfModule>
+
         Order deny,allow
         Allow from all
 
         Options +FollowSymLinks +SymLinksIfOwnerMatch
-
-        <IfModule !rewrite_module>
-            LoadModule rewrite_module modules/mod_rewrite.so
-        </IfModule>
 
         # WordPress rewrite rules
         <IfModule mod_rewrite.c>
@@ -30,12 +30,21 @@
             RewriteCond %{REQUEST_FILENAME} !-d
             RewriteRule . /index.php [L]
         </IfModule>
-
     </Directory>
+
+    # Any theme appended with -dev (e.g. omp-theme-dev) should not be cacheable
+    <DirectoryMatch "^<%= path %>/wp-content/themes/(.+)-dev">
+        <IfModule !headers_module>
+            LoadModule headers_module modules/mod_headers.so
+        </IfModule>
+
+        <IfModule mod_headers.c>
+            Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
+        </IfModule>
+    </DirectoryMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
     CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access.log combined
-
 </VirtualHost>
 
 <VirtualHost *:<%= http_port %>>

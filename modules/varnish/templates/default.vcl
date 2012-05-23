@@ -57,13 +57,20 @@ sub vcl_fetch {
 
     set beresp.grace = 6h;
 
+    if ( (!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
+        unset beresp.http.set-cookie;
+    }
+
     # Don't cache the admin section, post previews or xmlrpc
     if (req.url ~ "wp-(login|admin)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
         return (hit_for_pass);
     }
-    if ( (!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
-        unset beresp.http.set-cookie;
+
+    # If backend says no-cache, make it no-cache!
+    if(beresp.http.cache-control ~ "no-cache") {
+        return (hit_for_pass);
     }
+
     if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
         set beresp.ttl = 365d;
     }

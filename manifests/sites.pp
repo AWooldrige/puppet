@@ -61,7 +61,8 @@ node default-server inherits default {
         'authz_groupfile',
         'authz_host',
         'ssl',
-        'alias'
+        'alias',
+        'headers'
     ]
     $disabled = [
         'cgi',
