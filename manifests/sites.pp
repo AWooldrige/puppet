@@ -90,6 +90,7 @@ node "hera.woolie.co.uk" inherits default-server {
 node "metis.woolie.co.uk" inherits default-server {
 }
 node "devvm.woolie.co.uk" inherits default-server {
+    include devtools
 }
 
 #########################################################################
