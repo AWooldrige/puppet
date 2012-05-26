@@ -22,4 +22,8 @@ class devtools {
                      Package['php-pear'] ],
         unless => 'pear list -c phpunit | grep PHPUnit'
     }
+
+    package { 'php-codesniffer':
+        ensure => installed
+    }
 }
