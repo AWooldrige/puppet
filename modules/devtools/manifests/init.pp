@@ -20,7 +20,20 @@ class devtools {
             '/sbin'],
         require => [ Package['phpunit'],
                      Package['php-pear'] ],
-        unless => 'pear list -c phpunit | grep PHPUnit'
+        unless => 'pear list -c phpunit && pear list -c phpunit | grep PHPUnit'
+    }
+
+    exec { 'phing-install':
+        command => 'pear upgrade pear;pear channel-discover pear.phing.info;pear install --alldeps phing/phing;',
+        path => [
+            '/usr/local/bin',
+            '/opt/local/bin',
+            '/usr/bin',
+            '/usr/sbin',
+            '/bin',
+            '/sbin'],
+        require => Package['php-pear'],
+        unless => 'pear list -c phing && pear list -c phing | grep phing'
     }
 
     package { 'php-codesniffer':
