@@ -1,8 +1,4 @@
 class gvim {
-
-    package { 'exuberant-ctags':
-        ensure  => installed
-    }
     package { 'vim-gnome':
         ensure  => installed,
         require => Package['exuberant-ctags']

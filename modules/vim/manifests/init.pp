@@ -2,6 +2,9 @@ class vim {
     package { 'vim':
         ensure => installed,
     }
+    package { 'exuberant-ctags':
+        ensure  => installed
+    }
     file { '/etc/vim/vimrc.local':
         source  => 'puppet:///modules/vim/vimrc.local',
         owner   => 'root',
