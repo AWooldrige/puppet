@@ -175,6 +175,13 @@ define wordpress::instance (
             content => template("wordpress/wp-config.php")
         }
 
+        file { "${path}/wp-content/plugins/wpvp-plugin.php":
+            owner   => 'www-data',
+            group   => 'www-data',
+            mode    => '440',
+            source => 'puppet:///modules/wordpress/wpvp-plugin.php',
+        }
+
         $identifier       = $title
         $destination_path = extlookup('backup/path')
         $local_wp_path    = $path
