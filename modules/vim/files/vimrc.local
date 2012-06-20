@@ -18,6 +18,7 @@ let mapleader = ","             "Set the leader key
 set title                       "Set the terminal title
 set shortmess=atI               "Stifle many interruptive prompts
 set hidden                      "Allow vim to maintain background buffers
+set background=dark             "For using vim in a dark terminal
 
 
 " ================ Search Settings  =================
