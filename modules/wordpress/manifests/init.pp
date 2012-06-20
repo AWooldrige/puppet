@@ -168,6 +168,14 @@ define wordpress::instance (
             refreshonly => true
         }
 
+        cron {"wp-set-permissions-${title}":
+            ensure => present,
+            command => "/usr/bin/wp-set-permissions ${path}",
+            user => root,
+            hour => 2,
+            minute => 30
+        }
+
         file { "${path}/wp-config.php":
             owner   => 'www-data',
             group   => 'www-data',
