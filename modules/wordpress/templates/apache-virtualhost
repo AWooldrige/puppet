@@ -33,7 +33,7 @@
     </Directory>
 
     # Any theme appended with -dev (e.g. omp-theme-dev) should not be cacheable
-    <DirectoryMatch "^<%= path %>/wp-content/themes/(.+)-dev">
+    <DirectoryMatch "^<%= path %>/wp-content/themes/(?:.+)-dev">
         <IfModule !headers_module>
             LoadModule headers_module modules/mod_headers.so
         </IfModule>
