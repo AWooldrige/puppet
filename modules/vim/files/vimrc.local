@@ -126,3 +126,6 @@ noremap <leader>n :NERDTreeToggle<CR>
 noremap <leader>l :TlistToggle<CR>
 noremap <leader>r :TName '
 map <Tab> <C-w>w
+
+" Use sudo to save
+cmap w!! %!sudo tee > /dev/null %
