@@ -107,6 +107,15 @@ define wordpress::instance (
             mode    => '750',
             require => Package['apache2']
         }
+        file {"/etc/apache2/conf.d/sites/${underscore_domain}/_null.conf":
+            ensure  => present,
+            owner   => 'www-data',
+            group   => 'www-data',
+            mode    => '400',
+            content => '#Directory for snippets to be included in the HTTP virtualhost',
+            require => Httpd::Site["${underscore_domain}"],
+            notify  => Service['apache2']
+        }
         file {"/etc/apache2/sites-available/${underscore_domain}":
             ensure  => present,
             owner   => 'www-data',

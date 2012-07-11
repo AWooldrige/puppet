@@ -45,6 +45,8 @@
 
     ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
     CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access.log combined
+
+    Include /etc/apache2/conf.d/sites/<% underscore_domain %>/
 </VirtualHost>
 
 <VirtualHost *:<%= http_port %>>

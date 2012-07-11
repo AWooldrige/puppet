@@ -43,6 +43,13 @@ class httpd ( $http_port = extlookup('httpd/http_port'),
         content => template("httpd/conf.d/ports.conf"),
         notify  => Service['apache2']
     }
+    file {"/etc/apache2/conf.d/sites":
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '750',
+        require => Package['apache2']
+    }
     service { "apache2":
         ensure  => running,
         enable  => true,
@@ -143,5 +150,13 @@ define httpd::site($ensure = 'enabled') {
             }
         }
         default: { err ( "Unknown ensure value: '$ensure'" ) }
+    }
+
+    file {"/etc/apache2/conf.d/sites/${title}":
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '750',
+        require => Package['apache2']
     }
 }
