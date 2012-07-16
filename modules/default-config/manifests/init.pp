@@ -69,5 +69,6 @@ class default-config {
     include vim
     include sudo
     include sshd
+    include motd
     include bash
 }
