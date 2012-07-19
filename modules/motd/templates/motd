@@ -1,14 +1,19 @@
-#!/bin/bash
-[ -r /etc/lsb-release ] && . /etc/lsb-release
+#!/usr/bin/python
+import sys
+import os
+import socket
 
-if [ -z "$DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
-    # Fall back to using the very slow lsb_release utility
-    DISTRIB_DESCRIPTION=$(lsb_release -s -d)
-fi
+# Width of terminal
+TERM_WIDTH = 80
+SURROUND = '#'
 
-echo '###############################################################################';
 
-printf "Welcome to %s\n" "$(hostname)"
+def print_s(text):
+    print SURROUND + text.center(TERM_WIDTH - 2, ' ') + SURROUND
 
-printf "This machine is running  %s (%s %s %s)\n" "$DISTRIB_DESCRIPTION" "$(uname -o)" "$(uname -r)" "$(uname -m)"
-echo '###############################################################################';
+
+print SURROUND * TERM_WIDTH
+
+print_s("Welcome to %s" % socket.gethostname())
+
+print SURROUND * TERM_WIDTH
