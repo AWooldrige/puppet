@@ -31,7 +31,7 @@ class motd {
     file { "/etc/update-motd.d/00-custom-motd":
         owner   => 'root',
         group   => 'root',
-        mode    => '744',
+        mode    => '755',
         content => template("motd/motd")
     }
 }
