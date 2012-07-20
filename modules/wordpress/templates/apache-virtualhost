@@ -12,6 +12,15 @@
     ServerName <%= domain %>
 
     <Directory <%= path %>>
+
+        # This causes the WordPress flash uploader to fail with an HTTP error
+        <IfModule mod_security.c>
+            <Files async-upload.php>
+                SecFilterEngine Off
+                SecFilterScanPOST Off
+            </Files>
+        </IfModule>
+
         <IfModule !rewrite_module>
             LoadModule rewrite_module modules/mod_rewrite.so
         </IfModule>
