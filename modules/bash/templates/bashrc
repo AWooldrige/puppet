@@ -1,10 +1,19 @@
-alias ll='ls -alh'
-alias la='ls -A'
-alias l='ls -CFlh'
-
+###############################################################################
+# Misc
+###############################################################################
 set -o vi
 export EDITOR=vim
 
+# Enable color support for ls
+if [ "$TERM" != "dumb" ]; then
+    eval "`dircolors -b`"
+    alias ls='ls --color=auto'
+fi
+
+
+###############################################################################
+# Tools
+###############################################################################
 extract () {
    if [ -f $1 ] ; then
        case $1 in
@@ -26,7 +35,10 @@ extract () {
    fi
  }
 
-# set a fancy prompt (non-color, unless we know we "want" color)
+
+###############################################################################
+# Prompt
+###############################################################################
 BLACK="\[\033[0;30m\]"
 DARK_GRAY="\[\033[1;30m\]"
 LIGHT_GRAY="\[\033[0;37m\]"
@@ -53,14 +65,49 @@ export PS1="\`if [ \$? = 0 ];
     fi;
      \`"
 
-# enable color support of ls and also add handy aliases
-if [ "$TERM" != "dumb" ]; then
-    eval "`dircolors -b`"
-    alias ls='ls --color=auto'
-fi
+
+
+###############################################################################
+# Aliases
+###############################################################################
+# Directory listings
+alias ll='ls -alh'
+alias la='ls -A'
+alias l='ls -CFlh'
 
 # Directory navigation aliases
 alias ..='cd ..'
 alias 2..='cd ../..'
 alias 3..='cd ../../..'
 alias 4..='cd ../../../..'
+
+# 'tcurl' to print out timing information from a cURL request
+read -r -d '' FORMAT <<'EOF'
+
+*****************************************************
+*              TIMING/SIZE INFORMATION              *
+*****************************************************
+
+ time_namelookup: %{time_namelookup} seconds
+ time_connect: %{time_connect} seconds
+ time_appconnect: %{time_appconnect} seconds
+ time_pretransfer: %{time_pretransfer} seconds
+ time_redirect: %{time_redirect} seconds
+ time_starttransfer: %{time_starttransfer} seconds
+ time_total:%{time_total} seconds
+
+ speed_download: %{speed_download}
+ speed_upload: %{speed_upload}
+
+ size_download: %{size_download} bytes
+ size_upload: %{size_upload} bytes
+ size_header: %{size_header} bytes
+ size_request: %{size_request} bytes
+
+ num_connects: %{num_connects}
+ num_redirects: %{num_redirects}
+
+*****************************************************
+
+EOF
+alias tcurl="curl -w'${FORMAT}'"
