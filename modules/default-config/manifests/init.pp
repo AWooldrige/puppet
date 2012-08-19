@@ -64,6 +64,7 @@ class default-config {
 
     include user-woolie
     include puppet-auto-update
+    include apt
     include ntp
     include tmux
     include vim

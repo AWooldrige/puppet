@@ -22,6 +22,8 @@ if ! $::osfamily {
 $extlookup_datadir = "/root/extlookup/"
 $extlookup_precedence = ["nodes/%{hostname}", "common"]
 
+Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
+
 node default {
     include default-config
 }
