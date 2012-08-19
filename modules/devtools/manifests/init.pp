@@ -1,9 +1,24 @@
 class devtools {
 
-    package { 'php-pear':
+    $buildpackages = [
+        'build-essential',
+        'dh-make',
+        'dpkg-dev',
+        'debhelper',
+        'devscripts',
+        'fakeroot',
+        'lintian'
+    ]
+    package { $buildpackages:
         ensure => installed
     }
-    package { 'build-essential':
+
+
+    $phppackages = [
+        'php-pear',
+        'php-codesniffer'
+    ]
+    package { $phppackages:
         ensure => installed
     }
 
@@ -24,9 +39,5 @@ class devtools {
         require => [ Package['phpunit'],
                      Package['php-pear'] ],
         unless => 'pear list -c phpunit && pear list -c phpunit | grep PHPUnit'
-    }
-
-    package { 'php-codesniffer':
-        ensure => installed
     }
 }
