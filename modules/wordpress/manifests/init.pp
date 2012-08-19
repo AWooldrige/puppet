@@ -173,7 +173,7 @@ define wordpress::instance (
         exec { "wp-set-permissions-${underscore_domain}":
             command => "/usr/bin/wp-set-permissions ${path}",
             onlyif  => "/usr/bin/[ -f ${path}/wp-includes/version.php ]",
-            require => File['/usr/bin/wp-set-permissions'],
+            require => [File['/usr/bin/wp-set-permissions'], Exec["wp-install-${underscore_domain}"]],
             refreshonly => true
         }
 
@@ -189,6 +189,7 @@ define wordpress::instance (
             owner   => 'www-data',
             group   => 'www-data',
             mode    => '440',
+            require => Exec["wp-install-${underscore_domain}"],
             content => template("wordpress/wp-config.php")
         }
 
@@ -196,6 +197,7 @@ define wordpress::instance (
             owner   => 'www-data',
             group   => 'www-data',
             mode    => '440',
+            require => Exec["wp-install-${underscore_domain}"],
             source => 'puppet:///modules/wordpress/wpvp-plugin.php',
         }
 
