@@ -4,3 +4,6 @@
 [submodule "modules/puppetlabs-firewall"]
 	path = modules/puppetlabs-firewall
 	url = http://github.com/puppetlabs/puppetlabs-firewall.git
+[submodule "modules/apt"]
+	path = modules/apt
+	url = http://github.com/camptocamp/puppet-apt.git
