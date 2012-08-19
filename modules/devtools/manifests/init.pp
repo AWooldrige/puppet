@@ -51,4 +51,11 @@ class devtools {
         ensure => installed,
         require => Apt::Ppa['chris-lea']
     }
+
+
+    package{['less', 'jshint', 'recess', 'uglify-js']:
+        provider => npm,
+        ensure => installed,
+        require => Package['npm']
+    }
 }
