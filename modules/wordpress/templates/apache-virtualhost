@@ -8,7 +8,6 @@
 <VirtualHost *:<%= http_port %>>
 
     DocumentRoot <%= path %>
-
     ServerName <%= domain %>
 
     <Directory <%= path %>>
@@ -27,7 +26,6 @@
 
         Order deny,allow
         Allow from all
-
         Options +FollowSymLinks +SymLinksIfOwnerMatch
 
         # WordPress rewrite rules
@@ -41,12 +39,29 @@
         </IfModule>
     </Directory>
 
+    # All static assets, when served from a plugin or a theme should have good
+    # cache control directives
+    <DirectoryMatch "^<%= path %>/wp-content/">
+        <IfModule !headers_module>
+            LoadModule headers_module modules/mod_headers.so
+        </IfModule>
+        <IfModule !expires_module>
+            LoadModule expires_module modules/mod_expires.so
+        </IfModule>
+
+        <IfModule mod_headers.c>
+            Header set Cache-control "max-age=31536000"
+        </IfModule>
+        <IfModule mod_expires.c>
+            ExpiresDefault "access plus 1 year"
+        </IfModule>
+    </DirectoryMatch>
+
     # Any theme appended with -dev (e.g. omp-theme-dev) should not be cacheable
     <DirectoryMatch "^<%= path %>/wp-content/themes/(?:.+)-dev">
         <IfModule !headers_module>
             LoadModule headers_module modules/mod_headers.so
         </IfModule>
-
         <IfModule mod_headers.c>
             Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
         </IfModule>

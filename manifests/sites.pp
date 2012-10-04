@@ -60,6 +60,7 @@ node default-server inherits default {
     # isn't available
     $enabled =  [
         'rewrite',
+        'expires',
         'authz_groupfile',
         'authz_host',
         'ssl',
