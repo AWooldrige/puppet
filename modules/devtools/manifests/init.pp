@@ -13,6 +13,12 @@ class devtools {
         ensure => installed
     }
 
+    $devpackages = [
+        'virtualbox-qt'
+    ]
+    package { $devpackages:
+        ensure => installed
+    }
 
     $phppackages = [
         'php-pear',

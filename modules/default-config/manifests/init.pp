@@ -6,6 +6,7 @@ class default-config {
         'strace',
         'ack-grep',
         'iotop',
+        'powertop',
         'man-db',
         'rdiff-backup',
         'pwgen',
