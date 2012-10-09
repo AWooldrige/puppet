@@ -30,6 +30,12 @@ class default-config {
         group   => 'root',
         mode    => '400',
     }
+    file { '/bkps':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '400',
+    }
     file { '/root/extlookup/common.csv':
         ensure  => present,
         owner   => 'root',

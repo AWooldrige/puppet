@@ -217,7 +217,7 @@ define wordpress::instance (
         if $backups == true {
             cron {"incremental_backup_${title}":
                 ensure => present,
-                command => "/usr/bin/wp-backup -t incremental ${title}",
+                command => "/usr/bin/wp-backup incremental ${title}",
                 user => root,
                 hour => 4,
                 minute => 0

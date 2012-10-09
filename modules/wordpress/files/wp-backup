@@ -2,17 +2,55 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+
+"""
+#########################################################################
+##                                 wp-backup                           ##
+#########################################################################
+
+wp-backup has two modes:
+ - creating local full dumps of a WordPress instance's state.
+ - managing incremental backups on remote machines
+
+
+Configuration
+=============
+wp-backup uses configuration files to find data about a WordPress instance and
+where to place backups. There is one file per WordPress instance within
+/etc/wp-backup/
+
+
+Examples
+========
+    Note: For any command, append -n (or --no-op) to see what commands would
+          have been executed
+
+    Incremental Backups
+    -------------------
+       - To backup
+           wp-backup incremental ompcouk
+
+       - If restoring from backups for the same hostname:
+           wp-backup incremental ompcouk -r
+
+       - To restore from backups for a different hostname
+           wp-backup incremental ompcouk -r -f hera.woolie.co.uk
+
+
+
+    Full Backups
+    ---------------------
+        - To backup an instance to /bkps/[host]/[identifier].tar.gz
+            wp-backup full wooliecouk
+
+        - To restore an instance from a /bkps/[host]/[identifier].tar.gz
+            wp-backup full wooliecouk -r
+
+"""
+
+# Restoring from backups
+########################################################################
 #
-# Restoring from backups usage example:
-#
-#   - If restoring from backups for the same hostname:
-#       wp-backup -r ompcouk
-#
-#   - To restore from backups for a different hostname
-#       wp-backup -r -f hera.woolie.co.uk ompcouk
-#
-#   - To see what commands would be executed
-#       wp-backup --no-op -r ompcouk
 
 
 import argparse
@@ -25,57 +63,51 @@ import pprint
 import ConfigParser
 
 class WordpressBackup(object):
-
-    def __init__(self, btype, dest_path, wp_path, domain, no_op, identifier,
+    def __init__(self, mode, dest_path, wp_path, domain, no_op, identifier,
                  restore, from_host):
-        self._btype     = btype
-        self._dest_path  = dest_path + '/' +  from_host
-        self._wp_path    = wp_path
-        self._domain     = domain
-        self._no_op      = no_op
+        self._mode = mode
+        self._dest_path = dest_path + '/' +  from_host
+        self._wp_path = wp_path
+        self._wp_content = wp_path + 'wp-content'
+        self._domain = domain
+        self._no_op = no_op
         self._identifier = identifier
-        self._restore    = restore
-        self._from_host  = from_host
+        self._restore = restore
+        self._from_host = from_host
 
-        self._db_prfx    = 'wp_'
-        self._db_name    = self._db_prfx + self._identifier
+        #Hardcoded paths
+        self._db_prfx = 'wp_'
+        self._db_name = self._db_prfx + self._identifier
+        self._full_bkp_path = "/bkps/{0}".format(from_host, identifier)
 
-        #Are we restoring or backing up?
-        if restore:
-            if self._no_op:
-                tmpfile = '/tmp/randomtmpdir'
+        print restore
+        if mode == 'full':
+            if restore:
+                self.shell_execute_multi(
+                        self.full_rstr_cmd(self.create_tmp_dir()))
             else:
-                tmpfile = tempfile.mkdtemp()
-
-            for output in self.shell_execute(self.mysql_rstr_cmd(tmpfile)):
-                if output['return_code'] != 0:
-                    print '   - FAILURE'
-                    pprint.pprint(output)
-
-            for output in self.shell_execute(self.wpcontent_rstr_cmd()):
-                if output['return_code'] != 0:
-                    print '   - FAILURE'
-                    pprint.pprint(output)
-
+                self.shell_execute_multi(
+                        self.full_bkp_cmd(self.create_tmp_dir()))
         else:
-            if self._no_op:
-                tmpfile = '/tmp/randomtmpdir'
+            if restore:
+                self.shell_execute_multi(
+                        self.mysql_rstr_cmd(self.create_tmp_dir()))
+                self.shell_execute_multi(self.wpcontent_rstr_cmd())
             else:
-                tmpfile = tempfile.mkdtemp()
-
-            for output in self.shell_execute(self.mysql_bkp_cmd(tmpfile)):
-                if output['return_code'] != 0:
-                    print '   - FAILURE'
-                    pprint.pprint(output)
-
-            for output in self.shell_execute(self.wpcontent_bkp_cmd()):
-                if output['return_code'] != 0:
-                    print '   - FAILURE'
-                    pprint.pprint(output)
+                self.shell_execute_multi(
+                        self.mysql_bkp_cmd(self.create_tmp_dir()))
+                self.shell_execute_multi(self.wpcontent_bkp_cmd())
 
 
-    def build_transfer_command(self):
-        return False
+
+    ###########################################################################
+    # INCREMENTAL BACKUP COMMANDS
+    ###########################################################################
+    def create_tmp_dir(self):
+        if self._no_op:
+            return '/tmp/randomtmpdir'
+        else:
+            return tempfile.mkdtemp()
 
 
     def mysql_bkp_cmd(self, tmp_path):
@@ -150,39 +182,104 @@ class WordpressBackup(object):
         return cmds
 
 
-    def shell_execute(self, cmds):
-        if self._no_op:
-            print "\nShell commands that would have ran:"
-        else:
-            print "\nExecuting shell commands:"
+    ###########################################################################
+    # FULL BACKUP COMMANDS
+    ###########################################################################
+    def full_bkp_cmd(self, tmp_path):
+        cmds = []
 
+        # Make sure that the backup directory exists
+        cmds.append("/bin/mkdir -p {0}".format(self._full_bkp_path))
+
+        # Dump the MySQL table to a file
+        cmds.append("/usr/bin/mysqldump {0} > {1}/{0}.sql".format(
+                self._db_name, tmp_path))
+
+        # Archive up
+        cmd = ("/bin/tar --exclude=.svn -czf {3}/{0}.tar.gz -C {1}/ {4}.sql " +
+               "-C {2} wp-content")
+        cmds.append(cmd.format(self._identifier, tmp_path, self._wp_path,
+                               self._full_bkp_path, self._db_name))
+
+        # remove the temporary files
+        cmds.append("/bin/rm -rf {0}".format(tmp_path))
+
+        return cmds
+
+
+    def full_rstr_cmd(self, tmp_path):
+        cmds = []
+
+        # Extract backup into temporary location
+        cmds.append("/bin/tar -zxf {0}/{1}.tar.gz -C {2}".format(
+                self._full_bkp_path, self._identifier, tmp_path))
+
+
+        # Drop any tables currently in the database
+        cmd = ("/usr/bin/mysqldump --no-data --add-drop-table {0} | " +
+               "grep ^DROP | /usr/bin/mysql {0}")
+        cmds.append(cmd.format(self._db_name))
+
+        # Import the SQL statements
+        cmds.append("/usr/bin/mysql {0} < {1}/{0}.sql".format(
+                self._db_name, tmp_path))
+
+        # Clear out current wp-content
+        cmds.append("/bin/rm -rf {0}/wp-content".format(self._wp_path))
+
+        # Copy over wp-content from backup
+        cmds.append("/bin/mv {0}/wp-content {1}/".format(
+                tmp_path, self._wp_path))
+
+        # Remove the temporary files
+        cmds.append("/bin/rm -rf {0}".format(tmp_path))
+
+        # Ensure permissions are set correctly on any recovered files
+        cmds.append("/usr/bin/wp-set-permissions {0}".format(self._wp_path))
+
+        return cmds
+
+
+
+    def shell_execute_multi(self, cmds):
+        print('\n[INFO] Executing ' + str(len(cmds)) + ' commands')
         for cmd in cmds:
-            print('  ' + cmd)
+            self.shell_execute(cmd)
 
-            if not self._no_op:
-                process = subprocess.Popen(
-                    ['/bin/bash', '-c', cmd],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=False
-                )
+    def shell_execute(self, cmd):
+        """
+        Execute a bash shell command, returning the result of stdout or an
+        exception if an error occured
+        """
 
-                stderr_buffer = ""
-                stdout_buffer = ""
+        if self._no_op:
+            print('[noop] ' + cmd)
+            return
 
-                # retcode will return 'None' whilst the subprocess is running, sit in a
-                # while loop whilst it's running, returning the output at the end
-                while(True):
-                    retcode = process.poll()
-                    stdout_buffer += process.stdout.readline()
-                    stderr_buffer += process.stderr.readline()
-                    if(retcode is not None):
-                        yield {
-                            'return_code' : retcode,
-                            'stdout' : stdout_buffer,
-                            'stderr' : stderr_buffer
-                        }
-                        break
+        print('[executing] ' + cmd)
+
+        process = subprocess.Popen(
+            ['/bin/bash', '-c', cmd],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False
+        )
+
+        stderr_buffer = ""
+        stdout_buffer = ""
+
+        while(True):
+            retcode = process.poll()
+            stdout_buffer += process.stdout.readline()
+            stderr_buffer += process.stderr.readline()
+            if(retcode is not None):
+                if (retcode == 0):
+                    print stdout_buffer
+                    return retcode
+                else:
+                    raise Exception(
+                        "BASH ERROR (return code {0}): \n{1}".format(
+                            retcode, stdout_buffer + stderr_buffer))
 
 
 if __name__ == "__main__":
@@ -196,6 +293,13 @@ if __name__ == "__main__":
         ''')
     )
     argparser.add_argument(
+        'mode',
+        type=str,
+        default='full',
+        choices=['full', 'incremental'],
+        help='What backup mode to use - full or incremental'
+    )
+    argparser.add_argument(
         'identifier',
         type=str,
         help='Identifier used for the WordPress instance. Referencing a config'+
@@ -205,6 +309,7 @@ if __name__ == "__main__":
         '-n',
         '--no-op',
         action='store_true',
+        default=False,
         help='If no-op is flagged, no operations will occur, the script will ' +
              'just dump the commands it would have ran'
     )
@@ -212,6 +317,7 @@ if __name__ == "__main__":
         '-r',
         '--restore-from-backup',
         action='store_true',
+        default=False,
         help='Restore from backup, specify the hostname to restore from with '+
              '-f or the default is the current machine\'s hostname'
     )
@@ -223,26 +329,25 @@ if __name__ == "__main__":
         help='Specify hostname space to backup to, or restore from. E.g. ' +
               'hera.woolie.co.uk'
     )
-    argparser.add_argument(
-        '-t',
-        '--btype',
-        type=str,
-        default='full',
-        choices=['full', 'incremental'],
-        help='Full or incremental backup?'
-    )
     args = argparser.parse_args()
 
+    # The configuration file is lazy loaded, so no exception will be thrown
+    # here even if the file doesn't exist
     config = ConfigParser.RawConfigParser()
     config.read('/etc/wp-backup/' + args.identifier)
 
-    bkp = WordpressBackup(
-        btype=args.btype,
-        no_op=args.no_op,
-        identifier=args.identifier,
-        dest_path=config.get(args.identifier, 'destination_path'),
-        wp_path=config.get(args.identifier, 'local_wp_path'),
-        domain=config.get(args.identifier, 'domain'),
-        restore=args.restore_from_backup,
-        from_host=args.from_hostname
-    )
+    try:
+        bkp = WordpressBackup(
+            mode=args.mode,
+            no_op=args.no_op,
+            identifier=args.identifier,
+            dest_path=config.get(args.identifier, 'destination_path'),
+            wp_path=config.get(args.identifier, 'local_wp_path'),
+            domain=config.get(args.identifier, 'domain'),
+            restore=args.restore_from_backup,
+            from_host=args.from_hostname
+        )
+    except ConfigParser.NoSectionError:
+        msg = "Either the /etc/wp-backup/{0} file doesn't exist, or the " + \
+              "[{0}] section is not contained within it"
+        raise Exception(msg.format(args.identifier))
