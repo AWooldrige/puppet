@@ -7,6 +7,3 @@
 [submodule "modules/apt"]
 	path = modules/apt
 	url = http://github.com/camptocamp/puppet-apt.git
-[submodule "modules/npm"]
-	path = modules/npm
-	url = http://github.com/UniversityofWarwick/puppet-npm
