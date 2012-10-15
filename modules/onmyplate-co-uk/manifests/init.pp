@@ -4,5 +4,6 @@ class onmyplate-co-uk () {
         path    => "/var/www/onmyplate-co-uk",
         domain  => "onmyplate.co.uk",
         backups => true,
+        http_port => 81
     }
 }

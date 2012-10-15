@@ -49,7 +49,9 @@ define wordpress::instance (
     $ensure = '3.3.2',
     $path,
     $domain,
-    $backups = 'false') {
+    $backups = 'false',
+    $http_port=80,
+    $https_port=443) {
 
     $underscore_domain = regsubst($domain, '\.', '_', 'G')
     $wp_db_prefix  = "wp_"
@@ -65,9 +67,6 @@ define wordpress::instance (
     $wp_unique_secure_auth_salt = generate("/root/getpassword", "wp_${underscore_domain}_unique_secure_auth_salt")
     $wp_unique_logged_in_salt   = generate("/root/getpassword", "wp_${underscore_domain}_unique_logged_in_salt")
     $wp_unique_nonce_salt       = generate("/root/getpassword", "wp_${underscore_domain}_unique_nonce_salt")
-
-    $http_port = extlookup('httpd/http_port')
-    $https_port = extlookup('httpd/https_port')
 
     if $ensure == 'purged' {
 

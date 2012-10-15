@@ -1,5 +1,5 @@
-class httpd ( $http_port = extlookup('httpd/http_port'),
-              $https_port = extlookup('httpd/https_port') ) {
+class httpd ($http_port=80,
+             $https_port=443) {
 
     package { [ "apache2", "apache2-mpm-prefork", "ssl-cert" ]:
         ensure => installed

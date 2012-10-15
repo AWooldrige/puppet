@@ -45,16 +45,19 @@ node "agw-inspiron-1720" inherits default-desktop {
 #########################################################################
 ##                           Production Nodes                          ##
 #########################################################################
-node default-server inherits default {
+node default-wordpress-server inherits default {
     include zend-framework
     include wordpress
     include woolie-co-uk
     include onmyplate-co-uk
 
-    class { 'httpd': }
+    class {'httpd':
+        http_port => 81
+    }
+    class {'varnish': }
+
     include php
     include ssmtp
-    include varnish
 
     # authz_groupfile and authz_host are needed otherwise the Order statement
     # isn't available
@@ -88,18 +91,18 @@ node default-server inherits default {
         }
     }
 }
-node "hera.woolie.co.uk" inherits default-server {
+node "hera.woolie.co.uk" inherits default-wordpress-server {
 }
-node "metis.woolie.co.uk" inherits default-server {
+node "metis.woolie.co.uk" inherits default-wordpress-server {
 }
-node "devvm.woolie.co.uk" inherits default-server {
+node "devvm.woolie.co.uk" inherits default-wordpress-server {
     include devtools
 }
 
 #########################################################################
 ##                             Utility Nodes                           ##
 #########################################################################
-node default-utility-server inherits default {
+node default-monitoring-server inherits default {
 
     class { 'httpd': }
 
@@ -124,5 +127,5 @@ node default-utility-server inherits default {
     httpd::module { $enabled: ensure => enabled }
     httpd::module { $disabled: ensure => disabled }
 }
-node "eros.woolie.co.uk" inherits default-utility-server {
+node "mon1.woolie.co.uk" inherits default-monitoring-server {
 }

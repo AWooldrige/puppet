@@ -1,7 +1,6 @@
-class varnish {
-    $httpd_http_host = extlookup('varnish/httpd_http_host')
-    $httpd_http_port = extlookup('httpd/http_port')
-    $varnish_port = extlookup('varnish/port')
+class varnish ($varnish_port=80,
+               $httpd_http_host='127.0.0.1',
+               $httpd_http_port=81) {
 
     package { "varnish":
         ensure => installed

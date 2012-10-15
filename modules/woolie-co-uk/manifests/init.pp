@@ -4,5 +4,6 @@ class woolie-co-uk () {
         path    => "/var/www/woolie-co-uk",
         domain  => "woolie.co.uk",
         backups => true,
+        http_port => 81
     }
 }
