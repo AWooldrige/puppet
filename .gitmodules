@@ -10,3 +10,6 @@
 [submodule "modules/nodejs"]
 	path = modules/nodejs
 	url = http://github.com/puppetlabs/puppetlabs-nodejs
+[submodule "modules/stdlib"]
+	path = modules/stdlib
+	url = http://github.com/puppetlabs/puppetlabs-stdlib
