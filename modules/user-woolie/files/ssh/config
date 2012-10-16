@@ -48,18 +48,13 @@ Host devvm
 #########################################################################
 # Production
 #########################################################################
-Host metis
-    Hostname metis.woolie.co.uk
-    User woolie
-    IdentityFile /home/woolie/.ssh/id_rsa_metis
-
-Host eros
-    Hostname eros.woolie.co.uk
+Host hera
+    Hostname hera.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
-Host hera
-    Hostname hera.woolie.co.uk
+Host mon1
+    Hostname mon1.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
