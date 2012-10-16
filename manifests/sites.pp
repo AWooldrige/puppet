@@ -103,29 +103,7 @@ node "devvm.woolie.co.uk" inherits default-wordpress-server {
 ##                             Utility Nodes                           ##
 #########################################################################
 node default-monitoring-server inherits default {
-
-    class { 'httpd': }
-
-    # authz_groupfile and authz_host are needed otherwise the Order statement
-    # isn't available
-    $enabled =  [
-        'rewrite',
-        'authz_groupfile',
-        'authz_host',
-        'ssl',
-        'alias'
-    ]
-    $disabled = [
-        'cgi',
-        'authz_default',
-        'auth_basic',
-        'authz_user',
-        'autoindex',
-        'authn_file'
-    ]
-
-    httpd::module { $enabled: ensure => enabled }
-    httpd::module { $disabled: ensure => disabled }
+    include user-backupincoming
 }
 node "mon1.woolie.co.uk" inherits default-monitoring-server {
 }
