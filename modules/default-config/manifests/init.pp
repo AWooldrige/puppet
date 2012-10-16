@@ -69,6 +69,7 @@ class default-config {
         require => Package['openssh-server']
     }
 
+    include stdlib
     include user-woolie
     include puppet-auto-update
     include apt

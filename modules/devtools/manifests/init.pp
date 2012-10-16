@@ -47,21 +47,10 @@ class devtools {
         unless => 'pear list -c phpunit && pear list -c phpunit | grep PHPUnit'
     }
 
-    apt::ppa {'chris-lea':
-        ensure => present,
-        key    => 'C7917B12',
-        ppa    => 'node.js'
-    }
-
-    package{['nodejs', 'npm']:
-        ensure => installed,
-        require => Apt::Ppa['chris-lea']
-    }
-
+    include nodejs
 
     package{['less', 'jshint', 'recess', 'uglify-js']:
         provider => npm,
-        ensure => installed,
-        require => Package['npm']
+        ensure => installed
     }
 }
