@@ -68,6 +68,12 @@ class default-config {
         mode => '400',
         require => Package['openssh-server']
     }
+    file { "/opt/local-debs":
+        ensure => directory,
+        owner => 'root',
+        group => 'root',
+        mode => '700'
+    }
 
     include stdlib
     include user-woolie
