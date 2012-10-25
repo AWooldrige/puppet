@@ -118,4 +118,11 @@ class vim {
         mode   => '644',
         require => File['/etc/vim/syntax']
     }
+    file { '/etc/vim/syntax/puppet.vim':
+        source  => 'puppet:///modules/vim/syntax/puppet.vim',
+        owner   => 'root',
+        group   => 'root',
+        mode   => '644',
+        require => File['/etc/vim/syntax']
+    }
 }
