@@ -1,7 +1,7 @@
 class diamond (
-    $graphite_host=mon1.woolie.co.uk,
-    $graphite_port=2003,
-    $polling_interval=60) {
+    $graphite_host = 'mon1.woolie.co.uk',
+    $graphite_port = 2003,
+    $polling_interval = 60) {
 
     $pkg = 'diamond_3.0.2_all.deb'
 
@@ -38,6 +38,7 @@ class diamond (
     service { 'diamond':
         ensure => running,
         enable => true,
+        provider => upstart,
         require => [
             Package['diamond'],
             File['/etc/diamond/diamond.conf']]
