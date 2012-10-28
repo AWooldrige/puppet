@@ -25,16 +25,24 @@ class graphite ($httpd_port = 80) {
         group   => 'root',
         mode    => '755'
     }
-    file {"/etc/apache2/sites-available/graphite":
+    file {"/opt/graphite/conf/graphite.wsgi":
         ensure  => present,
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '400',
-        content => template("graphite/apache-virtualhost.erb"),
-        require => Package['apache2'],
-        notify  => Service['apache2']
+        content => template("graphite/graphite.wsgi.erb"),
+        require => Exec['graphite-web-install']
     }
 
+    file { '/opt/graphite/conf/storage-schemas.conf':
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => 700,
+        content => template('graphite/storage-schemas.conf.erb'),
+        notify => Exec['carbon-restart'],
+        require => Exec['carbon-install']
+    }
     /*
      * Annoyingly, we can't use the PIP package provider with these two, as they
      * don't register with PIP when correctly installed. I.e. You can keep
