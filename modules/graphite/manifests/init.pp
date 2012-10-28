@@ -34,15 +34,6 @@ class graphite ($httpd_port = 80) {
         require => Exec['graphite-web-install']
     }
 
-    file { '/opt/graphite/conf/storage-schemas.conf':
-        ensure => present,
-        owner => 'root',
-        group => 'root',
-        mode => 700,
-        content => template('graphite/storage-schemas.conf.erb'),
-        notify => Exec['carbon-restart'],
-        require => Exec['carbon-install']
-    }
     /*
      * Annoyingly, we can't use the PIP package provider with these two, as they
      * don't register with PIP when correctly installed. I.e. You can keep
