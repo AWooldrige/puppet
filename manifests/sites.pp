@@ -90,6 +90,10 @@ node default-wordpress-server inherits default {
             'root_password' => $mysql_root_password
         }
     }
+
+    class {'diamond':
+        graphite_host => 'mon1.woolie.co.uk'
+    }
 }
 node "hera.woolie.co.uk" inherits default-wordpress-server {
 }
@@ -97,6 +101,7 @@ node "metis.woolie.co.uk" inherits default-wordpress-server {
 }
 node "devvm.woolie.co.uk" inherits default-wordpress-server {
     include devtools
+
 }
 
 #########################################################################
@@ -104,6 +109,12 @@ node "devvm.woolie.co.uk" inherits default-wordpress-server {
 #########################################################################
 node default-monitoring-server inherits default {
     include user-backupincoming
+    include httpd
+    include graphite
+
+    class {'diamond':
+        graphite_host => '127.0.0.1'
+    }
 }
 node "mon1.woolie.co.uk" inherits default-monitoring-server {
 }
