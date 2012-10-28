@@ -34,6 +34,15 @@ class diamond (
         notify => Service['diamond'],
         require => Package['diamond']
     }
+    file { '/etc/diamond/collectors/UserScriptsCollector.conf':
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => 400,
+        content => template('diamond/UserScriptsCollector.conf.erb'),
+        notify => Service['diamond'],
+        require => Package['diamond']
+    }
 
     service { 'diamond':
         ensure => running,

@@ -24,6 +24,15 @@ class varnish ($varnish_port=80,
         content => template("varnish/service-script")
     }
 
+    file { "/usr/share/diamond/user_scripts/varnish_metrics":
+        source => 'puppet:///modules/varnish/varnish_metrics',
+        owner => "root",
+        group => "root",
+        mode  => '744',
+        require => Package["diamond"],
+        notify  => Service["diamond"]
+    }
+
     service { "varnish":
         ensure  => running,
         enable  => true,
