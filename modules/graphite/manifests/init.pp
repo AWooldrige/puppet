@@ -33,6 +33,15 @@ class graphite ($httpd_port = 80) {
         content => template("graphite/graphite.wsgi.erb"),
         require => Exec['graphite-web-install']
     }
+    file {"/etc/apache2/sites-available/graphite":
+        ensure  => present,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        content => template("graphite/apache-virtualhost.erb"),
+        require => Package['apache2'],
+        notify  => Service['apache2']
+    }
 
     /*
      * Annoyingly, we can't use the PIP package provider with these two, as they
