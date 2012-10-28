@@ -60,8 +60,11 @@ class graphite ($httpd_port = 80) {
         require => [ Package['django-tagging'], Package[$graphiteDebDeps], Exec['carbon-install'] ],
         creates => "/opt/graphite/bin/build-index.sh",
         path => ["/usr/bin", "/usr/sbin"],
-        notify => Exec['graphite-install-db'],
+        notify => [ Exec['graphite-install-db'], Exec['graphite-set-permissions'] ],
         timeout => 100
+    }
+    exec { "graphite-set-permissions":
+        command => "/bin/chown -R www-data:www-data /opt/graphite/storage"
     }
 
     file { '/opt/graphite/conf/carbon.conf':
