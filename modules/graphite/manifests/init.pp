@@ -74,7 +74,7 @@ class graphite ($httpd_port = 80) {
         mode => 700,
         content => template('graphite/carbon.conf.erb'),
         notify => Exec['carbon-service'],
-        require => Exec['graphite-web-install']
+        require => Exec['carbon-install']
     }
     file { '/opt/graphite/conf/storage-schemas.conf':
         ensure => present,
@@ -84,6 +84,14 @@ class graphite ($httpd_port = 80) {
         content => template('graphite/storage-schemas.conf.erb'),
         notify => Exec['carbon-restart'],
         require => Exec['carbon-install']
+    }
+    file { '/opt/graphite/webapp/graphite/local_settings.py':
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => 700,
+        content => template('graphite/local_settings.py.erb'),
+        require => Exec['graphite-web-install']
     }
 
     exec { "graphite-install-db":
