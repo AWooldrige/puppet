@@ -59,30 +59,6 @@ node default-wordpress-server inherits default {
     include php
     include ssmtp
 
-    # authz_groupfile and authz_host are needed otherwise the Order statement
-    # isn't available
-    $enabled =  [
-        'rewrite',
-        'expires',
-        'authz_groupfile',
-        'authz_host',
-        'ssl',
-        'alias',
-        'headers'
-    ]
-    $disabled = [
-        'cgi',
-        'authz_default',
-        'auth_basic',
-        'authz_user',
-        'autoindex',
-        'authn_file'
-    ]
-
-    httpd::module { $enabled: ensure => enabled }
-    httpd::module { $disabled: ensure => disabled }
-
-
     $mysql_root_password = generate("/root/getpassword", "mysql_root_password")
 
     class { 'mysql::server':

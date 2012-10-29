@@ -42,7 +42,10 @@ class wordpress {
         mode => '540'
     }
 
-
+    httpd::module { [ 'rewrite', 'expires', 'ssl', 'alias', 'headers',
+        'authz_host' ]:
+        ensure => enabled
+    }
 }
 
 define wordpress::instance (

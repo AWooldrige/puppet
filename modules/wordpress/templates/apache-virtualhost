@@ -2,6 +2,10 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+# Note that there are no <IfModule blah> checks. This is because these should
+# be specified in puppet. If they aren't we want it to fail hard, otherwise
+# we will never know about them.
+
 #########################################################################
 ##  Normal HTTP
 #########################################################################
@@ -11,66 +15,35 @@
     ServerName <%= domain %>
 
     <Directory <%= path %>>
-
-        # This causes the WordPress flash uploader to fail with an HTTP error
-        <IfModule mod_security.c>
-            <Files async-upload.php>
-                SecFilterEngine Off
-                SecFilterScanPOST Off
-            </Files>
-        </IfModule>
-
-        <IfModule !rewrite_module>
-            LoadModule rewrite_module modules/mod_rewrite.so
-        </IfModule>
-
         Order deny,allow
         Allow from all
         Options +FollowSymLinks +SymLinksIfOwnerMatch
 
         # WordPress rewrite rules
-        <IfModule mod_rewrite.c>
-            RewriteEngine On
-            RewriteBase /
-            RewriteRule ^index\.php$ - [L]
-            RewriteCond %{REQUEST_FILENAME} !-f
-            RewriteCond %{REQUEST_FILENAME} !-d
-            RewriteRule . /index.php [L]
-        </IfModule>
+        RewriteEngine On
+        RewriteBase /
+        RewriteRule ^index\.php$ - [L]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.php [L]
     </Directory>
 
     # All static assets, when served from a plugin or a theme should have good
     # cache control directives
     <DirectoryMatch "^<%= path %>/wp-content/">
-        <IfModule !headers_module>
-            LoadModule headers_module modules/mod_headers.so
-        </IfModule>
-        <IfModule !expires_module>
-            LoadModule expires_module modules/mod_expires.so
-        </IfModule>
-
-        <IfModule mod_headers.c>
-            Header set Cache-control "max-age=31536000"
-        </IfModule>
-        <IfModule mod_expires.c>
-            ExpiresDefault "access plus 1 year"
-        </IfModule>
+        Header set Cache-control "max-age=31536000"
+        ExpiresDefault "access plus 1 year"
     </DirectoryMatch>
 
     # Any theme appended with -dev (e.g. omp-theme-dev) should not be cacheable
     <DirectoryMatch "^<%= path %>/wp-content/themes/(?:.+)-dev">
-        <IfModule !headers_module>
-            LoadModule headers_module modules/mod_headers.so
-        </IfModule>
-        <IfModule mod_headers.c>
-            Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
-        </IfModule>
+        Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
     </DirectoryMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
     CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access.log combined
 
-    Include /etc/apache2/conf.d/sites/<% underscore_domain %>/
+    Include /etc/apache2/conf.d/sites/<%= underscore_domain %>/
 </VirtualHost>
 
 <VirtualHost *:<%= http_port %>>
@@ -82,56 +55,47 @@
 #########################################################################
 ##  Secure HTTPS
 #########################################################################
-<IfModule mod_ssl.c>
-    <VirtualHost <%= @ipaddress %>:<%= https_port %>>
+<VirtualHost <%= @ipaddress %>:<%= https_port %>>
 
-        DocumentRoot <%= path %>
-        ServerName <%= domain %>
+    DocumentRoot <%= path %>
+    ServerName <%= domain %>
 
-        <Directory <%= path %>>
-            Order deny,allow
-            Allow from all
+    <Directory <%= path %>>
+        Order deny,allow
+        Allow from all
+        Options +FollowSymLinks +SymLinksIfOwnerMatch
 
-            Options +FollowSymLinks +SymLinksIfOwnerMatch
+        # WordPress rewrite rules
+        RewriteEngine On
+        RewriteBase /
+        RewriteRule ^index\.php$ - [L]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /index.php [L]
+    </Directory>
 
-            <IfModule !rewrite_module>
-                LoadModule rewrite_module modules/mod_rewrite.so
-            </IfModule>
+    ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error_ssl.log
+    CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access_ssl.log combined
 
-            # WordPress rewrite rules
-            <IfModule mod_rewrite.c>
-                RewriteEngine On
-                RewriteBase /
-                RewriteRule ^index\.php$ - [L]
-                RewriteCond %{REQUEST_FILENAME} !-f
-                RewriteCond %{REQUEST_FILENAME} !-d
-                RewriteRule . /index.php [L]
-            </IfModule>
-        </Directory>
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
-        ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error_ssl.log
-        CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access_ssl.log combined
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
 
-        SSLEngine on
-        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
-        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    BrowserMatch "MSIE [2-6]" \
+        nokeepalive ssl-unclean-shutdown \
+        downgrade-1.0 force-response-1.0
+    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+</VirtualHost>
 
-        <FilesMatch "\.(cgi|shtml|phtml|php)$">
-            SSLOptions +StdEnvVars
-        </FilesMatch>
+<VirtualHost <%= @ipaddress %>:<%= https_port %>>
+    ServerName www.<%= domain %>
+    Redirect permanent / https://<%= domain %>/
 
-        BrowserMatch "MSIE [2-6]" \
-            nokeepalive ssl-unclean-shutdown \
-            downgrade-1.0 force-response-1.0
-        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
-    </VirtualHost>
-
-    <VirtualHost <%= @ipaddress %>:<%= https_port %>>
-        ServerName www.<%= domain %>
-        Redirect permanent / https://<%= domain %>/
-
-        SSLEngine on
-        SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
-        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
-    </VirtualHost>
-</IfModule>
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+</VirtualHost>

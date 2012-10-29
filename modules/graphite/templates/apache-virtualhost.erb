@@ -10,10 +10,6 @@
 # you will need to change all the occurances of /opt/graphite/
 # in this file to your chosen install location.
 
-<IfModule !wsgi_module.c>
-    LoadModule wsgi_module modules/mod_wsgi.so
-</IfModule>
-
 # XXX You need to set this up!
 # Read http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives#WSGISocketPrefix
 WSGISocketPrefix /var/run/wsgi/wsgi
