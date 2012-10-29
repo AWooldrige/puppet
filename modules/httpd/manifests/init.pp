@@ -1,5 +1,7 @@
-class httpd ($http_port=80,
-             $https_port=443) {
+class httpd (
+    $http_port=80,
+    $https_port=443,
+    $status_port=8000) {
 
     package { [ "apache2", "apache2-mpm-prefork", "ssl-cert" ]:
         ensure => installed
@@ -23,6 +25,21 @@ class httpd ($http_port=80,
         require => Package['apache2'],
         content => template("httpd/conf.d/security"),
         notify  => Service['apache2']
+    }
+    file { "/etc/apache2/conf.d/status.conf":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        content => template("httpd/conf.d/status.conf"),
+        notify  => Service['apache2']
+    }
+    file {"/var/log/apache2/status":
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '750',
+        require => Package['apache2']
     }
     file { "/etc/apache2/apache2.conf":
         owner   => 'www-data',
