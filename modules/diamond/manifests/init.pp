@@ -6,7 +6,7 @@ class diamond (
     $pkg = 'diamond_3.0.2_all.deb'
 
     exec { 'download-diamond-pkg':
-        command => "curl -o /opt/local-debs/${pkg} http://github.com/downloads/AWooldrige/puppet/${pkg}",
+        command => "curl -o /opt/local-debs/${pkg} https://github.com/downloads/AWooldrige/puppet/${pkg}",
         creates => "/opt/local-debs/${pkg}"
     }
 
