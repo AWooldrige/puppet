@@ -28,23 +28,23 @@ Examples
     Incremental Backups
     -------------------
        - To backup
-           wp-backup incremental ompcouk
+           wp-backup incremental wp_ompcouk
 
        - If restoring from backups for the same hostname:
-           wp-backup incremental ompcouk -r
+           wp-backup incremental wp_ompcouk -r
 
        - To restore from backups for a different hostname
-           wp-backup incremental ompcouk -r -f hera.woolie.co.uk
+           wp-backup incremental wp_ompcouk -r -f hera
 
 
 
     Full Backups
     ---------------------
         - To backup an instance to /bkps/[host]/[identifier].tar.gz
-            wp-backup full wooliecouk
+            wp-backup full wp_wooliecouk
 
         - To restore an instance from a /bkps/[host]/[identifier].tar.gz
-            wp-backup full wooliecouk -r
+            wp-backup full wp_wooliecouk -r
 
 """
 
@@ -63,24 +63,24 @@ import pprint
 import ConfigParser
 
 class WordpressBackup(object):
-    def __init__(self, mode, dest_path, wp_path, domain, no_op, identifier,
-                 restore, from_host):
+    def __init__(self, mode, dest_path, wp_path, no_op, identifier, restore, from_host):
         self._mode = mode
-        self._dest_path = dest_path + '/' +  from_host
+        self._dest_path = dest_path
         self._wp_path = wp_path
         self._wp_content = wp_path + 'wp-content'
-        self._domain = domain
         self._no_op = no_op
         self._identifier = identifier
         self._restore = restore
         self._from_host = from_host
 
         #Hardcoded paths
-        self._db_prfx = 'wp_'
-        self._db_name = self._db_prfx + self._identifier
-        self._full_bkp_path = "/bkps/{0}".format(from_host, identifier)
+        self._db_name = self._identifier
+        self._full_bkp_path = "/bkps/wordpress_full"
 
-        print restore
+        self._local_full_bkp_file = self._full_bkp_path + '/' + self._identifier + '.tar.bz2'
+        self._remote_full_bkp_path = 'backupoutgoing:' + self._dest_path + '/wordpress_full/'
+        self._remote_full_bkp_file = 'backupoutgoing:' + self._dest_path + '/wordpress_full/' + self._identifier + '.tar.gz'
+
         if mode == 'full':
             if restore:
                 self.shell_execute_multi(
@@ -118,11 +118,11 @@ class WordpressBackup(object):
         (self._db_name, tmp_path, self._db_name))
 
         # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup --create-full-path %s %s/%s/mysql' % \
+        cmds.append('/usr/bin/rdiff-backup --create-full-path %s backupoutgoing::%s/%s/mysql' % \
         (tmp_path, self._dest_path, self._identifier))
 
         # remove old backups
-        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/mysql' % \
+        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W backupoutgoing::%s/%s/mysql' % \
         (self._dest_path, self._identifier))
 
         # remove the temporary files
@@ -136,7 +136,7 @@ class WordpressBackup(object):
         cmds = []
 
         # Pull in the mysql dump to the temporary location
-        cmds.append('/usr/bin/rdiff-backup -r now %s/%s/mysql %s' % \
+        cmds.append('/usr/bin/rdiff-backup -r now backupoutgoing::%s/%s/mysql %s' % \
         (self._dest_path, self._identifier, tmp_path))
 
         # Drop any tables currently in the database
@@ -158,11 +158,11 @@ class WordpressBackup(object):
         cmds = []
 
         # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup --create-full-path %s/wp-content %s/%s/wp-content' % \
+        cmds.append('/usr/bin/rdiff-backup --create-full-path %s/wp-content backupoutgoing::%s/%s/wp-content' % \
         (self._wp_path, self._dest_path, self._identifier))
 
         # remove old backups
-        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W %s/%s/wp-content' % \
+        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W backupoutgoing::%s/%s/wp-content' % \
         (self._dest_path, self._identifier))
 
         return cmds
@@ -176,7 +176,7 @@ class WordpressBackup(object):
         (self._wp_path))
 
         # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup -r now %s/%s/wp-content %s/wp-content' % \
+        cmds.append('/usr/bin/rdiff-backup -r now backupoutgoing::%s/%s/wp-content %s/wp-content' % \
         (self._dest_path, self._identifier, self._wp_path))
 
         return cmds
@@ -196,7 +196,7 @@ class WordpressBackup(object):
                 self._db_name, tmp_path))
 
         # Archive up
-        cmd = ("/bin/tar --exclude=.svn -czf {3}/{0}.tar.gz -C {1}/ {4}.sql " +
+        cmd = ("/bin/tar --exclude=.svn -cjf {3}/{0}.tar.bz2 -C {1}/ {4}.sql " +
                "-C {2} wp-content")
         cmds.append(cmd.format(self._identifier, tmp_path, self._wp_path,
                                self._full_bkp_path, self._db_name))
@@ -204,14 +204,27 @@ class WordpressBackup(object):
         # remove the temporary files
         cmds.append("/bin/rm -rf {0}".format(tmp_path))
 
+
+        # Make sure that the backup directory exists on the remote host
+        cmds.append('/usr/bin/ssh backupoutgoing "/bin/mkdir -p {0}/wordpress_full"'.format(
+            self._dest_path))
+
+        # Copy the backup file accross
+        cmds.append('/usr/bin/scp {0} {1}'.format(
+            self._local_full_bkp_file, self._remote_full_bkp_path))
+
         return cmds
 
 
     def full_rstr_cmd(self, tmp_path):
         cmds = []
 
+        # Copy the backup file accross
+        cmds.append('/usr/bin/scp {0} {1}'.format(
+            self._local_full_bkp_file, self._remote_full_bkp_path))
+
         # Extract backup into temporary location
-        cmds.append("/bin/tar -zxf {0}/{1}.tar.gz -C {2}".format(
+        cmds.append("/bin/tar -jxf {0}/{1}.tar.bz2 -C {2}".format(
                 self._full_bkp_path, self._identifier, tmp_path))
 
 
@@ -283,6 +296,12 @@ class WordpressBackup(object):
 
 
 if __name__ == "__main__":
+
+    # The configuration file is lazy loaded, so no exception will be thrown
+    # here even if the file doesn't exist
+    config = ConfigParser.RawConfigParser()
+    config.read('/etc/wp-backup.conf')
+
     argparser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
@@ -325,29 +344,23 @@ if __name__ == "__main__":
         '-f',
         '--from-hostname',
         type=str,
-        default=socket.gethostname(),
+        default=config.get('local', 'host'),
         help='Specify hostname space to backup to, or restore from. E.g. ' +
               'hera.woolie.co.uk'
     )
     args = argparser.parse_args()
-
-    # The configuration file is lazy loaded, so no exception will be thrown
-    # here even if the file doesn't exist
-    config = ConfigParser.RawConfigParser()
-    config.read('/etc/wp-backup/' + args.identifier)
 
     try:
         bkp = WordpressBackup(
             mode=args.mode,
             no_op=args.no_op,
             identifier=args.identifier,
-            dest_path=config.get(args.identifier, 'destination_path'),
-            wp_path=config.get(args.identifier, 'local_wp_path'),
-            domain=config.get(args.identifier, 'domain'),
+            dest_path=config.get('destination', 'path'),
+            wp_path='/var/www/' + args.identifier,
             restore=args.restore_from_backup,
             from_host=args.from_hostname
         )
     except ConfigParser.NoSectionError:
-        msg = "Either the /etc/wp-backup/{0} file doesn't exist, or the " + \
+        msg = "Either the /etc/wp-backup.conf file doesn't exist, or the " + \
               "[{0}] section is not contained within it"
         raise Exception(msg.format(args.identifier))

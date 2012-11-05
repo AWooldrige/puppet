@@ -20,7 +20,9 @@ if ! $::osfamily {
 
 
 $extlookup_datadir = "/root/extlookup/"
-$extlookup_precedence = ["nodes/%{hostname}", "common"]
+$extlookup_precedence = ["nodes/${::hostname}", "common"]
+
+$backup_path = "/home/backupincoming/${::hostname}"
 
 Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
 
