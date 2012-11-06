@@ -60,3 +60,4 @@ Host backupoutgoing
     Hostname mon1.woolie.co.uk
     User backupincoming
     IdentityFile /root/.ssh/id_rsa_backupincoming
+    StrictHostKeyChecking no
