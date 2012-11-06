@@ -186,18 +186,17 @@ define wordpress::instance (
     if $backups == true {
         cron {"incremental_backup_${wp_id}":
             ensure => present,
-            command => "/usr/bin/wp-backup incremental ${wp_id}",
+            command => "/usr/bin/wp-backup backup incremental ${wp_id}",
             user => root,
-            hour => 4,
+            hour => 11,
             minute => 0
         }
         cron {"full_backup_${wp_id}":
             ensure => present,
-            command => "/usr/bin/wp-backup full ${wp_id}",
+            command => "/usr/bin/wp-backup backup full ${wp_id}",
             user => root,
-            hour => 5,
-            minute => 0,
-            monthday => [1, 15]
+            hour => 23,
+            minute => 0
         }
     }
 }

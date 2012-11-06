@@ -1,366 +1,81 @@
-#!/usr/bin/python
+#!/usr/bin/env bash
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
-"""
-#########################################################################
-##                                 wp-backup                           ##
-#########################################################################
-
-wp-backup has two modes:
- - creating local full dumps of a WordPress instance's state.
- - managing incremental backups on remote machines
-
-
-Configuration
-=============
-wp-backup uses configuration files to find data about a WordPress instance and
-where to place backups. There is one file per WordPress instance within
-/etc/wp-backup/
-
-
-Examples
-========
-    Note: For any command, append -n (or --no-op) to see what commands would
-          have been executed
-
-    Incremental Backups
-    -------------------
-       - To backup
-           wp-backup incremental wp_ompcouk
-
-       - If restoring from backups for the same hostname:
-           wp-backup incremental wp_ompcouk -r
-
-       - To restore from backups for a different hostname
-           wp-backup incremental wp_ompcouk -r -f hera
-
-
-
-    Full Backups
-    ---------------------
-        - To backup an instance to /bkps/[host]/[identifier].tar.gz
-            wp-backup full wp_wooliecouk
-
-        - To restore an instance from a /bkps/[host]/[identifier].tar.gz
-            wp-backup full wp_wooliecouk -r
-
-"""
-
-# Restoring from backups
-########################################################################
-#
-
-
-import argparse
-import subprocess
-import socket
-import tempfile
-import textwrap
-import shutil
-import pprint
-import ConfigParser
-
-class WordpressBackup(object):
-    def __init__(self, mode, dest_path, wp_path, no_op, identifier, restore, from_host):
-        self._mode = mode
-        self._dest_path = dest_path
-        self._wp_path = wp_path
-        self._wp_content = wp_path + 'wp-content'
-        self._no_op = no_op
-        self._identifier = identifier
-        self._restore = restore
-        self._from_host = from_host
-
-        #Hardcoded paths
-        self._db_name = self._identifier
-        self._full_bkp_path = "/bkps/wordpress_full"
-
-        self._local_full_bkp_file = self._full_bkp_path + '/' + self._identifier + '.tar.bz2'
-        self._remote_full_bkp_path = 'backupoutgoing:' + self._dest_path + '/wordpress_full/'
-        self._remote_full_bkp_file = 'backupoutgoing:' + self._dest_path + '/wordpress_full/' + self._identifier + '.tar.gz'
-
-        if mode == 'full':
-            if restore:
-                self.shell_execute_multi(
-                        self.full_rstr_cmd(self.create_tmp_dir()))
-            else:
-                self.shell_execute_multi(
-                        self.full_bkp_cmd(self.create_tmp_dir()))
-        else:
-            if restore:
-                self.shell_execute_multi(
-                        self.mysql_rstr_cmd(self.create_tmp_dir()))
-                self.shell_execute_multi(self.wpcontent_rstr_cmd())
-            else:
-                self.shell_execute_multi(
-                        self.mysql_bkp_cmd(self.create_tmp_dir()))
-                self.shell_execute_multi(self.wpcontent_bkp_cmd())
-
-
-
-    ###########################################################################
-    # INCREMENTAL BACKUP COMMANDS
-    ###########################################################################
-    def create_tmp_dir(self):
-        if self._no_op:
-            return '/tmp/randomtmpdir'
-        else:
-            return tempfile.mkdtemp()
-
-
-    def mysql_bkp_cmd(self, tmp_path):
-        cmds = []
-
-        # Dump the MySQL table to a file
-        cmds.append('/usr/bin/mysqldump %s > %s/%s.sql' % \
-        (self._db_name, tmp_path, self._db_name))
-
-        # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup --create-full-path %s backupoutgoing::%s/%s/mysql' % \
-        (tmp_path, self._dest_path, self._identifier))
-
-        # remove old backups
-        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W backupoutgoing::%s/%s/mysql' % \
-        (self._dest_path, self._identifier))
-
-        # remove the temporary files
-        cmds.append('/bin/rm -rf %s' % \
-        (tmp_path))
-
-        return cmds
-
-
-    def mysql_rstr_cmd(self, tmp_path):
-        cmds = []
-
-        # Pull in the mysql dump to the temporary location
-        cmds.append('/usr/bin/rdiff-backup -r now backupoutgoing::%s/%s/mysql %s' % \
-        (self._dest_path, self._identifier, tmp_path))
-
-        # Drop any tables currently in the database
-        cmds.append('/usr/bin/mysqldump --no-data --add-drop-table %s | grep ^DROP | /usr/bin/mysql %s' %\
-        (self._db_name, self._db_name))
-
-        # Import the SQL statements
-        cmds.append('/usr/bin/mysql %s < %s/%s.sql' % \
-        (self._db_name, tmp_path, self._db_name))
-
-        # Remove the temporary files
-        cmds.append('/bin/rm -rf %s' % \
-        (tmp_path))
-
-        return cmds
-
-
-    def wpcontent_bkp_cmd(self):
-        cmds = []
-
-        # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup --create-full-path %s/wp-content backupoutgoing::%s/%s/wp-content' % \
-        (self._wp_path, self._dest_path, self._identifier))
-
-        # remove old backups
-        cmds.append('/usr/bin/rdiff-backup --remove-older-than 2W backupoutgoing::%s/%s/wp-content' % \
-        (self._dest_path, self._identifier))
-
-        return cmds
-
-
-    def wpcontent_rstr_cmd(self):
-        cmds = []
-
-        # Clear out current wp-content
-        cmds.append('/bin/rm -rf %s/wp-content' % \
-        (self._wp_path))
-
-        # rdiff to backup location
-        cmds.append('/usr/bin/rdiff-backup -r now backupoutgoing::%s/%s/wp-content %s/wp-content' % \
-        (self._dest_path, self._identifier, self._wp_path))
-
-        return cmds
-
-
-    ###########################################################################
-    # FULL BACKUP COMMANDS
-    ###########################################################################
-    def full_bkp_cmd(self, tmp_path):
-        cmds = []
-
-        # Make sure that the backup directory exists
-        cmds.append("/bin/mkdir -p {0}".format(self._full_bkp_path))
-
-        # Dump the MySQL table to a file
-        cmds.append("/usr/bin/mysqldump {0} > {1}/{0}.sql".format(
-                self._db_name, tmp_path))
-
-        # Archive up
-        cmd = ("/bin/tar --exclude=.svn -cjf {3}/{0}.tar.bz2 -C {1}/ {4}.sql " +
-               "-C {2} wp-content")
-        cmds.append(cmd.format(self._identifier, tmp_path, self._wp_path,
-                               self._full_bkp_path, self._db_name))
-
-        # remove the temporary files
-        cmds.append("/bin/rm -rf {0}".format(tmp_path))
-
-
-        # Make sure that the backup directory exists on the remote host
-        cmds.append('/usr/bin/ssh backupoutgoing "/bin/mkdir -p {0}/wordpress_full"'.format(
-            self._dest_path))
-
-        # Copy the backup file accross
-        cmds.append('/usr/bin/scp {0} {1}'.format(
-            self._local_full_bkp_file, self._remote_full_bkp_path))
-
-        return cmds
-
-
-    def full_rstr_cmd(self, tmp_path):
-        cmds = []
-
-        # Copy the backup file accross
-        cmds.append('/usr/bin/scp {0} {1}'.format(
-            self._local_full_bkp_file, self._remote_full_bkp_path))
-
-        # Extract backup into temporary location
-        cmds.append("/bin/tar -jxf {0}/{1}.tar.bz2 -C {2}".format(
-                self._full_bkp_path, self._identifier, tmp_path))
-
-
-        # Drop any tables currently in the database
-        cmd = ("/usr/bin/mysqldump --no-data --add-drop-table {0} | " +
-               "grep ^DROP | /usr/bin/mysql {0}")
-        cmds.append(cmd.format(self._db_name))
-
-        # Import the SQL statements
-        cmds.append("/usr/bin/mysql {0} < {1}/{0}.sql".format(
-                self._db_name, tmp_path))
-
-        # Clear out current wp-content
-        cmds.append("/bin/rm -rf {0}/wp-content".format(self._wp_path))
-
-        # Copy over wp-content from backup
-        cmds.append("/bin/mv {0}/wp-content {1}/".format(
-                tmp_path, self._wp_path))
-
-        # Remove the temporary files
-        cmds.append("/bin/rm -rf {0}".format(tmp_path))
-
-        # Ensure permissions are set correctly on any recovered files
-        cmds.append("/usr/bin/wp-set-permissions {0}".format(self._wp_path))
-
-        return cmds
-
-
-
-    def shell_execute_multi(self, cmds):
-        print('\n[INFO] Executing ' + str(len(cmds)) + ' commands')
-        for cmd in cmds:
-            self.shell_execute(cmd)
-
-    def shell_execute(self, cmd):
-        """
-        Execute a bash shell command, returning the result of stdout or an
-        exception if an error occured
-        """
-
-        if self._no_op:
-            print('[noop] ' + cmd)
-            return
-
-        print('[executing] ' + cmd)
-
-        process = subprocess.Popen(
-            ['/bin/bash', '-c', cmd],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=False
-        )
-
-        stderr_buffer = ""
-        stdout_buffer = ""
-
-        while(True):
-            retcode = process.poll()
-            stdout_buffer += process.stdout.readline()
-            stderr_buffer += process.stderr.readline()
-            if(retcode is not None):
-                if (retcode == 0):
-                    print stdout_buffer
-                    return retcode
-                else:
-                    raise Exception(
-                        "BASH ERROR (return code {0}): \n{1}".format(
-                            retcode, stdout_buffer + stderr_buffer))
-
-
-if __name__ == "__main__":
-
-    # The configuration file is lazy loaded, so no exception will be thrown
-    # here even if the file doesn't exist
-    config = ConfigParser.RawConfigParser()
-    config.read('/etc/wp-backup.conf')
-
-    argparser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent('''\
-            WordPress Backup Script
-            --------------------------------
-            Manages incremental and full backups of WordPress instances, to either
-            filesystem or rdiff-backup servers.
-        ''')
-    )
-    argparser.add_argument(
-        'mode',
-        type=str,
-        default='full',
-        choices=['full', 'incremental'],
-        help='What backup mode to use - full or incremental'
-    )
-    argparser.add_argument(
-        'identifier',
-        type=str,
-        help='Identifier used for the WordPress instance. Referencing a config'+
-             ' file under /etc/wp-backup/'
-    )
-    argparser.add_argument(
-        '-n',
-        '--no-op',
-        action='store_true',
-        default=False,
-        help='If no-op is flagged, no operations will occur, the script will ' +
-             'just dump the commands it would have ran'
-    )
-    argparser.add_argument(
-        '-r',
-        '--restore-from-backup',
-        action='store_true',
-        default=False,
-        help='Restore from backup, specify the hostname to restore from with '+
-             '-f or the default is the current machine\'s hostname'
-    )
-    argparser.add_argument(
-        '-f',
-        '--from-hostname',
-        type=str,
-        default=config.get('local', 'host'),
-        help='Specify hostname space to backup to, or restore from. E.g. ' +
-              'hera.woolie.co.uk'
-    )
-    args = argparser.parse_args()
-
-    try:
-        bkp = WordpressBackup(
-            mode=args.mode,
-            no_op=args.no_op,
-            identifier=args.identifier,
-            dest_path=config.get('destination', 'path'),
-            wp_path='/var/www/' + args.identifier,
-            restore=args.restore_from_backup,
-            from_host=args.from_hostname
-        )
-    except ConfigParser.NoSectionError:
-        msg = "Either the /etc/wp-backup.conf file doesn't exist, or the " + \
-              "[{0}] section is not contained within it"
-        raise Exception(msg.format(args.identifier))
+info="[INFO] "
+error="[ERROR] "
+usage="Usage: $0 <backup|restore> <incremental|full> <wordpress_instance_identifier>"
+
+if /usr/bin/[ "$#" -ne 3 ]; then
+    /bin/echo $usage
+    exit 1
+fi
+
+action="$1"
+packaging="$2"
+wp_id="$3"
+wpcontent_path="/var/www/"$wp_id"/wp-content"
+uploads_path=$wpcontent_path"/uploads"
+backup_path="/bkps-incremental/wordpress/"$wp_id
+full_backup_path="/bkps-full/wordpress"
+
+if /usr/bin/[ ! -d $wpcontent_path ]; then
+    /bin/echo "WordPress id $wp_id doesn't exist. Couldn't find $wp_path"
+    exit 2
+fi
+
+
+if /usr/bin/[ $action = "backup" ]; then
+    echo $info"=== Generating Backup for "$wp_id" ==="
+
+    echo $info"Cleaning out backups directory "$backup_path
+    /bin/rm -rf $backup_path
+    /bin/mkdir -p $backup_path
+
+    echo $info"Creating hardlink mirror of "$uploads_path
+    /bin/cp -al $uploads_path $backup_path || \
+        echo $error"Could not find wp-content/uploads"
+
+    echo $info"Dumping MySQL database "$wp_id
+    /usr/bin/mysqldump $wp_id > $backup_path"/"$wp_id".sql"
+
+    if /usr/bin/[ $packaging = "full" ]; then
+        /bin/mkdir -p $full_backup_path
+
+        echo $info"Creating full backup within "$full_backup_path
+        /bin/tar -cjf $full_backup_path"/"$wp_id".tar.bz2" -C $backup_path .
+    fi
+    exit 0
+fi
+
+if /usr/bin/[ $action = "restore" ]; then
+    echo $info"=== Restoring Backup for "$wp_id" ==="
+
+    if /usr/bin/[ $packaging = "full" ]; then
+        echo $info"Extracting full backup into incremental backup dir"
+        /bin/rm -rf $backup_path
+        /bin/mkdir -p $backup_path
+        /bin/tar -jxf $full_backup_path"/"$wp_id".tar.bz2" -C $backup_path || \
+            exit 3
+    fi
+
+    echo $info"Cleaning out uploads directory "$uploads_path
+    /bin/rm -rf $uploads_path
+
+    echo $info"Copying files from "$backup_path" to "$uploads_path
+    /bin/cp -al $backup_path/uploads $wpcontent_path
+
+    echo $info"Dropping any tables currently in the database"
+    /usr/bin/mysqldump --no-data --add-drop-table $wp_id | \
+        /bin/grep ^DROP | /usr/bin/mysql $wp_id
+
+    echo $info"Restoring database "
+    /usr/bin/mysql $wp_id < $backup_path"/"$wp_id".sql"
+
+    exit 0
+fi
+
+/bin/echo $error"Action needs to be either 'backup' or 'restore'"
+/bin/echo $usage
+exit 1
