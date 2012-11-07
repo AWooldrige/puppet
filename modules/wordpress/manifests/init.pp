@@ -50,8 +50,6 @@ class wordpress {
         mode    => '644',
     }
 
-    #$destination_path = "backupoutgoing::${backup_path}/wordpress"
-
     file {"/etc/wp-backup.conf":
         ensure => present,
         owner => 'root',
