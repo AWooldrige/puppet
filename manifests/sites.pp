@@ -59,6 +59,7 @@ node default-wordpress-server inherits default {
     class {'varnish': }
 
     include php
+    include pear
     include ssmtp
 
     $mysql_root_password = generate("/root/getpassword", "mysql_root_password")

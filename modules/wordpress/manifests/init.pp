@@ -59,6 +59,10 @@ class wordpress {
         mode => '440',
         content => template("wordpress/backup-config")
     }
+
+    pear::package { "wpcli":
+        repository => "wp-cli.org/pear"
+    }
 }
 
 

@@ -20,11 +20,7 @@ class devtools {
         ensure => installed
     }
 
-    $phppackages = [
-        'php-pear',
-        'php-codesniffer'
-    ]
-    package { $phppackages:
+    package { 'php-codesniffer':
         ensure => installed
     }
 
