@@ -2,6 +2,7 @@ class default-config {
 
     $enhancers = [
         'tree',
+        'zip',
         'unzip',
         'strace',
         'ack-grep',
