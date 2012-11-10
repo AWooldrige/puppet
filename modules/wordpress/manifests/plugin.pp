@@ -11,9 +11,9 @@
 #     }
 #
 # Example: using a local zip of a plugin, but not activating
-#     wordpress::plugin { 'wooliecouk:omp-theme':
+#     wordpress::plugin { 'wooliecouk:omp-plugin':
 #        ensure =>  'installed',
-#        source => '/opt/local-zips/omp-theme.zip',
+#        source => '/opt/local-zips/omp-plugin.zip',
 #        active => false
 #     }
 #
