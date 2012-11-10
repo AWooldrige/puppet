@@ -30,8 +30,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-define('WPVP_PLUGIN_VERSION', '0.1.0');
-define('WPVP_PLUGIN_URL', plugin_dir_url( __FILE__ ));
+define('WP_VARNISH_PLUGIN_VERSION', '0.1.0');
+define('WP_VARNISH_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 //If we're on a development theme, don't cache anything!
 if (strpos(get_option('template'), '-dev') !== false) {
