@@ -29,14 +29,19 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
     if $ensure == 'installed' {
 
         #Work out correct argument to wp theme install command
-        $arg = $theme_name
-        if $source_file != false { $arg = $source_file }
+        if $source_file != false {
+            $arg = $source_file
+        }
+        else {
+            $arg = $theme_name
+        }
 
         exec { "wp-theme-install-${title}":
             cwd => $wp_path,
             command => "wp theme install ${arg}",
             path => [ '/usr/bin', '/bin' ],
-            creates => $theme_path
+            creates => $theme_path,
+            notify => [ Service['varnish']]
         }
 
         if $active == true {

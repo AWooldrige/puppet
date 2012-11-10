@@ -29,14 +29,19 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
     if $ensure == 'installed' {
 
         #Work out correct argument to wp plugin install command
-        $arg = $plugin_name
-        if $source_file != false { $arg = $source_file }
+        if $source_file != false {
+            $arg = $source_file
+        }
+        else {
+            $arg = $theme_name
+        }
 
         exec { "wp-plugin-install-${title}":
             cwd => $wp_path,
             command => "wp plugin install ${arg}",
             path => [ '/usr/bin', '/bin' ],
-            creates => $plugin_path
+            creates => $plugin_path,
+            notify => [Service['varnish']]
         }
 
         if $active == true {
