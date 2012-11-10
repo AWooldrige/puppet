@@ -88,7 +88,7 @@ define wordpress::instance (
     # Ensure permissions are set correctly for WordPress files
     exec { "wp-set-permissions-${wp_id}":
         command => "/usr/bin/wp-set-permissions ${path}",
-        require => [ File['/usr/bin/wp-set-permissions'], Exec["wp-install-${wp_id}"] ],
+        require => File['/usr/bin/wp-set-permissions'],
         refreshonly => true
     }
     cron {"wp-set-permissions-${title}":
