@@ -41,7 +41,7 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
             command => "wp plugin install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $plugin_path,
-            notify => [Service['varnish']]
+            notify => Service['varnish']
         }
 
         if $active == true {

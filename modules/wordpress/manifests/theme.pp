@@ -41,7 +41,7 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
             command => "wp theme install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $theme_path,
-            notify => [ Service['varnish']]
+            notify => Service['varnish']
         }
 
         if $active == true {
