@@ -13,6 +13,19 @@ class wordpress {
         group => 'root',
         mode => '540'
     }
+    exec { 'wp-set-permissions':
+        command => "/usr/bin/wp-set-permissions /var/www/wp_*",
+        require => File['/usr/bin/wp-set-permissions'],
+        refreshonly => true
+    }
+    cron {'wp-set-permissions':
+        ensure => present,
+        command => "/usr/bin/wp-set-permissions /var/www/wp_*",
+        user => root,
+        hour => 2,
+        minute => 30
+    }
+
 
     file { '/usr/bin/wp-backup':
         source => 'puppet:///modules/wordpress/wp-backup',

@@ -41,7 +41,7 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
             command => "wp theme install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $theme_path,
-            notify => Service['varnish']
+            notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
 
         if $active == true {
@@ -50,7 +50,8 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
                 command => "wp theme activate ${theme_name}",
                 unless => "wp theme status ${theme_name} | grep 'Status.*Active'",
                 path => [ '/usr/bin', '/bin' ],
-                require => Exec["wp-theme-install-${title}"]
+                require => Exec["wp-theme-install-${title}"],
+                notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
             }
         }
         else {
@@ -59,7 +60,8 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
                 command => "wp theme deactivate ${theme_name}",
                 unless => "wp theme status ${theme_name} | grep 'Status.*Inactive'",
                 path => [ '/usr/bin', '/bin' ],
-                require => Exec["wp-theme-install-${title}"]
+                require => Exec["wp-theme-install-${title}"],
+                notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
             }
         }
     }
@@ -69,6 +71,7 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
             command => "wp theme uninstall ${theme_name}",
             onlyif => "[ -d ${theme_path} ]",
             path => [ '/usr/bin', '/bin' ],
+            notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
     }
 }

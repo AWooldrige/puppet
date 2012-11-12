@@ -41,7 +41,7 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
             command => "wp plugin install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $plugin_path,
-            notify => Service['varnish']
+            notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
 
         if $active == true {
@@ -50,7 +50,8 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
                 command => "wp plugin activate ${plugin_name}",
                 unless => "wp plugin status ${plugin_name} | grep 'Status.*Active'",
                 path => [ '/usr/bin', '/bin' ],
-                require => Exec["wp-plugin-install-${title}"]
+                require => Exec["wp-plugin-install-${title}"],
+                notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
             }
         }
         else {
@@ -59,7 +60,8 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
                 command => "wp plugin deactivate ${plugin_name}",
                 unless => "wp plugin status ${plugin_name} | grep 'Status.*Inactive'",
                 path => [ '/usr/bin', '/bin' ],
-                require => Exec["wp-plugin-install-${title}"]
+                require => Exec["wp-plugin-install-${title}"],
+                notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
             }
         }
     }
@@ -69,6 +71,7 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
             command => "wp plugin uninstall ${plugin_name}",
             onlyif => "[ -d ${plugin_path} ]",
             path => [ '/usr/bin', '/bin' ],
+            notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
     }
 }

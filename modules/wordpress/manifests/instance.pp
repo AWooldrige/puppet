@@ -73,32 +73,16 @@ define wordpress::instance (
         command => "svn checkout http://core.svn.wordpress.org/tags/${ensure} ${path}",
         creates => "${path}/wp-includes/version.php",
         require => Package['subversion'],
-        notify => [ Exec["wp-set-permissions-${wp_id}"] ],
+        notify => [ Service['varnish'], Exec['wp-set-permissions'] ],
         path => '/usr/bin'
     }
     exec { "wp-update-${wp_id}":
         command => "svn switch http://core.svn.wordpress.org/tags/${ensure} ${path}",
         onlyif  => "grep ${path}/wp-includes/version.php | grep ${ensure}",
         require => [ Exec["wp-install-${wp_id}"], Package['subversion'] ],
-        notify => Exec["wp-set-permissions-${wp_id}"],
+        notify => [ Service['varnish'], Exec['wp-set-permissions'] ],
         path => [ '/usr/bin', '/bin' ]
     }
-
-
-    # Ensure permissions are set correctly for WordPress files
-    exec { "wp-set-permissions-${wp_id}":
-        command => "/usr/bin/wp-set-permissions ${path}",
-        require => File['/usr/bin/wp-set-permissions'],
-        refreshonly => true
-    }
-    cron {"wp-set-permissions-${title}":
-        ensure => present,
-        command => "/usr/bin/wp-set-permissions ${path}",
-        user => root,
-        hour => 2,
-        minute => 30
-    }
-
 
     # Automatically create the WordPress configuration file
     $wp_unique_auth_key = generate("/root/getpassword", "${wp_id}_unique_auth_key")
