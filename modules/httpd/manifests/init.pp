@@ -34,6 +34,12 @@ class httpd (
         content => template("httpd/conf.d/status.conf"),
         notify  => Service['apache2']
     }
+    file { "/etc/diamond/collectors/HttpdCollector.conf":
+        owner   => 'root',
+        group   => 'root',
+        mode    => '400',
+        content => template("httpd/diamond/HttpdCollector.conf")
+    }
     file {"/var/log/apache2/status":
         ensure  => directory,
         owner   => 'www-data',
