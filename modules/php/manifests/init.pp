@@ -1,6 +1,6 @@
 class php {
 
-    package { ["libapache2-mod-php5", "php5-mysql", "php5-gd"]:
+    package { ['libapache2-mod-php5', 'php5-mysql', 'php5-gd', 'php-apc']:
         ensure => installed
     }
 
