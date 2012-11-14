@@ -29,8 +29,17 @@ class diamond (
         ensure => present,
         owner => 'root',
         group => 'root',
-        mode => 400,
+        mode => 644,
         content => template('diamond/diamond.conf.erb'),
+        notify => Service['diamond'],
+        require => Package['diamond']
+    }
+    file { '/etc/init/diamond.conf':
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => 644,
+        content => template('diamond/diamond.upstart.conf.erb'),
         notify => Service['diamond'],
         require => Package['diamond']
     }
@@ -49,6 +58,8 @@ class diamond (
         provider => upstart,
         require => [
             Package['diamond'],
-            File['/etc/diamond/diamond.conf']]
+            File['/etc/diamond/diamond.conf'],
+            File['/etc/init/diamond.conf']
+            ]
     }
 }

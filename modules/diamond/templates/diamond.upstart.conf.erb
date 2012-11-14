@@ -1,0 +1,12 @@
+# diamond - A system statistics collector for graphite
+#
+# Diamond is a daemon and toolset for gather system statistics
+# and publishing them to graphite.
+
+start on stopped rc RUNLEVEL=[2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 90
+
+exec /usr/bin/diamond --foreground
