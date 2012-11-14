@@ -7,6 +7,8 @@ start on stopped rc RUNLEVEL=[2345]
 stop on runlevel [!2345]
 
 respawn
-respawn limit 10 90
+
+# Only allow 1 restart per minute
+respawn limit 1 60
 
 exec /usr/bin/diamond --foreground
