@@ -1,4 +1,5 @@
-[<%= identifier %>]
-destination_path = <%= destination_path %>
-local_wp_path = <%= local_wp_path %>
-domain = <%= domain %>
+[destination]
+path = /home/backupincoming/<%= hostname %>
+
+[local]
+host = <%= hostname %>

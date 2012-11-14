@@ -46,7 +46,6 @@ class diamond (
 
     service { 'diamond':
         ensure => running,
-        enable => true,
         provider => upstart,
         require => [
             Package['diamond'],

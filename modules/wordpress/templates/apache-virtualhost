@@ -40,10 +40,10 @@
         Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
     </DirectoryMatch>
 
-    ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error.log
-    CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/<%= wp_id %>/error.log
+    CustomLog ${APACHE_LOG_DIR}/<%= wp_id %>/access.log combined
 
-    Include /etc/apache2/conf.d/sites/<%= underscore_domain %>/
+    Include /etc/apache2/conf.d/sites/<%= wp_id %>/
 </VirtualHost>
 
 <VirtualHost *:<%= http_port %>>
@@ -74,8 +74,8 @@
         RewriteRule . /index.php [L]
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/error_ssl.log
-    CustomLog ${APACHE_LOG_DIR}/<%= underscore_domain %>/access_ssl.log combined
+    ErrorLog ${APACHE_LOG_DIR}/<%= wp_id %>/error_ssl.log
+    CustomLog ${APACHE_LOG_DIR}/<%= wp_id %>/access_ssl.log combined
 
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem

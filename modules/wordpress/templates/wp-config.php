@@ -20,10 +20,10 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', '<%= wp_db_name %>');
+define('DB_NAME', '<%= wp_id %>');
 
 /** MySQL database username */
-define('DB_USER', '<%= wp_db_user %>');
+define('DB_USER', '<%= wp_id %>');
 
 /** MySQL database password */
 define('DB_PASSWORD', '<%= wp_db_pass %>');
@@ -63,7 +63,7 @@ define('NONCE_SALT',       '<%= wp_unique_nonce_salt %>');
  * You can have multiple installations in one database if you give each a unique
  * prefix. Only numbers, letters, and underscores please!
  */
-$table_prefix  = '<%= wp_db_prefix %>';
+$table_prefix  = 'wp_';
 
 /**
  * WordPress Localized Language, defaults to English.

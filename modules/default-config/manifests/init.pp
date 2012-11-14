@@ -2,6 +2,7 @@ class default-config {
 
     $enhancers = [
         'tree',
+        'zip',
         'unzip',
         'strace',
         'ack-grep',
@@ -30,7 +31,13 @@ class default-config {
         group   => 'root',
         mode    => '400',
     }
-    file { '/bkps':
+    file { '/bkps-full':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '400',
+    }
+    file { '/bkps-incremental':
         ensure  => directory,
         owner   => 'root',
         group   => 'root',
@@ -49,6 +56,19 @@ class default-config {
         mode => '700',
         require => [ Package['pwgen'],
                      File['/root/extlookup'] ]
+    }
+    file { '/usr/bin/transfer-incremental-backups':
+        source => 'puppet:///modules/default-config/transfer-incremental-backups',
+        owner => 'root',
+        group => 'root',
+        mode => '540'
+    }
+    cron {"transfer-incremental-backups":
+        ensure => present,
+        command => "/usr/bin/transfer-incremental-backups push",
+        user => root,
+        hour => 1,
+        minute => 0
     }
     file { "/root/.ssh":
         ensure => directory,

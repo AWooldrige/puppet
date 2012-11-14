@@ -3,27 +3,28 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
-if /usr/bin/[ "$#" -ne 1 ]; then
+if /usr/bin/[ "$#" -lt 1 ]; then
     /bin/echo "Usage: $0 <wordpress_root_path>"
     exit 1
 fi
 
-wp_path="$1"
+# Iterate over each path provided
+for wp_path in "$@"
+do
+    if /usr/bin/[ ! -d $wp_path ]; then
+        /bin/echo "wordpress path doesn't exist: $wp_path"
+        exit 2
+    fi
 
-if /usr/bin/[ ! -d $wp_path ]; then
-    /bin/echo "wordpress path doesn't exist: $wp_path"
-    exit 2
-fi
+    # Lock down then unlock as needed
+    /bin/chown -R www-data:www-data $wp_path
+    /usr/bin/find $wp_path -type d -print0 | /usr/bin/xargs -0 /bin/chmod 550
+    /usr/bin/find $wp_path -type f -print0 | /usr/bin/xargs -0 /bin/chmod 440
 
 
-# Lock down then unlock as needed
-/bin/chown -R www-data:www-data $wp_path
-/usr/bin/find $wp_path -type d -print0 | /usr/bin/xargs -0 /bin/chmod 550
-/usr/bin/find $wp_path -type f -print0 | /usr/bin/xargs -0 /bin/chmod 440
-
-
-# Full read and write within uploads
-# /usr/bin/find $wp_path/wp-content -type d -print0 | /usr/bin/xargs -0 /bin/chmod 750
-if /usr/bin/[ -d $wp_path/wp-content/uploads ]; then
-    /usr/bin/find $wp_path/wp-content/uploads -type d -print0 | /usr/bin/xargs -0 /bin/chmod 750
-fi
+    # Full read and write within uploads
+    # /usr/bin/find $wp_path/wp-content -type d -print0 | /usr/bin/xargs -0 /bin/chmod 750
+    if /usr/bin/[ -d $wp_path/wp-content/uploads ]; then
+        /usr/bin/find $wp_path/wp-content/uploads -type d -print0 | /usr/bin/xargs -0 /bin/chmod 750
+    fi
+done
