@@ -41,6 +41,7 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
             command => "wp theme install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $theme_path,
+            require => Exec['wpcli-install'],
             notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
 

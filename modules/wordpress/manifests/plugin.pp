@@ -41,6 +41,7 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
             command => "wp plugin install ${arg}",
             path => [ '/usr/bin', '/bin' ],
             creates => $plugin_path,
+            require => Exec['wpcli-install'],
             notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
 

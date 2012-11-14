@@ -55,7 +55,16 @@ class wordpress {
         content => template("wordpress/backup-config")
     }
 
-    pear::package { "wpcli":
-        repository => "wp-cli.org/pear"
+    # Very annoying, can't use the pear module, as a bug prevents the repository
+    # from containing forward slashes. A pull has been requested for a fix, but
+    # not yet been merged
+    #pear::package { "wpcli":
+    #    repository => "wp-cli.org/pear"
+    #}
+    exec { 'wpcli-install':
+        command => 'pear channel-discover wp-cli.org/pear; pear update-channels;pear install wpcli/wpcli;',
+        path => ['/bin', '/usr/bin'],
+        require => Package['php-pear'],
+        unless => 'pear list -c wpcli && pear list -c wpcli | grep wpcli'
     }
 }
