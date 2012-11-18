@@ -26,13 +26,13 @@ class wordpress {
         minute => 30
     }
 
-
     file { '/usr/bin/wp-backup':
         source => 'puppet:///modules/wordpress/wp-backup',
         owner => 'root',
         group => 'root',
         mode => '540'
     }
+
 
     httpd::module { [ 'rewrite', 'expires', 'ssl', 'alias', 'headers',
         'authz_host' ]:
@@ -66,5 +66,15 @@ class wordpress {
         path => ['/bin', '/usr/bin'],
         require => Package['php-pear'],
         unless => 'pear list -c wpcli && pear list -c wpcli | grep wpcli'
+    }
+
+    # thumbnails wpcli command
+    file { "/usr/share/php/wp-cli/commands/community/thumbnails.php":
+        source => 'puppet:///modules/wordpress/thumbnails.php',
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => '644',
+        require => Exec["wpcli-install"]
     }
 }

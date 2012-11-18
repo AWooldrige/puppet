@@ -122,26 +122,6 @@ define wordpress::instance (
         require => File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"]
     }
 
-
-    # wp-thumbnails plugin
-    file { "${path}/wp-content/plugins/wp-thumbnails":
-        ensure => directory,
-        owner => 'www-data',
-        group => 'www-data',
-        require => Exec["wp-install-${wp_id}"]
-    }
-    file { "${path}/wp-content/plugins/wp-thumbnails/wp-thumbnails.php":
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '440',
-        require =>  File["${path}/wp-content/plugins/wp-thumbnails"],
-        source => 'puppet:///modules/wordpress/wp-thumbnails.php',
-    }
-    wordpress::plugin { "${title}:wp-thumbnails":
-        ensure => 'installed',
-        require => File["${path}/wp-content/plugins/wp-thumbnails/wp-thumbnails.php"]
-    }
-
     # Backup configuration
     #$destination_path = extlookup('backup/path')
 
