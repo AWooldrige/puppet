@@ -1,26 +1,15 @@
 <?php
-/*
-Plugin Name: WordPress Thumbnail CLI tools
-Plugin URI: https://github.com/AWooldrige/puppet
-Description: CLI management of WordPress media thumbnails using wpcli
-Version: 0.1.0
-Author: Alistair Wooldrige
-Author URI: http://woolie.co.uk
-License: GPLv2 or later
-
-WordPress doesn't provide a mechanism to regenerate thumbnails if the list of
-sizes changes.
- */
-
 define('WP_THUMBAILS_PLUGIN_VERSION', '0.1.0');
 define('WP_THUMBAILS_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
- /**
+/**
+ * WordPress doesn't provide a mechanism to regenerate thumbnails if the list of
+ * sizes changes.
  *
  * @package wp-cli
  * @subpackage commands/community
  * @maintainer Alistair Wooldrige (http://woolie.co.uk)
-*/
+ */
 class Thumbnails_Command extends WP_CLI_Command {
 
     /**
@@ -32,13 +21,16 @@ class Thumbnails_Command extends WP_CLI_Command {
      */
     public function generate() {
 
+        WP_CLI::line('%9Syncing to DB%n');
+        WP_CLI::line('%9=============%n');
         self::syncDbToFs();
 
         $images = self::getImageAttachments();
         $targetSizes = self::getSizes();
 
         if($images) {
-            WP_CLI::line('Generating thumbnails for:');
+            WP_CLI::line('\n%9Generating Thumbnails%n');
+            WP_CLI::line('%9=============%n');
 
             foreach($images as $image) {
                 $imageMeta = wp_get_attachment_metadata($image->ID);
@@ -60,9 +52,8 @@ class Thumbnails_Command extends WP_CLI_Command {
                             //TODO: Pull the following out into a static function
 
                             WP_CLI::line(
-                                'Generating "' . $sizeName . '" for - [' .
-                                $image->ID . '] ' . $image->post_title . '(' .
-                                $originalPath . ')'
+                                '%9' . $sizeName . '%n for [' .  $image->ID .
+                                '] ' . $imageMeta['file']
                             );
 
                             $meta = wp_generate_attachment_metadata($image->ID, $originalPath);
@@ -89,8 +80,8 @@ class Thumbnails_Command extends WP_CLI_Command {
                 }
                 else {
                     WP_CLI::warning(
-                        'Could not find original file for image [' . $image->ID .
-                        '] %9' . $image->post_title . '%n at ' . $originalPath
+                        'Could not find original for image [' . $image->ID .
+                        '] ' . $originalPath
                     );
                 }
             }
@@ -189,8 +180,8 @@ class Thumbnails_Command extends WP_CLI_Command {
                 }
                 else {
                     WP_CLI::warning(
-                        'Could not find file for image [' . $image->ID .
-                        '] %9' . $image->post_title . '%n at ' . $originalPath
+                        'Could not find original for image [' . $image->ID .
+                        '] ' . $originalPath
                     );
                 }
             }
