@@ -15,7 +15,8 @@ fi
 action="$1"
 packaging="$2"
 wp_id="$3"
-wpcontent_path="/var/www/"$wp_id"/wp-content"
+wp_path="/var/www/"$wp_id
+wpcontent_path=$wp_path"/wp-content"
 uploads_path=$wpcontent_path"/uploads"
 backup_path="/bkps-incremental/wordpress/"$wp_id
 full_backup_path="/bkps-full/wordpress"
@@ -39,6 +40,9 @@ if /usr/bin/[ $action = "backup" ]; then
 
     echo $info"Dumping MySQL database "$wp_id
     /usr/bin/mysqldump $wp_id > $backup_path"/"$wp_id".sql"
+
+    echo $info"Removing resized images from backup"
+    /usr/bin/find $backup_path/uploads/ -regextype sed -regex ".*/.*[0-9]\+x[0-9]\+\..*" -delete
 
     if /usr/bin/[ $packaging = "full" ]; then
         /bin/mkdir -p $full_backup_path
@@ -70,8 +74,11 @@ if /usr/bin/[ $action = "restore" ]; then
     /usr/bin/mysqldump --no-data --add-drop-table $wp_id | \
         /bin/grep ^DROP | /usr/bin/mysql $wp_id
 
-    echo $info"Restoring database "
+    echo $info"Restoring database"
     /usr/bin/mysql $wp_id < $backup_path"/"$wp_id".sql"
+
+    echo $info"Generating thumbnails"
+    /usr/bin/wp thumbnails generate --path=$wp_path
 
     exit 0
 fi
