@@ -3,6 +3,10 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+#Exit if any unset variables are used, if any command returns an error
+set -o nounset
+set -o errexit
+
 if /usr/bin/[ "$#" -lt 1 ]; then
     /bin/echo "Usage: $0 <wordpress_root_path>"
     exit 1

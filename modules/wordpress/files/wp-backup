@@ -3,6 +3,10 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+#Exit if any unset variables are used, if any command returns an error
+set -o nounset
+set -o errexit
+
 info="[INFO] "
 error="[ERROR] "
 usage="Usage: $0 <backup|restore> <incremental|full> <wordpress_instance_identifier>"
@@ -36,7 +40,7 @@ if /usr/bin/[ $action = "backup" ]; then
 
     echo $info"Creating hardlink mirror of "$uploads_path
     /bin/cp -al $uploads_path $backup_path || \
-        echo $error"Could not find wp-content/uploads"
+        { echo $error"Could not find wp-content/uploads"; exit 1; }
 
     echo $info"Dumping MySQL database "$wp_id
     /usr/bin/mysqldump $wp_id > $backup_path"/"$wp_id".sql"
@@ -48,7 +52,7 @@ if /usr/bin/[ $action = "backup" ]; then
         /bin/mkdir -p $full_backup_path
 
         echo $info"Creating full backup within "$full_backup_path
-        /bin/tar -cjf $full_backup_path"/"$wp_id".tar.bz2" -C $backup_path .
+        /bin/tar -czf $full_backup_path"/"$wp_id".tar.gz" -C $backup_path .
     fi
     exit 0
 fi
@@ -60,8 +64,7 @@ if /usr/bin/[ $action = "restore" ]; then
         echo $info"Extracting full backup into incremental backup dir"
         /bin/rm -rf $backup_path
         /bin/mkdir -p $backup_path
-        /bin/tar -jxf $full_backup_path"/"$wp_id".tar.bz2" -C $backup_path || \
-            exit 3
+        /bin/tar -zxf $full_backup_path"/"$wp_id".tar.gz" -C $backup_path
     fi
 
     echo $info"Cleaning out uploads directory "$uploads_path
