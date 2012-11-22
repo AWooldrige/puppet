@@ -23,12 +23,12 @@ define wordpress::instance (
 
 
     # HTTPD Logs directory
-    file {"/var/log/apache2/${wp_id}":
+    file {"/var/log/apache2/vhost/${wp_id}":
         ensure => directory,
         owner => 'www-data',
         group => 'www-data',
         mode => '750',
-        require => Package['apache2']
+        require => File["/var/log/apache2/vhost"]
     }
 
 
@@ -51,6 +51,7 @@ define wordpress::instance (
     }
     httpd::site { $wp_id:
         ensure => enabled,
+        require => File["/var/log/apache2/vhost/${wp_id}"]
     }
 
 

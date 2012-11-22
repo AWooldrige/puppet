@@ -40,8 +40,8 @@
         Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
     </DirectoryMatch>
 
-    ErrorLog ${APACHE_LOG_DIR}/<%= wp_id %>/error.log
-    CustomLog ${APACHE_LOG_DIR}/<%= wp_id %>/access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access.log combined
 
     Include /etc/apache2/conf.d/sites/<%= wp_id %>/
 </VirtualHost>

@@ -11,7 +11,7 @@
         Allow from all
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/error.default.log
-    CustomLog ${APACHE_LOG_DIR}/access.default.log combined
+    ErrorLog ${APACHE_LOG_DIR}/vhost/default/error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/default/access.log combined
 
 </VirtualHost>

@@ -10,6 +10,13 @@ class httpd (
         ensure => absent,
     }
 
+    file {"/var/log/apache2/vhost":
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '750',
+        require => Package['apache2']
+    }
     file { "/etc/apache2/conf.d/fqdn":
         owner   => 'www-data',
         group   => 'www-data',
@@ -40,12 +47,12 @@ class httpd (
         mode    => '400',
         content => template("httpd/diamond/HttpdCollector.conf")
     }
-    file {"/var/log/apache2/status":
+    file {"/var/log/apache2/vhost/status":
         ensure  => directory,
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '750',
-        require => Package['apache2']
+        require => File['/var/log/apache2/vhost']
     }
     file { "/etc/apache2/apache2.conf":
         owner   => 'www-data',
@@ -123,8 +130,16 @@ class httpd (
         content => template("httpd/default/index.html"),
         require => File['/var/www/default']
     }
+    file {"/var/log/apache2/vhost/default":
+        ensure => directory,
+        owner => 'www-data',
+        group => 'www-data',
+        mode => '750',
+        require => File['/var/log/apache2/vhost']
+    }
     httpd::site { 'default':
-        ensure => enabled
+        ensure => enabled,
+        require => File["/var/log/apache2/vhost/default"]
     }
 
 }

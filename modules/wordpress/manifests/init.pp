@@ -39,14 +39,6 @@ class wordpress {
         ensure => enabled
     }
 
-    file {"/etc/logrotate.d/wordpress_instances":
-        source => 'puppet:///modules/wordpress/logrotate',
-        ensure  => present,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '644',
-    }
-
     file {"/etc/wp-backup.conf":
         ensure => present,
         owner => 'root',
