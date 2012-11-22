@@ -10,7 +10,7 @@ class diamond (
         creates => "/opt/local-debs/${pkg}"
     }
 
-    package { ["python-support", "python-configobj"]:
+    package { ["sysstat", "python-support", "python-configobj"]:
         ensure => installed
     }
 
@@ -22,6 +22,7 @@ class diamond (
             File['/opt/local-debs'],
             Package['python-support'],
             Package['python-configobj'],
+            Package['sysstat'],
             Exec['download-diamond-pkg'] ]
     }
 
@@ -43,7 +44,10 @@ class diamond (
         notify => Service['diamond'],
         require => Package['diamond']
     }
-    file { '/etc/diamond/collectors/UserScriptsCollector.conf':
+
+    $collectors_conf = '/etc/diamond/collectors'
+
+    file { "${collectors_conf}/UserScriptsCollector.conf":
         ensure => present,
         owner => 'root',
         group => 'root',
@@ -53,6 +57,25 @@ class diamond (
         require => Package['diamond']
     }
 
+    file { ["${collectors_conf}/CPUCollector.conf",
+            "${collectors_conf}/DiskSpaceCollector.conf",
+            "${collectors_conf}/DiskUsageCollector.conf",
+            "${collectors_conf}/LoadAverageCollector.conf",
+            "${collectors_conf}/MemoryCollector.conf",
+            "${collectors_conf}/NetworkCollector.conf",
+            "${collectors_conf}/SockstatCollector.conf",
+            "${collectors_conf}/TCPCollector.conf",
+            "${collectors_conf}/InterruptCollector.conf",
+            "${collectors_conf}/FilestatCollector.conf",
+            "${collectors_conf}/VMStatCollector.conf"]:
+        ensure => present,
+        owner => 'root',
+        group => 'root',
+        mode => 644,
+        content => 'enabled = True',
+        notify => Service['diamond'],
+        require => Package['diamond']
+    }
     service { 'diamond':
         ensure => running,
         provider => upstart,
