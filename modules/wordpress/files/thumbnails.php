@@ -28,66 +28,66 @@ class Thumbnails_Command extends WP_CLI_Command {
         $images = self::getImageAttachments();
         $targetSizes = self::getSizes();
 
-        if($images) {
-            WP_CLI::line('\n%9Generating Thumbnails%n');
-            WP_CLI::line('%9=============%n');
+        if(!$images) {
+            WP_CLI::warning('There are no image attachments on this WordPress blog');
+            return;
+        }
 
-            foreach($images as $image) {
-                $imageMeta = wp_get_attachment_metadata($image->ID);
-                $originalPath = get_attached_file($image->ID);
+        WP_CLI::line('');
+        WP_CLI::line('%9Generating Thumbnails%n');
+        WP_CLI::line('%9=====================%n');
 
-                if(file_exists($originalPath)) {
+        foreach($images as $image) {
+            $imageMeta = wp_get_attachment_metadata($image->ID);
+            $originalPath = get_attached_file($image->ID);
 
-                    //Could just call wp_generate_attachment_metadata for all images,
-                    //but this is a very slow call, even if nothing needs generating
-                    foreach($targetSizes as $sizeName => $sizeAttrs) {
+            if(!file_exists($originalPath)) {
+                WP_CLI::warning(
+                    'Could not find original for image [' . $image->ID .
+                    '] ' . $originalPath
+                );
+                break;
+            }
 
-                        //There's no point checking which target sizes don't exist,
-                        //just regenerate at the first miss
-                        if(!array_key_exists($sizeName, $imageMeta['sizes'])) {
-
-                            //TODO: Need to check if the original image size is smaller than the resized,
-                            //because at the moment it will try and regenerate every time
-
-                            //TODO: Pull the following out into a static function
-
-                            WP_CLI::line(
-                                '%9' . $sizeName . '%n for [' .  $image->ID .
-                                '] ' . $imageMeta['file']
-                            );
-
-                            $meta = wp_generate_attachment_metadata($image->ID, $originalPath);
-                            //print_r($meta);
-
-                            if(is_wp_error($meta)) {
-                                WP_CLI::warning(
-                                    $meta->get_error_message() .
-                                    ' whilst processing image ID '. $image->ID .
-                                    ' - ' . $image->post_title
-                                );
-                            }
-                            if(empty($meta)) {
-                                WP_CLI::warning(
-                                    'Whilst processing image ID ' . $image->ID .
-                                    ' - ' . $image->post_title
-                                );
-                            }
-
-                            wp_update_attachment_metadata($image->ID, $meta);
-                            break;
-                        }
-                    }
-                }
-                else {
-                    WP_CLI::warning(
-                        'Could not find original for image [' . $image->ID .
-                        '] ' . $originalPath
-                    );
+            $notFound = array();
+            //Could just call wp_generate_attachment_metadata for all images,
+            //but this is a very slow call, even if nothing needs generating
+            foreach($targetSizes as $sizeName => $sizeAttrs) {
+                if(!array_key_exists($sizeName, $imageMeta['sizes'])) {
+                    $notFound[] = $sizeName;
                 }
             }
-        }
-        else {
-            WP_CLI::warning('There are no image attachments on this WordPress blog');
+
+            print_r($notFound);
+            if(count($notFound) > 0) {
+
+                //TODO: Pull the following out into a static function
+
+                WP_CLI::line(
+                    '%9' . implode($notFound, ', ') . '%n for [' .  $image->ID .
+                    '] ' . $imageMeta['file']
+                );
+
+                $meta = wp_generate_attachment_metadata($image->ID, $originalPath);
+                //print_r($meta);
+
+                if(is_wp_error($meta)) {
+                    WP_CLI::warning(
+                        $meta->get_error_message() .
+                        ' whilst processing image ID '. $image->ID .
+                        ' - ' . $image->post_title
+                    );
+                }
+                if(empty($meta)) {
+                    WP_CLI::warning(
+                        'Whilst processing image ID ' . $image->ID .
+                        ' - ' . $image->post_title
+                    );
+                }
+
+                wp_update_attachment_metadata($image->ID, $meta);
+                break;
+            }
         }
     }
 
@@ -152,7 +152,6 @@ class Thumbnails_Command extends WP_CLI_Command {
         $images = self::getImageAttachments();
 
         if($images) {
-
             foreach($images as $image) {
                 $originalPath = get_attached_file($image->ID);
 
