@@ -17,6 +17,14 @@ class httpd (
         mode    => '750',
         require => Package['apache2']
     }
+    file { "/etc/logrotate.d/apache2-vhosts":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        source => 'puppet:///modules/httpd/vhost_logrotate',
+        notify  => Service['apache2']
+    }
     file { "/etc/apache2/conf.d/fqdn":
         owner   => 'www-data',
         group   => 'www-data',
@@ -39,6 +47,22 @@ class httpd (
         mode    => '400',
         require => Package['apache2'],
         content => template("httpd/conf.d/status.conf"),
+        notify  => Service['apache2']
+    }
+    file { "/etc/apache2/conf.d/status.conf":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        content => template("httpd/conf.d/status.conf"),
+        notify  => Service['apache2']
+    }
+    file { "/etc/apache2/mods-available/status.conf":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        source => 'puppet:///modules/httpd/status.conf',
         notify  => Service['apache2']
     }
     file { "/etc/diamond/collectors/HttpdCollector.conf":
