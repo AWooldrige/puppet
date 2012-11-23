@@ -114,7 +114,7 @@ syntax on
 syntax enable
 filetype on
 filetype plugin on
-au BufNewFile,BufRead *.pp set filetype puppet
+au BufNewFile,BufRead *.pp set filetype=puppet
 au BufNewFile,BufRead *.spv set filetype=php
 au BufNewFile,BufRead *.vcl set filetype=c
 set colorcolumn=80
