@@ -17,8 +17,8 @@ WSGISocketPrefix /var/run/wsgi/wsgi
 <VirtualHost *:<%= httpd_port %>>
         ServerName graphite.woolie.co.uk
         DocumentRoot "/opt/graphite/webapp"
-        ErrorLog ${APACHE_LOG_DIR}/graphite/error.log
-        CustomLog ${APACHE_LOG_DIR}/graphite/access.log combined
+        ErrorLog ${APACHE_LOG_DIR}/vhost/graphite/error.log
+        CustomLog ${APACHE_LOG_DIR}/vhost/graphite/access.log combined
 
         # I've found that an equal number of processes & threads tends
         # to show the best performance for Graphite (ymmv).

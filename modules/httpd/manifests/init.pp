@@ -41,43 +41,6 @@ class httpd (
         content => template("httpd/conf.d/security"),
         notify  => Service['apache2']
     }
-    file { "/etc/apache2/conf.d/status.conf":
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '400',
-        require => Package['apache2'],
-        content => template("httpd/conf.d/status.conf"),
-        notify  => Service['apache2']
-    }
-    file { "/etc/apache2/conf.d/status.conf":
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '400',
-        require => Package['apache2'],
-        content => template("httpd/conf.d/status.conf"),
-        notify  => Service['apache2']
-    }
-    file { "/etc/apache2/mods-available/status.conf":
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '400',
-        require => Package['apache2'],
-        source => 'puppet:///modules/httpd/status.conf',
-        notify  => Service['apache2']
-    }
-    file { "/etc/diamond/collectors/HttpdCollector.conf":
-        owner   => 'root',
-        group   => 'root',
-        mode    => '400',
-        content => template("httpd/diamond/HttpdCollector.conf")
-    }
-    file {"/var/log/apache2/vhost/status":
-        ensure  => directory,
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '750',
-        require => File['/var/log/apache2/vhost']
-    }
     file { "/etc/apache2/apache2.conf":
         owner   => 'www-data',
         group   => 'www-data',
@@ -142,8 +105,8 @@ class httpd (
     file { "/etc/apache2/sites-available/default":
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '400',
-        content => template("httpd/default/conf"),
+        mode    => '600',
+        content => template("httpd/vhosts/default"),
         notify  => Service['apache2'],
         require => File['/var/www/default/index.html']
     }
@@ -154,18 +117,43 @@ class httpd (
         content => template("httpd/default/index.html"),
         require => File['/var/www/default']
     }
-    file {"/var/log/apache2/vhost/default":
-        ensure => directory,
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '750',
-        require => File['/var/log/apache2/vhost']
-    }
     httpd::site { 'default':
-        ensure => enabled,
-        require => File["/var/log/apache2/vhost/default"]
+        ensure => enabled
     }
 
+
+    # Exposing mod_status output locally to diamond
+    file { "/etc/apache2/mods-available/status.conf":
+        source => 'puppet:///modules/httpd/status.conf',
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '400',
+        require => Package['apache2'],
+        notify  => Service['apache2']
+    }
+    httpd::module{ 'status':
+       ensure => enabled,
+       require => File["/etc/apache2/mods-available/status.conf"]
+    }
+
+    file { "/etc/apache2/sites-available/status":
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '600',
+        content => template("httpd/vhosts/status"),
+        require => Package['apache2'],
+        notify  => Service['apache2']
+    }
+    httpd::site { 'status':
+        ensure => enabled
+    }
+    file { "/etc/diamond/collectors/HttpdCollector.conf":
+        owner => 'root',
+        group => 'root',
+        mode => '400',
+        content => template("httpd/diamond/HttpdCollector.conf"),
+        notify => Service['diamond']
+    }
 }
 
 define httpd::module($ensure = 'enabled') {
@@ -198,10 +186,10 @@ define httpd::site($ensure = 'enabled') {
 
     case $ensure {
         'enabled' : {
-            exec { "/usr/sbin/a2ensite $title":
+            exec { "/usr/sbin/a2ensite ${title}":
                 unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify => Exec["force-reload-apache2"],
-                require => Package['apache2']
+                require => [ File["/etc/apache2/sites-available/${title}"], Package['apache2'] ]
             }
         }
         'disabled': {
@@ -220,5 +208,12 @@ define httpd::site($ensure = 'enabled') {
         group   => 'www-data',
         mode    => '750',
         require => Package['apache2']
+    }
+    file { "/var/log/apache2/vhost/${title}":
+        ensure => directory,
+        owner => 'www-data',
+        group => 'www-data',
+        mode => '750',
+        require => File['/var/log/apache2/vhost']
     }
 }

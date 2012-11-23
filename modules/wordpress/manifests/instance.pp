@@ -22,15 +22,6 @@ define wordpress::instance (
     $path = "/var/www/${wp_id}"
 
 
-    # HTTPD Logs directory
-    file {"/var/log/apache2/vhost/${wp_id}":
-        ensure => directory,
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '750',
-        require => File["/var/log/apache2/vhost"]
-    }
-
 
     # HTTPD Virtualhost configuration
     file {"/etc/apache2/sites-available/${wp_id}":
@@ -50,8 +41,7 @@ define wordpress::instance (
         notify => Service['apache2']
     }
     httpd::site { $wp_id:
-        ensure => enabled,
-        require => File["/var/log/apache2/vhost/${wp_id}"]
+        ensure => enabled
     }
 
 

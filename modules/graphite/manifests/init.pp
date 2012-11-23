@@ -13,12 +13,6 @@ class graphite ($httpd_port = 80) {
         provider => pip
     }
 
-    file {"/var/log/apache2/graphite":
-        ensure  => directory,
-        owner   => 'www-data',
-        group   => 'www-data',
-        mode    => '750'
-    }
     file {"/var/run/wsgi":
         ensure  => directory,
         owner   => 'root',
