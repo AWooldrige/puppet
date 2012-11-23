@@ -5,8 +5,7 @@
 
 extlookupcsvfile='/root/extlookup/common.csv'
 
-fields=( "backup/path,<remote path for backups - e.g. backup8::/var/bkps or /var/bkps>"
-         "ssmtp/mailhub,<SMTP mail address - e.g. smtp.gmail.com:587>"
+fields=( "ssmtp/mailhub,<SMTP mail address - e.g. smtp.gmail.com:587>"
          "ssmtp/user,<SMTP user name - e.g. noreply@woolie.co.uk>"
          "ssmtp/pass,<SMTP password>" )
 

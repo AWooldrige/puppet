@@ -113,9 +113,6 @@ define wordpress::instance (
         require => File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"]
     }
 
-    # Backup configuration
-    #$destination_path = extlookup('backup/path')
-
     if $backups == true {
         cron {"incremental_backup_${wp_id}":
             ensure => present,
