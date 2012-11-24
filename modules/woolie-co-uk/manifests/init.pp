@@ -20,8 +20,10 @@ class woolie-co-uk {
     wordpress::plugin { [ "${wp_id}:akismet",
                           "${wp_id}:disqus-comment-system",
                           "${wp_id}:google-analytics-for-wordpress",
+                          "${wp_id}:google-sitemap-generator",
                           "${wp_id}:wp-syntax" ]:
         ensure => 'installed',
+        active => true,
         require => Wordpress::Instance[$wp_id]
     }
 
