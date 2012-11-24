@@ -74,9 +74,7 @@ node default-wordpress-server inherits default {
         graphite_host => 'mon1.woolie.co.uk'
     }
 }
-node "hera.woolie.co.uk" inherits default-wordpress-server {
-}
-node "metis.woolie.co.uk" inherits default-wordpress-server {
+node "web1.woolie.co.uk" inherits default-wordpress-server {
 }
 node "devvm.woolie.co.uk" inherits default-wordpress-server {
     include devtools
