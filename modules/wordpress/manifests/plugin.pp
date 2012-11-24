@@ -33,7 +33,7 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
             $arg = $source_file
         }
         else {
-            $arg = $theme_name
+            $arg = $plugin_name
         }
 
         exec { "wp-plugin-install-${title}":

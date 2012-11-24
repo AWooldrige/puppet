@@ -13,7 +13,7 @@
 # Example: using a local zip of a theme, and activating
 #     wordpress::theme { 'ompcouk:omp-theme':
 #        ensure =>  'installed',
-#        source => '/opt/local-zips/omp-theme.zip',
+#        source_file => '/opt/local-zips/omp-theme.zip',
 #        active => true
 #     }
 #
