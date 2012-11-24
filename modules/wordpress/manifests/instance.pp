@@ -68,8 +68,9 @@ define wordpress::instance (
         path => '/usr/bin'
     }
     exec { "wp-update-${wp_id}":
-        command => "svn switch http://core.svn.wordpress.org/tags/${ensure} ${path}",
-        onlyif  => "grep ${path}/wp-includes/version.php | grep ${ensure}",
+        cwd => $path,
+        command => "wp core update --version=${ensure} && wp core update_db",
+        unless => "grep 'wp_version' ${path}/wp-includes/version.php | grep '${ensure}'",
         require => [ Exec["wp-install-${wp_id}"], Package['subversion'] ],
         notify => [ Service['varnish'], Exec['wp-set-permissions'] ],
         path => [ '/usr/bin', '/bin' ]
