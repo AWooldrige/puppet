@@ -74,8 +74,8 @@
         RewriteRule . /index.php [L]
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/<%= wp_id %>/error_ssl.log
-    CustomLog ${APACHE_LOG_DIR}/<%= wp_id %>/access_ssl.log combined
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error_ssl.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access_ssl.log combined
 
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
