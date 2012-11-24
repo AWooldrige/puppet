@@ -39,14 +39,6 @@ class wordpress {
         ensure => enabled
     }
 
-    file {"/etc/wp-backup.conf":
-        ensure => present,
-        owner => 'root',
-        group => 'root',
-        mode => '440',
-        content => template("wordpress/backup-config")
-    }
-
     # Very annoying, can't use the pear module, as a bug prevents the repository
     # from containing forward slashes. A pull has been requested for a fix, but
     # not yet been merged

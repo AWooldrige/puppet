@@ -1,5 +1,0 @@
-[destination]
-path = /home/backupincoming/<%= hostname %>
-
-[local]
-host = <%= hostname %>
