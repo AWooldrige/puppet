@@ -88,7 +88,7 @@ class default-config {
         mode => '400',
         require => Package['openssh-server']
     }
-    file { "/opt/local-debs":
+    file { [ "/opt/local-debs", "/opt/local-zips" ]:
         ensure => directory,
         owner => 'root',
         group => 'root',
