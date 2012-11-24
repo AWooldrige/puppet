@@ -7,7 +7,8 @@ class diamond (
 
     exec { 'download-diamond-pkg':
         command => "curl -L -o /opt/local-debs/${pkg} https://github.com/downloads/AWooldrige/puppet/${pkg}",
-        creates => "/opt/local-debs/${pkg}"
+        creates => "/opt/local-debs/${pkg}",
+        require => File['/opt/local-debs']
     }
 
     package { ["sysstat", "python-support", "python-configobj"]:
