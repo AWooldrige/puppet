@@ -27,7 +27,7 @@ ServerKeyBits 768
 
 # Logging
 SyslogFacility AUTH
-LogLevel INFO
+LogLevel ERROR
 
 # Authentication:
 LoginGraceTime 120
