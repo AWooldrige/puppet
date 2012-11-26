@@ -23,7 +23,7 @@ class graphite ($httpd_port = 80) {
         ensure  => present,
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '400',
+        mode    => '644',
         content => template("graphite/graphite.wsgi.erb"),
         require => Exec['graphite-web-install']
     }
@@ -31,7 +31,7 @@ class graphite ($httpd_port = 80) {
         ensure  => present,
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '400',
+        mode    => '644',
         content => template("graphite/apache-virtualhost.erb"),
         require => Package['apache2'],
         notify  => Service['apache2']
@@ -64,8 +64,8 @@ class graphite ($httpd_port = 80) {
     file { '/opt/graphite/conf/carbon.conf':
         ensure => present,
         owner => 'root',
-        group => 'root',
-        mode => 700,
+        group => 'www-data',
+        mode => 644,
         content => template('graphite/carbon.conf.erb'),
         notify => Exec['carbon-service'],
         require => Exec['carbon-install']
@@ -73,8 +73,8 @@ class graphite ($httpd_port = 80) {
     file { '/opt/graphite/conf/storage-schemas.conf':
         ensure => present,
         owner => 'root',
-        group => 'root',
-        mode => 700,
+        group => 'www-data',
+        mode => 644,
         content => template('graphite/storage-schemas.conf.erb'),
         notify => Exec['carbon-restart'],
         require => Exec['carbon-install']
@@ -82,8 +82,8 @@ class graphite ($httpd_port = 80) {
     file { '/opt/graphite/webapp/graphite/local_settings.py':
         ensure => present,
         owner => 'root',
-        group => 'root',
-        mode => 700,
+        group => 'www-data',
+        mode => 644,
         content => template('graphite/local_settings.py.erb'),
         require => Exec['graphite-web-install']
     }
