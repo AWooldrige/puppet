@@ -7,18 +7,30 @@ class varnish ($varnish_port=80,
     }
 
     file { "/etc/varnish/default.vcl":
+        ensure => absent
+    }
+
+    file { "/etc/varnish/main.vcl":
+        source => 'puppet:///modules/varnish/main.vcl',
         owner => "root",
         group => "root",
-        mode  => '400',
+        mode  => '644',
+        require => Package["varnish"],
+        notify  => Service["varnish"]
+    }
+    file { "/etc/varnish/backends.vcl":
+        owner => "root",
+        group => "root",
+        mode  => '644',
         require => Package["varnish"],
         notify  => Service["varnish"],
-        content => template("varnish/default.vcl")
+        content => template("varnish/backends.vcl.erb")
     }
 
     file { "/etc/default/varnish":
         owner => "root",
         group => "root",
-        mode  => '400',
+        mode  => '644',
         require => Package["varnish"],
         notify  => Service["varnish"],
         content => template("varnish/service-script")

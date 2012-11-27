@@ -1,7 +1,4 @@
-backend default {
-    .host = "<%= httpd_http_host %>";
-    .port = "<%= httpd_http_port %>";
-}
+include "backends.vcl";
 
 sub vcl_recv {
 
