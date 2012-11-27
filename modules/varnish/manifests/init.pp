@@ -19,12 +19,20 @@ class varnish ($varnish_port=80,
         notify  => Service["varnish"]
     }
     file { "/etc/varnish/backends.vcl":
+        content => template("varnish/backends.vcl.erb"),
         owner => "root",
         group => "root",
         mode  => '644',
         require => Package["varnish"],
-        notify  => Service["varnish"],
-        content => template("varnish/backends.vcl.erb")
+        notify  => Service["varnish"]
+    }
+    file { "/etc/varnish/acl.vcl":
+        content => template("varnish/acl.vcl.erb"),
+        owner => "root",
+        group => "root",
+        mode  => '644',
+        require => Package["varnish"],
+        notify  => Service["varnish"]
     }
 
     file { "/etc/default/varnish":

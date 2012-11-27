@@ -1,4 +1,5 @@
 include "backends.vcl";
+include "acl.vcl";
 
 sub vcl_recv {
 
