@@ -2,21 +2,6 @@ include "backends.vcl";
 
 sub vcl_recv {
 
-    # Normalise accept-encodings
-    if (req.http.Accept-Encoding) {
-        if (req.url ~  "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
-            # No point in compressing these
-            remove req.http.Accept-Encoding;
-        } elsif (req.http.Accept-Encoding ~ "gzip") {
-            set req.http.Accept-Encoding = "gzip";
-        } elsif (req.http.Accept-Encoding ~ "deflate") {
-            set req.http.Accept-Encoding = "deflate";
-        } else {
-            # unknown algorithm
-            remove req.http.Accept-Encoding;
-        }
-    }
-
     set req.grace = 6h;
 
     # Always cache these types
