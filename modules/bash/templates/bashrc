@@ -111,3 +111,4 @@ read -r -d '' FORMAT <<'EOF'
 
 EOF
 alias tcurl="curl -w'${FORMAT}'"
+alias icurl='curl -s -o /dev/null -D -'
