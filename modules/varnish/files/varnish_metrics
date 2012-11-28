@@ -1,2 +1,5 @@
 #!/bin/bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
 /usr/bin/varnishstat -1 | /bin/grep -v 'LCK.' | /bin/grep -v 'VBE.' | /bin/sed 's/[^A-Za-z0-9 ]/_/g' | /usr/bin/awk '{print $1,$2}' | /bin/sed 's/^/varnish./g'
