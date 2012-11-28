@@ -1,61 +1,79 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+# Some snippets have used the following as a base:
+# https://github.com/mattiasgeniar/varnish-3.0-configuration-templates
+
+# This VCL implements a WordPress 'Cookie Firewall':
+# Unless on a admin or login page, all 'Cookie' and 'Set-Cookie' headers are
+# dropped
+
 include "backends.vcl";
 include "acl.vcl";
 
 sub vcl_recv {
-
     set req.grace = 6h;
 
-    # Always cache these types
-    if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
-        unset req.http.Cookie;
-        set req.url = regsub(req.url, "\?.*$", "");
-    }
-
-
-    if (req.url ~ "\?(utm_(campaign|medium|source|term)|adParams|client|cx|eid|fbid|feed|ref(id|src)?|v(er|iew))=") {
-        set req.url = regsub(req.url, "\?.*$", "");
-    }
-
-    if (req.http.cookie) {
-
-        # Replace wordpress_test_cookie with wptestcookie to avoid preventing
-        # cache
-        if (req.http.Cookie ~ "wordpress_test_cookie") {
-            set req.http.Cookie = regsuball(req.http.Cookie, "wordpress_test_cookie=", "; wptestcookie=");
+    # Allow purging only from the purgeallow ACL
+    if (req.request == "PURGE") {
+        if (!client.ip ~ purgeallow) {
+            error 403 "PURGE requests not allowed from this IP";
         }
+        return (lookup);
+    }
 
-        # Only pay attention to wordpress_ cookie
-        if (req.http.cookie ~ "(wordpress_)") {
-            return(pass);
+    # Append or set X-Forwarded-For with IP of Varnish
+    if (req.restarts == 0) {
+        if (req.http.X-Forwarded-For) {
+            set req.http.X-Forwarded-For = req.http.X-Forwarded-For + ", " + client.ip;
         } else {
-            unset req.http.cookie;
+            set req.http.X-Forwarded-For = client.ip;
         }
     }
 
-    remove req.http.X-Forwarded-For;
-    set req.http.X-Forwarded-For = client.ip;
+    # Remove any Google Analytics query strings
+    if (req.url ~ "(\?|&)(utm_source|utm_medium|utm_campaign|gclid|cx|ie|cof|siteurl)=") {
+        set req.url = regsuball(req.url, "&(utm_source|utm_medium|utm_campaign|gclid|cx|ie|cof|siteurl)=([A-z0-9_\-\.%25]+)", "");
+        set req.url = regsuball(req.url, "\?(utm_source|utm_medium|utm_campaign|gclid|cx|ie|cof|siteurl)=([A-z0-9_\-\.%25]+)", "?");
+        set req.url = regsub(req.url, "\?&", "?");
+        set req.url = regsub(req.url, "\?$", "");
+    }
+
+    # Remove Cookie header for static files and duck out
+    if (req.url ~ "^[^?]*\.(bmp|bz2|css|doc|eot|flv|gif|gz|ico|jpeg|jpg|js|less|mp[34]|pdf|png|rar|rtf|swf|tar|tgz|txt|wav|woff|xml|zip)(\?.*)?$") {
+        unset req.http.Cookie;
+        return (lookup);
+    }
+
+    # If we're on the admin/login/rpc pages, duck out
+    if (req.url ~ "(wp-(login|admin)|login)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
+        return (pass);
+    }
+
+    # Normal guest, remove cookie and head off!
+    remove req.http.cookie;
+}
+
+sub vcl_hit {
+    if (req.request == "PURGE") {
+        purge;
+        error 200 "Purged";
+    }
+}
+
+sub vcl_miss {
+    if (req.request == "PURGE") {
+        purge;
+        error 200 "Purged";
+    }
 }
 
 sub vcl_fetch {
-
     set beresp.grace = 6h;
 
-    if ( (!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
+    #Only allow Set-Cookie from the admin/login pages and not on GETs
+    if ((!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
         unset beresp.http.set-cookie;
-    }
-
-    # Don't cache the admin section, post previews or xmlrpc
-    if (req.url ~ "wp-(login|admin)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
-        return (hit_for_pass);
-    }
-
-    # If backend says no-cache, make it no-cache!
-    if(beresp.http.cache-control ~ "no-cache") {
-        return (hit_for_pass);
-    }
-
-    if (req.url ~ "\.(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(\?.*|)$") {
-        set beresp.ttl = 365d;
     }
 }
 
