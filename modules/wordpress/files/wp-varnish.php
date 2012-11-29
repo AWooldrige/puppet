@@ -30,10 +30,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-define('WP_VARNISH_PLUGIN_VERSION', '0.1.0');
+define('WP_VARNISH_PLUGIN_VERSION', '0.1.1');
 define('WP_VARNISH_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 //If we're on a development theme, don't cache anything!
-if (strpos(get_option('template'), '-dev') !== false) {
+if (is_admin() || (strpos(get_option('template'), '-dev') !== false)) {
     header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate', true);
+}
+else {
+    //Cache in Varnish for 5 days, but send to the public as 10 seconds
+    header('Cache-Control: max-age=10', true);
+    if($_SERVER['HTTP_X_VARNISH']) {
+        header('X-Varnish-TTL: 432000', true);
+    }
 }

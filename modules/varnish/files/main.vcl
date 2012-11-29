@@ -75,6 +75,17 @@ sub vcl_fetch {
     if ((!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
         unset beresp.http.set-cookie;
     }
+
+    # Allow override of the TTL inside Varnish, leaving the public cache control
+    # headers intact
+    if (beresp.http.X-Varnish-TTL) {
+        C{
+            char *ttl;
+            ttl = VRT_GetHdr(sp, HDR_BERESP, "\016X-Varnish-TTL:");
+            VRT_l_beresp_ttl(sp, atoi(ttl));
+        }C
+        remove beresp.http.X-Varnish-TTL;
+    }
 }
 
 sub vcl_deliver {
