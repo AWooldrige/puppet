@@ -79,10 +79,12 @@ sub vcl_fetch {
 
 sub vcl_deliver {
     if (obj.hits > 0) {
-        set resp.http.X-Cache = "HIT";
+        set resp.http.X-Cache-Status = "HIT";
         set resp.http.X-Cache-Hits = obj.hits;
+        set resp.http.X-Cache-Age = resp.http.Age;
     }
     else {
-        set resp.http.X-Cache = "MISS";
+        set resp.http.X-Cache-Status = "MISS";
     }
+    set resp.http.Age = "0";
 }
