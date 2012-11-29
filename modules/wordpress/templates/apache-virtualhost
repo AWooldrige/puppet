@@ -35,8 +35,8 @@
         ExpiresDefault "access plus 1 year"
     </DirectoryMatch>
 
-    # Any theme appended with -dev (e.g. omp-theme-dev) should not be cacheable
-    <DirectoryMatch "^<%= path %>/wp-content/themes/(?:.+)-dev">
+    # Any theme/plugin appended with -dev should not be cacheable
+    <DirectoryMatch "^<%= path %>/wp-content/(?:plugin|theme)s/(?:.+)-dev">
         Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
     </DirectoryMatch>
 
