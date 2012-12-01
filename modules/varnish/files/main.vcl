@@ -46,7 +46,7 @@ sub vcl_recv {
     }
 
     # If we're on the admin/login/rpc pages, duck out
-    if (req.url ~ "(wp-(login|admin)|login)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
+    if (req.url ~ "(wp-(login|admin|cron)|login)" || req.url ~ "preview=true" || req.url ~ "xmlrpc.php") {
         return (pass);
     }
 
@@ -72,7 +72,7 @@ sub vcl_fetch {
     set beresp.grace = 6h;
 
     #Only allow Set-Cookie from the admin/login pages and not on GETs
-    if ((!(req.url ~ "(wp-(login|admin)|login)")) || (req.request == "GET") ) {
+    if ((!(req.url ~ "(wp-(login|admin|cron)|login)")) || (req.request == "GET") ) {
         unset beresp.http.set-cookie;
     }
 

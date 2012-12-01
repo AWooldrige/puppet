@@ -76,6 +76,7 @@ define wordpress::instance (
         path => [ '/usr/bin', '/bin' ]
     }
 
+
     # Automatically create the WordPress configuration file
     $wp_unique_auth_key = generate("/root/getpassword", "${wp_id}_unique_auth_key")
     $wp_unique_secure_auth_key  = generate("/root/getpassword", "${wp_id}_unique_secure_auth_key")
@@ -112,6 +113,29 @@ define wordpress::instance (
     wordpress::plugin { "${title}:wp-varnish":
         ensure => 'installed',
         require => File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"]
+    }
+
+    exec { "wp-disqus-sync-disable-${wp_id}":
+        cwd => $path,
+        command => "wp option set disqus_manual_sync true",
+        unless => "wp option get disqus_manual_sync",
+        require => Exec["wp-install-${wp_id}"],
+        notify => Service['varnish'],
+        path => ['/usr/bin', '/bin']
+    }
+
+    #TODO: Cron the disqus comment sync script
+
+    #Gaarg, there's no way to change directory in a cron, and running:
+    #   /usr/bin/php /var/www/vhost/wp-cron.php doesn't work because the PHP
+    # include path isn't set correctly. For this reason, we have to very hackily
+    # fire an HTTP request back to ourselves
+    cron {"wp-cron-${wp_id}":
+        ensure => present,
+        command => "/usr/bin/curl -I http://${domain}/wp-cron.php",
+        user => root,
+        minute => 0,
+        require => Exec["wp-install-${wp_id}"],
     }
 
     if $backups == true {
