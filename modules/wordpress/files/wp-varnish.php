@@ -38,9 +38,17 @@ if (is_admin() || (strpos(get_option('template'), '-dev') !== false)) {
     header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate', true);
 }
 else {
-    //Cache in Varnish for 5 days, but send to the public as 10 seconds
-    header('Cache-Control: max-age=10', true);
-    if($_SERVER['HTTP_X_VARNISH']) {
-        header('X-Varnish-TTL: 432000', true);
+    if (is_search()) {
+        header('Cache-Control: max-age=60', true);
+        if($_SERVER['HTTP_X_VARNISH']) {
+            header('X-Varnish-TTL: 3600', true);
+        }
+    }
+    else {
+        //Cache in Varnish for 5 days, but send to the public as 10 seconds
+        header('Cache-Control: max-age=60', true);
+        if($_SERVER['HTTP_X_VARNISH']) {
+            header('X-Varnish-TTL: 432000', true);
+        }
     }
 }
