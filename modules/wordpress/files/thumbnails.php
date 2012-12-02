@@ -58,7 +58,6 @@ class Thumbnails_Command extends WP_CLI_Command {
                 }
             }
 
-            print_r($notFound);
             if(count($notFound) > 0) {
 
                 //TODO: Pull the following out into a static function
@@ -86,7 +85,6 @@ class Thumbnails_Command extends WP_CLI_Command {
                 }
 
                 wp_update_attachment_metadata($image->ID, $meta);
-                break;
             }
         }
     }
