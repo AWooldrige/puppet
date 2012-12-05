@@ -20,7 +20,7 @@ class wordpress {
     }
     cron {'wp-set-permissions':
         ensure => present,
-        command => "/usr/bin/wp-set-permissions /var/www/wp_*",
+        command => "/usr/bin/chronic /usr/bin/wp-set-permissions /var/www/wp_*",
         user => root,
         hour => 2,
         minute => 30

@@ -1,6 +1,7 @@
 class default-config {
 
     $enhancers = [
+        'moreutils',
         'tree',
         'zip',
         'unzip',
@@ -65,7 +66,7 @@ class default-config {
     }
     cron {"transfer-incremental-backups":
         ensure => present,
-        command => "/usr/bin/transfer-incremental-backups push",
+        command => "/usr/bin/chronic /usr/bin/transfer-incremental-backups push",
         user => root,
         hour => 1,
         minute => 0

@@ -132,7 +132,7 @@ define wordpress::instance (
     # fire an HTTP request back to ourselves
     cron {"wp-cron-${wp_id}":
         ensure => present,
-        command => "/usr/bin/curl -I http://${domain}/wp-cron.php",
+        command => "/usr/bin/chronic /usr/bin/curl -I http://${domain}/wp-cron.php",
         user => root,
         minute => 0,
         require => Exec["wp-install-${wp_id}"],
@@ -141,14 +141,14 @@ define wordpress::instance (
     if $backups == true {
         cron {"incremental_backup_${wp_id}":
             ensure => present,
-            command => "/usr/bin/wp-backup backup incremental ${wp_id}",
+            command => "/usr/bin/chronic /usr/bin/wp-backup backup incremental ${wp_id}",
             user => root,
             hour => 11,
             minute => 0
         }
         cron {"full_backup_${wp_id}":
             ensure => present,
-            command => "/usr/bin/wp-backup backup full ${wp_id}",
+            command => "/usr/bin/chronic /usr/bin/wp-backup backup full ${wp_id}",
             user => root,
             hour => 23,
             minute => 0

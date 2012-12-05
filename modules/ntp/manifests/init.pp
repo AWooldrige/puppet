@@ -40,7 +40,7 @@ class ntp {
     }
 
     cron { 'ntp-kick' :
-        command => "/usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /etc/init.d/ntp restart )",
+        command => "/usr/bin/chronic /usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /etc/init.d/ntp restart )",
         user    => 'root',
         ensure  => present,
         minute  => 0,

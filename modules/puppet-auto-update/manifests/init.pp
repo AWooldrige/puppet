@@ -1,6 +1,6 @@
 class puppet-auto-update {
     cron { 'puppet-git-update':
-        command => '/usr/bin/puppet-git-update',
+        command => '/usr/bin/chronic /usr/bin/puppet-git-update',
         user    => root,
         ensure => present,
         hour  => 9,
@@ -9,7 +9,7 @@ class puppet-auto-update {
                      File['/usr/bin/puppet-git-update'] ]
     }
     cron { 'puppet-git-run':
-        command => '/usr/bin/puppet-git-run',
+        command => '/usr/bin/chronic /usr/bin/puppet-git-run',
         user    => root,
         ensure => present,
         hour  => 21,
