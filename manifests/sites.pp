@@ -25,6 +25,7 @@ $extlookup_precedence = ["nodes/${::hostname}", "common"]
 $backup_path = "/home/backupincoming/${::hostname}"
 
 Exec { path => '/usr/bin:/bin:/usr/sbin:/sbin' }
+Cron { environment => "MAILTO=cron-notify@woolie.co.uk" }
 
 node default {
     include default-config

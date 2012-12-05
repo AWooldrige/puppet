@@ -1,6 +1,7 @@
 class ssmtp {
-    $ssmtp_mailhub = extlookup('ssmtp/mailhub')
-    $ssmtp_user = extlookup('ssmtp/user')
+    $ssmtp_mailhub = "smtp.gmail.com:587"
+    $ssmtp_user = "noreply@woolie.co.uk"
+    $ssmtp_default_sendto = "root-at-${hostname}@woolie.co.uk"
     $ssmtp_pass = extlookup('ssmtp/pass')
 
     package { 'ssmtp':

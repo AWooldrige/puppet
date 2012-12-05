@@ -5,9 +5,7 @@
 
 extlookupcsvfile='/root/extlookup/common.csv'
 
-fields=( "ssmtp/mailhub,<SMTP mail address - e.g. smtp.gmail.com:587>"
-         "ssmtp/user,<SMTP user name - e.g. noreply@woolie.co.uk>"
-         "ssmtp/pass,<SMTP password>" )
+fields=( "ssmtp/pass,<SMTP password>" )
 
 # END CONFIGURATION
 ######################################
