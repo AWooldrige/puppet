@@ -39,11 +39,18 @@ class ntp {
         require => Package["ntp"],
     }
 
+    file { '/usr/bin/ntp-kick':
+        source => 'puppet:///modules/ntp/ntp-kick',
+        owner => 'root',
+        group => 'root',
+        mode => '544'
+    }
     cron { 'ntp-kick' :
-        command => "/usr/bin/chronic /usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /etc/init.d/ntp restart )",
+        command => "/usr/bin/chronic /usr/bin/ntp-kick",
         user    => 'root',
         ensure  => present,
         minute  => 0,
-        require => Package['ntp']
+        hour  => 5,
+        require => [ Package['ntp'], File['/usr/bin/ntp-kick'] ]
     }
 }

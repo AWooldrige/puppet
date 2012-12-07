@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /usr/sbin/service ntp restart )
