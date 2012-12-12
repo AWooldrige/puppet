@@ -17,6 +17,33 @@ action=$1
 hostname=$(hostname -s)
 bkp_location=/bkps-incremental
 
+retry_if_failed() {
+    local max_attempts=4
+    local exitCode=1
+
+    until [ $exitCode == 0 ] ; do
+        set +e
+        "$@"
+        exitCode=$?
+        set -e
+
+        if [ $max_attempts -le 0 ]; then break; fi
+
+        if [ $exitCode != 0 ]; then
+            echo $info"Command failed - retrying in 10 seconds" 1>&2
+            sleep 10
+            max_attempts=$(( max_attempts - 1 ))
+        fi
+    done
+
+    if [ $exitCode != 0 ]; then
+        echo $error"Failed too many times, not retrying" 1>&2
+    fi
+
+  return $exitCode
+}
+
+
 if /usr/bin/[ -z $hostname ]; then
     /bin/echo $error"Hostname (found by 'hostname -s') cannot be empty"
     exit 1
@@ -37,12 +64,12 @@ if /usr/bin/[ $action = "push" ]; then
 
 
     echo $info"Sending with rdiff-backup"
-    /usr/bin/rdiff-backup \
+    retry_if_failed /usr/bin/rdiff-backup \
         --create-full-path --force --exclude-special-files --no-acls --no-eas \
         $bkp_location backupoutgoing::./$hostname/ || exit 3
 
     echo $info"Cleaning up backup revision history older than 2 weeks"
-    /usr/bin/rdiff-backup --remove-older-than 2W backupoutgoing::./$hostname/ || exit 3
+    retry_if_failed /usr/bin/rdiff-backup --force --remove-older-than 2W backupoutgoing::./$hostname/ || exit 3
 
     exit 0
 fi
@@ -58,7 +85,7 @@ if /usr/bin/[ $action = "pull" ]; then
     rm -rf $bkp_location/*
 
     echo $info"Retrieving with rdiff-backup"
-    /usr/bin/rdiff-backup -r now \
+    retry_if_failed /usr/bin/rdiff-backup -r now \
         --exclude-special-files --no-acls --no-eas \
         backupoutgoing::./$from_hostname/ $bkp_location/ || exit 3
 
