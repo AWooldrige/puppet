@@ -3,7 +3,7 @@
 Plugin Name: Puppet/Varnish Additions
 Plugin URI: https://github.com/AWooldrige/puppet
 Description: Makes WordPress more Puppet/Varnish friendly.
-Version: 0.1.0
+Version: 0.1.2
 Author: Alistair Wooldrige
 Author URI: http://woolie.co.uk
 License: GPLv2 or later
@@ -30,25 +30,24 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-define('WP_VARNISH_PLUGIN_VERSION', '0.1.1');
+define('WP_VARNISH_PLUGIN_VERSION', '0.1.2');
 define('WP_VARNISH_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
-//If we're on a development theme, don't cache anything!
-if (is_admin() || (strpos(get_option('template'), '-dev') !== false)) {
-    header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate', true);
-}
-else {
-    if (is_search()) {
-        header('Cache-Control: max-age=60', true);
+function add_cache_control_headers() {
+    if (is_admin() || (strpos(get_option('template'), '-dev') !== false)) {
+        header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate', true);
+        return;
+    }
+    if (is_search() || is_archive()) {
+        header('Cache-Control: max-age=20', true);
         if($_SERVER['HTTP_X_VARNISH']) {
             header('X-Varnish-TTL: 3600', true);
         }
+        return;
     }
-    else {
-        //Cache in Varnish for 5 days, but send to the public as 10 seconds
-        header('Cache-Control: max-age=60', true);
-        if($_SERVER['HTTP_X_VARNISH']) {
-            header('X-Varnish-TTL: 432000', true);
-        }
+    header('Cache-Control: max-age=60', true);
+    if($_SERVER['HTTP_X_VARNISH']) {
+        header('X-Varnish-TTL: 432000', true);
     }
 }
+add_action('wp', 'add_cache_control_headers');
