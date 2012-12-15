@@ -16,7 +16,9 @@ define wordpress::instance (
     $domain,
     $backups='true',
     $http_port=80,
-    $https_port=443) {
+    $https_port=443,
+    $varnish_addr='127.0.0.1',
+    $varnish_port=80) {
 
     $wp_id = "wp_${title}"
     $path = "/var/www/${wp_id}"

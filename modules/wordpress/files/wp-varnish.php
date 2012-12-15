@@ -51,3 +51,27 @@ function add_cache_control_headers() {
     }
 }
 add_action('wp', 'add_cache_control_headers');
+
+
+
+/**
+ * Varnish content purging
+ */
+function wp_varnish_purge_post($post_id) {
+    wp_varnish_purge_url(get_permalink($post_id));
+    wp_varnish_purge_url(home_url('/'));
+}
+function wp_varnish_purge_url($url) {
+    $url_parts = parse_url($url);
+    $purge_url = 'http://'.VARNISH_ADDR.':'.VARNISH_PORT.$url_parts['path'];
+    $ch = curl_init($purge_url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: '.$url_parts['host']));
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
+    curl_exec($ch);
+    curl_close($ch);
+}
+
+//Purge the post and homepage whenever these are triggered
+add_action('publish_post', 'wp_varnish_purge_post', 99);
+add_action('edit_post', 'wp_varnish_purge_post', 99);
+add_action('deleted_post', 'wp_varnish_purge_post', 99);

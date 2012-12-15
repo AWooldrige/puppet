@@ -58,7 +58,11 @@ define('SECURE_AUTH_SALT', '<%= wp_unique_secure_auth_salt %>');
 define('LOGGED_IN_SALT',   '<%= wp_unique_logged_in_salt %>');
 define('NONCE_SALT',       '<%= wp_unique_nonce_salt %>');
 
-/**#@-*/
+/**
+ * The following are for the wp-varnish WordPress plugin
+ */
+define('VARNISH_ADDR', '<%= varnish_addr %>');
+define('VARNISH_PORT', '<%= varnish_port %>');
 
 /**
  * WordPress Database Table prefix.
