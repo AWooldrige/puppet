@@ -64,13 +64,6 @@ class default-config {
         group => 'root',
         mode => '540'
     }
-    cron {"transfer-incremental-backups":
-        ensure => present,
-        command => "/usr/bin/chronic /usr/bin/transfer-incremental-backups push",
-        user => root,
-        hour => 1,
-        minute => 0
-    }
     file { "/root/.ssh":
         ensure => directory,
         owner => 'root',

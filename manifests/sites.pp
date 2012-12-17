@@ -44,7 +44,6 @@ node "agw-nc10" inherits default-desktop {
 node "agw-inspiron-1720" inherits default-desktop {
 }
 
-
 #########################################################################
 ##                           Production Nodes                          ##
 #########################################################################
@@ -64,7 +63,6 @@ node default-wordpress-server inherits default {
     include ssmtp
 
     $mysql_root_password = generate("/root/getpassword", "mysql_root_password")
-
     class { 'mysql::server':
         config_hash => {
             'root_password' => $mysql_root_password
@@ -76,10 +74,19 @@ node default-wordpress-server inherits default {
     }
 }
 node "web1.woolie.co.uk" inherits default-wordpress-server {
+    cron {"transfer-incremental-backups":
+        ensure => present,
+        command => "/usr/bin/chronic /usr/bin/transfer-incremental-backups push",
+        user => root,
+        hour => 1,
+        minute => 0
+    }
 }
 node "devvm.woolie.co.uk" inherits default-wordpress-server {
+    cron {"transfer-incremental-backups":
+        ensure => absent
+    }
     include devtools
-
 }
 
 #########################################################################
@@ -89,6 +96,10 @@ node default-monitoring-server inherits default {
     include user-backupincoming
     include httpd
     include graphite
+
+    cron {"transfer-incremental-backups":
+        ensure => absent
+    }
 
     class {'diamond':
         graphite_host => '127.0.0.1'
