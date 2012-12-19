@@ -12,6 +12,6 @@
     </Directory>
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/default/error.log
-    CustomLog ${APACHE_LOG_DIR}/vhost/default/access.log combined
+    CustomLog ${APACHE_LOG_DIR}/vhost/default/access.log vhost_combined_varnish
 
 </VirtualHost>
