@@ -15,6 +15,7 @@ What does this plugin do:
       be sent to prevent caching in Varnish and in the browser.
  * When a post is modified, it will request that Varnish purge that page, and
    the homepage
+ * Removes width and height parameters from image thumbnail HTML
 */
 
 define('WP_VARNISH_PLUGIN_VERSION', '0.1.2');
@@ -39,8 +40,6 @@ function add_cache_control_headers() {
 }
 add_action('wp', 'add_cache_control_headers');
 
-
-
 /**
  * Varnish content purging
  */
@@ -62,3 +61,33 @@ function wp_varnish_purge_url($url) {
 add_action('publish_post', 'wp_varnish_purge_post', 99);
 add_action('edit_post', 'wp_varnish_purge_post', 99);
 add_action('deleted_post', 'wp_varnish_purge_post', 99);
+
+/**
+ * WordPress adds absolute width and height parameters to post thumbnails.
+ * Although hacky, this filter strips this on the way out.
+ *
+ * Source:
+ * http://wordpress.stackexchange.com/questions/5568/filter-to-remove-image-dimension-attributes
+ *
+ * @param post thumbnail html $html
+ * @access public
+ * @return string filtered html without width or height
+ */
+function remove_thumbnail_dimensions($html) {
+    $html = preg_replace('/(width|height)=\"\d*\"\s/', "", $html);
+    return $html;
+}
+add_filter('post_thumbnail_html', 'remove_thumbnail_dimensions', 10);
+add_filter('image_send_to_editor', 'remove_thumbnail_dimensions', 10);
+
+/**
+ * The default jpeg quality within WordPress is 90, which is a bit high.
+ *
+ * @param int $quality jpeg quality
+ * @access public
+ * @return int new jpeg quality
+ */
+function jpeg_resize_quality($quality){
+    return 70;
+}
+add_filter('jpeg_quality', 'jpeg_resize_quality');
