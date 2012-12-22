@@ -55,6 +55,13 @@ function wp_varnish_purge_url($url) {
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
     curl_exec($ch);
     curl_close($ch);
+
+    $req_url = 'http://'.VARNISH_ADDR.':'.VARNISH_PORT.$url_parts['path'];
+    $ch = curl_init($purge_url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: '.$url_parts['host']));
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD');
+    curl_exec($ch);
+    curl_close($ch);
 }
 
 //Purge the post and homepage whenever these are triggered
