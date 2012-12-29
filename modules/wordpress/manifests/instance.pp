@@ -23,8 +23,6 @@ define wordpress::instance (
     $wp_id = "wp_${title}"
     $path = "/var/www/${wp_id}"
 
-
-
     # HTTPD Virtualhost configuration
     file {"/etc/apache2/sites-available/${wp_id}":
         ensure => present,
@@ -97,6 +95,13 @@ define wordpress::instance (
         content => template("wordpress/wp-config.php")
     }
 
+    exec { "wp-sitemapfiles-${wp_id}":
+        command => "touch ${path}/sitemap.xml ${path}/sitemap.xml.gz",
+        creates => "${path}/sitemap.xml",
+        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ],
+        notify => [ Service["varnish"], Exec["wp-set-permissions"] ],
+        path => "/usr/bin"
+    }
 
     # Add a plugin which helps with the Varnish/WordPress integration
     file { "${path}/wp-content/plugins/wp-varnish":
@@ -113,20 +118,25 @@ define wordpress::instance (
         source => 'puppet:///modules/wordpress/wp-varnish.php',
     }
     wordpress::plugin { "${title}:wp-varnish":
-        ensure => 'installed',
-        require => File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"]
+        ensure => "installed",
+        active => true,
+        require => [
+            File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"],
+            Exec["wp-install-${wp_id}"],
+            Exec["wp-update-${wp_id}"] ],
     }
-
-    exec { "wp-disqus-sync-disable-${wp_id}":
-        cwd => $path,
-        command => "wp option set disqus_manual_sync true",
-        unless => "wp option get disqus_manual_sync",
-        require => Exec["wp-install-${wp_id}"],
-        notify => Service['varnish'],
-        path => ['/usr/bin', '/bin']
+    wordpress::plugin { [ "${title}:livefyre-comments",
+                          "${title}:google-analytics-for-wordpress",
+                          "${title}:google-sitemap-generator" ]:
+        ensure => "installed",
+        active => true,
+        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
-
-    #TODO: Cron the disqus comment sync script
+    wordpress::plugin { [ "${title}:disqus-comment-system",
+                          "${title}:aksimet" ]:
+        ensure => "removed",
+        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
+    }
 
     #Gaarg, there's no way to change directory in a cron, and running:
     #   /usr/bin/php /var/www/vhost/wp-cron.php doesn't work because the PHP

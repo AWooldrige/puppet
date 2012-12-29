@@ -9,7 +9,6 @@ class woolie-co-uk {
         require => File['/opt/local-zips']
     }
 
-
     wordpress::instance { $wp_id:
         ensure  => "3.4.2",
         domain  => "woolie.co.uk",
@@ -17,12 +16,8 @@ class woolie-co-uk {
         http_port => 81
     }
 
-    wordpress::plugin { [ "${wp_id}:akismet",
-                          "${wp_id}:disqus-comment-system",
-                          "${wp_id}:google-analytics-for-wordpress",
-                          "${wp_id}:google-sitemap-generator",
-                          "${wp_id}:wp-syntax" ]:
-        ensure => 'installed',
+    wordpress::plugin { "${wp_id}:wp-syntax":
+        ensure => "installed",
         active => true,
         require => Wordpress::Instance[$wp_id]
     }
