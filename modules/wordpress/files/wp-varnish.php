@@ -53,15 +53,20 @@ function wp_varnish_purge_url($url) {
     $ch = curl_init($purge_url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: '.$url_parts['host']));
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_exec($ch);
     curl_close($ch);
 
+    /*
+     * TODO: This needs adding to a immediately scheduled task as it makes
+     * saving posts dog slow.
     $req_url = 'http://'.VARNISH_ADDR.':'.VARNISH_PORT.$url_parts['path'];
     $ch = curl_init($purge_url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: '.$url_parts['host']));
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD');
     curl_exec($ch);
     curl_close($ch);
+     */
 }
 
 //Purge the post and homepage whenever these are triggered
@@ -95,6 +100,6 @@ add_filter('image_send_to_editor', 'remove_thumbnail_dimensions', 10);
  * @return int new jpeg quality
  */
 function jpeg_resize_quality($quality){
-    return 70;
+    return 75;
 }
 add_filter('jpeg_quality', 'jpeg_resize_quality');
