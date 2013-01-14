@@ -126,13 +126,14 @@ define wordpress::instance (
             Exec["wp-update-${wp_id}"] ],
     }
     wordpress::plugin { [ "${title}:google-analytics-for-wordpress",
-                          "${title}:google-sitemap-generator" ]:
+                          "${title}:xml-sitemap-feed" ]:
         ensure => "installed",
         active => true,
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
     wordpress::plugin { [ "${title}:livefyre-comments",
                           "${title}:disqus-comment-system",
+                          "${title}:google-sitemap-generator",
                           "${title}:aksimet" ]:
         ensure => "removed",
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]

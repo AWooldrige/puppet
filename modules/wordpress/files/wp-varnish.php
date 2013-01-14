@@ -47,7 +47,6 @@ function wp_varnish_purge_post($post_id) {
     wp_varnish_purge_url(get_permalink($post_id));
     wp_varnish_purge_url(home_url('/'));
     wp_varnish_purge_url(home_url('/sitemap.xml'));
-    wp_varnish_purge_url(home_url('/sitemap.xml.gz'));
 }
 function wp_varnish_purge_url($url) {
     $url_parts = parse_url($url);

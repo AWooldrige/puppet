@@ -69,8 +69,8 @@ define wordpress::plugin($ensure, $active=true, $source_file=false) {
     if $ensure == "removed" {
         exec { "wp-plugin-remove-${title}":
             cwd => $wp_path,
-            command => "wp plugin deactivate ${plugin_name}; wp plugin uninstall ${plugin_name}",
-            onlyif => "wp plugin status ${plugin_name}",
+            command => "rm -rf ${plugin_path}",
+            unless => "[ ! -d ${plugin_path} ]",
             path => [ '/usr/bin', '/bin' ],
             notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
         }
