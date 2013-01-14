@@ -95,12 +95,9 @@ define wordpress::instance (
         content => template("wordpress/wp-config.php")
     }
 
-    exec { "wp-sitemapfiles-${wp_id}":
-        command => "touch ${path}/sitemap.xml ${path}/sitemap.xml.gz",
-        creates => "${path}/sitemap.xml",
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ],
-        notify => [ Service["varnish"], Exec["wp-set-permissions"] ],
-        path => "/usr/bin"
+    file { [ "${path}/sitemap.xml", "${path}/sitemap.xml.gz" ]:
+        ensure => absent,
+        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
 
     # Add a plugin which helps with the Varnish/WordPress integration
