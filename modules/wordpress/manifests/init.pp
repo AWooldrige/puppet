@@ -18,6 +18,12 @@ class wordpress {
         require => File['/usr/bin/wp-set-permissions'],
         refreshonly => true
     }
+    exec { 'wp-generate-thumbnails':
+        command => "echo /var/www/wp_* | xargs -d' ' -P 5 -I % wp --path=% thumbnails generate",
+        notify => Exec['wp-set-permissions'],
+        refreshonly => true
+    }
+
     cron {'wp-set-permissions':
         ensure => present,
         command => "/usr/bin/chronic /usr/bin/wp-set-permissions /var/www/wp_*",

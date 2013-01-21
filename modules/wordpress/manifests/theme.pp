@@ -42,7 +42,10 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
             path => [ '/usr/bin', '/bin' ],
             creates => $theme_path,
             require => Exec['wpcli-install'],
-            notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
+            notify => [
+                Service['varnish'],
+                Exec['wp-set-permissions'],
+                Exec['wp-generate-thumbnails'] ]
         }
 
         if $active == true {
@@ -52,8 +55,11 @@ define wordpress::theme($ensure, $active=false, $source_file=false) {
                 unless => "wp theme status ${theme_name} | grep 'Status.*Active'",
                 path => [ '/usr/bin', '/bin' ],
                 require => Exec["wp-theme-install-${title}"],
-                notify => [ Service['varnish'], Exec['wp-set-permissions'] ]
-            }
+                notify => [
+                    Service['varnish'],
+                    Exec['wp-set-permissions'],
+                    Exec['wp-generate-thumbnails'] ]
+                }
         }
         else {
             exec { "wp-theme-deactivate-${title}":
