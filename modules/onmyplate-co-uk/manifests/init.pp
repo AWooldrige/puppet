@@ -2,9 +2,9 @@ class onmyplate-co-uk {
 
     $wp_id = 'ompcouk'
 
-    $theme_version = '0.2.0'
+    $theme_version = '0.2.1'
     exec { "download-omp-theme-${theme_version}":
-        command => "curl -L -o /opt/local-zips/omp-theme-${theme_version}.zip https://dl.dropbox.com/s/gm2rep7exbdxq4m/omp-theme-${theme_version}.zip?dl=1",
+        command => "curl -L -o /opt/local-zips/omp-theme-${theme_version}.zip https://dl.dropbox.com/s/saabu4lj7va7vab/omp-theme-${theme_version}.zip?dl=1",
         creates => "/opt/local-zips/omp-theme-${theme_version}.zip",
         require => File['/opt/local-zips']
     }
