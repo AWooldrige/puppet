@@ -11,7 +11,7 @@
 [server]
 
 # Handlers for published metrics.
-handlers = diamond.handler.graphite.GraphiteHandler, diamond.handler.archive.ArchiveHandler
+handlers = diamond.handler.graphite.GraphiteHandler
 
 # User diamond will run as
 # Leave empty to use the current user
@@ -42,14 +42,6 @@ keys = rotated_file
 
 ### Defaults options for all Handlers
 [[default]]
-
-[[ArchiveHandler]]
-
-# File to write archive log files
-log_file = /var/log/diamond/archive.log
-
-# Number of days to keep archive log files
-days = 7
 
 [[GraphiteHandler]]
 ### Options for GraphiteHandler
