@@ -2,22 +2,22 @@ class onmyplate-co-uk {
 
     $wp_id = 'ompcouk'
 
-    $theme_version = '0.2.1'
+    $theme_version = '0.3.0'
     exec { "download-omp-theme-${theme_version}":
-        command => "curl -L -o /opt/local-zips/omp-theme-${theme_version}.zip https://dl.dropbox.com/s/saabu4lj7va7vab/omp-theme-${theme_version}.zip?dl=1",
+        command => "curl -L -o /opt/local-zips/omp-theme-${theme_version}.zip https://s3-eu-west-1.amazonaws.com/woolie-releases/wp_ompcouk/omp-theme-${theme_version}.zip",
         creates => "/opt/local-zips/omp-theme-${theme_version}.zip",
         require => File['/opt/local-zips']
     }
 
     $plugin_version = '0.2.0'
     exec { "download-omp-plugin-${plugin_version}":
-        command => "curl -L -o /opt/local-zips/omp-plugin-${plugin_version}.zip https://dl.dropbox.com/s/tce6rjijpuvl0vz/omp-plugin-${plugin_version}.zip?dl=1",
+        command => "curl -L -o /opt/local-zips/omp-plugin-${plugin_version}.zip https://s3-eu-west-1.amazonaws.com/woolie-releases/wp_ompcouk/omp-plugin-${plugin_version}.zip",
         creates => "/opt/local-zips/omp-plugin-${plugin_version}.zip",
         require => File['/opt/local-zips']
     }
 
     wordpress::instance { $wp_id:
-        ensure  => "3.5",
+        ensure  => "3.5.1",
         domain  => "onmyplate.co.uk",
         backups => true,
         http_port => 81
