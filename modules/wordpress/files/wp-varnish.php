@@ -16,6 +16,7 @@ What does this plugin do:
  * When a post is modified, it will request that Varnish purge that page, and
    the homepage
  * Removes width and height parameters from image thumbnail HTML
+ * Rewrites https urls to admin.
 */
 
 define('WP_VARNISH_PLUGIN_VERSION', '0.1.2');
@@ -86,3 +87,36 @@ function jpeg_resize_quality($quality){
     return 75;
 }
 add_filter('jpeg_quality', 'jpeg_resize_quality');
+
+
+
+
+
+/**
+ * THIRD PARTY FUNCTIONS
+ */
+
+/**
+ * Swap out the current site domain with {@see SSL_DOMAIN_ALIAS} if the
+ * protocol is HTTPS.
+ *
+ * This function was written by TheDeadMedic in this question:
+ * http://wordpress.stackexchange.com/questions/38902
+ *
+ * @param string $url
+ * @return string
+ */
+function _use_ssl_domain_alias_for_https( $url )
+{
+    static $domain;
+    if ( ! isset( $domain ) )
+        $domain = defined( 'WP_SITEURL' ) && defined( 'SSL_DOMAIN_ALIAS' ) ? parse_url( WP_SITEURL, PHP_URL_HOST ) : false;
+
+    if ( $domain && strpos( $url, 'https' ) === 0 )
+        $url = str_replace( $domain, SSL_DOMAIN_ALIAS, $url );
+
+    return $url;
+}
+add_filter( 'plugins_url', '_use_ssl_domain_alias_for_https', 1 );
+add_filter( 'content_url', '_use_ssl_domain_alias_for_https', 1 );
+add_filter( 'site_url', '_use_ssl_domain_alias_for_https', 1 );

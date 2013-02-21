@@ -18,23 +18,21 @@
  * @package WordPress
  */
 
-// ** MySQL settings - You can get this info from your web host ** //
-/** The name of the database for WordPress */
+define('WP_SITEURL','http://<%= domain %>');
+define('WP_HOME','http://<%= domain %>');
+
+define("WP_CONTENT_URL", "http://static.<%= domain %>/wp-content");
+define("COOKIE_DOMAIN", "<%= domain %>");
+
+define('FORCE_SSL_LOGIN', true);
+define('FORCE_SSL_ADMIN', true);
+define('SSL_DOMAIN_ALIAS', 'admin.<%= domain %>');
+
 define('DB_NAME', '<%= wp_id %>');
-
-/** MySQL database username */
 define('DB_USER', '<%= wp_id %>');
-
-/** MySQL database password */
 define('DB_PASSWORD', '<%= wp_db_pass %>');
-
-/** MySQL hostname */
 define('DB_HOST', '<%= wp_db_host %>');
-
-/** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
-
-/** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
 
 /** Disable WordPress cron requests **/

@@ -6,13 +6,28 @@
 # be specified in puppet. If they aren't we want it to fail hard, otherwise
 # we will never know about them.
 
+
 #########################################################################
-##  Normal HTTP
+## Root domain and its origin
 #########################################################################
 <VirtualHost *:<%= http_port %>>
-
     DocumentRoot <%= path %>
     ServerName <%= domain %>
+    ServerAlias origin.<%= domain %>
+    RequestHeader set WordPress-Subdomain ""
+
+    #wp-content should be served from 'static' subdomain
+    <LocationMatch "^/wp-content">
+        Header always set Cache-control "max-age=86400"
+        Redirect permanent / http://static.<%= domain %>/
+    </LocationMatch>
+
+    #Redirect any admin parts to 'admin' subdomain, except wp-cron.php and
+    #wp-includes
+    <LocationMatch "^/(?:wp-admin|(?:wp-login|xmlrpc)\.php)">
+        Header always set Cache-control "max-age=86400"
+        Redirect permanent / https://admin.<%= domain %>/
+    </LocationMatch>
 
     <Directory <%= path %>>
         Order deny,allow
@@ -27,38 +42,78 @@
         RewriteCond %{REQUEST_FILENAME} !-d
         RewriteRule . /index.php [L]
     </Directory>
-
-    # All static assets, when served from a plugin or a theme should have good
-    # cache control directives
-    <DirectoryMatch "^<%= path %>/wp-content/">
-        Header set Cache-control "max-age=31536000"
-        ExpiresDefault "access plus 1 year"
-    </DirectoryMatch>
-
-    # Any theme/plugin appended with -dev should not be cacheable
-    <DirectoryMatch "^<%= path %>/wp-content/(?:plugin|theme)s/(?:.+)-dev">
-        Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
-    </DirectoryMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error.log
     CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access.log combined_varnish
-
     Include /etc/apache2/conf.d/sites/<%= wp_id %>/
 </VirtualHost>
 
+
+#########################################################################
+## 'www' subdomain and its origin
+#########################################################################
 <VirtualHost *:<%= http_port %>>
     ServerName www.<%= domain %>
+    ServerAlias www.origin.<%= domain %>
+    RequestHeader set WordPress-Subdomain "www"
+
+    Header always set Cache-control "max-age=86400"
     Redirect permanent / http://<%= domain %>/
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.access.log combined_varnish
 </VirtualHost>
 
 
 #########################################################################
-##  Secure HTTPS
+## 'static' subdomain and its origin
 #########################################################################
-<VirtualHost <%= @ipaddress %>:<%= https_port %>>
-
+<VirtualHost *:<%= http_port %>>
     DocumentRoot <%= path %>
-    ServerName <%= domain %>
+    ServerName static.<%= domain %>
+    ServerAlias static.origin.<%= domain %>
+    RequestHeader set WordPress-Subdomain "static"
+
+    #Lock down all, then only allow static files to be served
+    <Directory <%= path %>>
+        Order deny,allow
+        Deny from all
+        <FilesMatch "\.(gif|jpe?g|png|ico|js|css|svg|txt)$">
+            Allow from all
+        </FilesMatch>
+    </Directory>
+
+    # All static assets, should have good cache control directives
+    Header set Cache-control "max-age=31536000"
+    ExpiresDefault "access plus 1 year"
+
+    # Any theme/plugin appended with -dev should not be cacheable
+    <LocationMatch "^/wp-content/(?:plugin|theme)s/(?:.+)-dev">
+        Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
+    </LocationMatch>
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.access.log combined_varnish
+    Include /etc/apache2/conf.d/sites/<%= wp_id %>/
+</VirtualHost>
+
+
+#########################################################################
+## 'admin' SSL only subdomain
+#########################################################################
+<VirtualHost *:<%= https_port %>>
+    DocumentRoot <%= path %>
+    ServerName admin.<%= domain %>
+    RequestHeader set WordPress-Subdomain "admin"
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RewriteEngine On
+    RewriteCond %{HTTP_COOKIE} !.*wordpress_logged_in_.*
+    RewriteCond %{REQUEST_URI} !^/wp-(?:login|admin).*$
+    RewriteRule .* /wp-login.php [R=permanent,L]
 
     <Directory <%= path %>>
         Order deny,allow
@@ -74,28 +129,10 @@
         RewriteRule . /index.php [L]
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error_ssl.log
-    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access_ssl.log combined_varnish
-
-    SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
-    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
-
-    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+    <FilesMatch "\.php$">
         SSLOptions +StdEnvVars
     </FilesMatch>
 
-    BrowserMatch "MSIE [2-6]" \
-        nokeepalive ssl-unclean-shutdown \
-        downgrade-1.0 force-response-1.0
-    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
-</VirtualHost>
-
-<VirtualHost <%= @ipaddress %>:<%= https_port %>>
-    ServerName www.<%= domain %>
-    Redirect permanent / https://<%= domain %>/
-
-    SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
-    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/admin.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/admin.access.log combined_varnish
 </VirtualHost>
