@@ -72,6 +72,7 @@ class httpd (
         enable  => true,
         hasrestart => true,
         require => Package['apache2'],
+        notify => Service['varnish']
     }
 
 
