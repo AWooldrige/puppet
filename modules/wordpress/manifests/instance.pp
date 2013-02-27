@@ -32,14 +32,6 @@ define wordpress::instance (
         content => template("wordpress/apache-virtualhost"),
         notify => Service['apache2']
     }
-    file {"/etc/apache2/conf.d/sites/${wp_id}/_null.conf":
-        ensure => present,
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '400',
-        content => '#Directory for snippets to be included in the HTTP virtualhost',
-        notify => Service['apache2']
-    }
     httpd::site { $wp_id:
         ensure => enabled
     }

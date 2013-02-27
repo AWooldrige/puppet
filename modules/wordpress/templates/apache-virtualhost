@@ -45,7 +45,20 @@
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error.log
     CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access.log combined_varnish
-    Include /etc/apache2/conf.d/sites/<%= wp_id %>/
+</VirtualHost>
+<VirtualHost *:<%= https_port %>>
+    ServerName <%= domain %>
+    ServerAlias origin.<%= domain %>
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    Header always set Cache-control "max-age=86400"
+    Redirect permanent / http://<%= domain %>/
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/access.log combined_varnish
 </VirtualHost>
 
 
@@ -59,6 +72,20 @@
 
     Header always set Cache-control "max-age=86400"
     Redirect permanent / http://<%= domain %>/
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.access.log combined_varnish
+</VirtualHost>
+<VirtualHost *:<%= https_port %>>
+    ServerName www.<%= domain %>
+    ServerAlias www.origin.<%= domain %>
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    Header always set Cache-control "max-age=86400"
+    Redirect permanent / http://www.<%= domain %>/
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.error.log
     CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/www.access.log combined_varnish
@@ -94,16 +121,40 @@
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.error.log
     CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.access.log combined_varnish
-    Include /etc/apache2/conf.d/sites/<%= wp_id %>/
+</VirtualHost>
+<VirtualHost *:<%= https_port %>>
+    ServerName static.<%= domain %>
+    ServerAlias static.origin.<%= domain %>
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    Header always set Cache-control "max-age=86400"
+    Redirect permanent / http://static.<%= domain %>/
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.access.log combined_varnish
 </VirtualHost>
 
 
 #########################################################################
 ## 'admin' SSL only subdomain
 #########################################################################
+<VirtualHost *:<%= http_port %>>
+    ServerName admin.<%= domain %>
+    ServerAlias admin.origin.<%= domain %>
+
+    Header always set Cache-control "max-age=86400"
+    Redirect permanent / https://admin.<%= domain %>/
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/admin.error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/admin.access.log combined_varnish
+</VirtualHost>
 <VirtualHost *:<%= https_port %>>
     DocumentRoot <%= path %>
     ServerName admin.<%= domain %>
+    ServerAlias admin.origin.<%= domain %>
     RequestHeader set WordPress-Subdomain "admin"
 
     SSLEngine on
@@ -111,9 +162,8 @@
     SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
     RewriteEngine On
-    RewriteCond %{HTTP_COOKIE} !.*wordpress_logged_in_.*
-    RewriteCond %{REQUEST_URI} !^/wp-(?:login|admin).*$
-    RewriteRule .* /wp-login.php [R=permanent,L]
+    RewriteCond %{REQUEST_URI} !^/wp-(?:login|admin|includes).*$
+    RewriteRule .* /wp-admin/ [R=permanent,L]
 
     <Directory <%= path %>>
         Order deny,allow

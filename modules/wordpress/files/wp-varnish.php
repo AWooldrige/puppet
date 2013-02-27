@@ -9,37 +9,18 @@ Author URI: http://woolie.co.uk
 License: GPLv2 or later
 
 What does this plugin do:
- * Cache-Control headers:
-    * Suitable caching applied to different pages
-    * If a theme's name is suffixed with "-dev", then Cache-Control headers will
-      be sent to prevent caching in Varnish and in the browser.
  * When a post is modified, it will request that Varnish purge that page, and
    the homepage
  * Removes width and height parameters from image thumbnail HTML
  * Rewrites https urls to admin.
+
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
 */
 
 define('WP_VARNISH_PLUGIN_VERSION', '0.1.2');
 define('WP_VARNISH_PLUGIN_URL', plugin_dir_url( __FILE__ ));
-
-function add_cache_control_headers() {
-    if (is_admin() || (strpos(get_option('template'), '-dev') !== false)) {
-        header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate', true);
-        return;
-    }
-    if (is_search() || is_archive()) {
-        header('Cache-Control: max-age=20', true);
-        if($_SERVER['HTTP_X_VARNISH']) {
-            header('X-Varnish-TTL: 3600', true);
-        }
-        return;
-    }
-    header('Cache-Control: max-age=60', true);
-    if($_SERVER['HTTP_X_VARNISH']) {
-        header('X-Varnish-TTL: 432000', true);
-    }
-}
-add_action('wp', 'add_cache_control_headers');
 
 /**
  * Varnish content purging
@@ -58,20 +39,7 @@ function wp_varnish_purge_url($url) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_exec($ch);
     curl_close($ch);
-
-    /*
-     * TODO: This needs adding to a immediately scheduled task as it makes
-     * saving posts dog slow.
-    $req_url = 'http://'.VARNISH_ADDR.':'.VARNISH_PORT.$url_parts['path'];
-    $ch = curl_init($purge_url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Host: '.$url_parts['host']));
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD');
-    curl_exec($ch);
-    curl_close($ch);
-     */
 }
-
-//Purge the post and homepage whenever these are triggered
 add_action('publish_post', 'wp_varnish_purge_post', 99);
 add_action('edit_post', 'wp_varnish_purge_post', 99);
 add_action('deleted_post', 'wp_varnish_purge_post', 99);
@@ -87,36 +55,27 @@ function jpeg_resize_quality($quality){
     return 75;
 }
 add_filter('jpeg_quality', 'jpeg_resize_quality');
+add_filter('wp_editor_set_quality', 'jpeg_resize_quality' );
 
-
-
-
-
-/**
- * THIRD PARTY FUNCTIONS
- */
 
 /**
  * Swap out the current site domain with {@see SSL_DOMAIN_ALIAS} if the
  * protocol is HTTPS.
  *
- * This function was written by TheDeadMedic in this question:
+ * This function was inspired by the one written by TheDeadMedic:
  * http://wordpress.stackexchange.com/questions/38902
  *
- * @param string $url
- * @return string
+ * @param string $url the URL to possibly use SSL alias for
+ * @return string the possibly SSL version of the URL
  */
-function _use_ssl_domain_alias_for_https( $url )
-{
-    static $domain;
-    if ( ! isset( $domain ) )
-        $domain = defined( 'WP_SITEURL' ) && defined( 'SSL_DOMAIN_ALIAS' ) ? parse_url( WP_SITEURL, PHP_URL_HOST ) : false;
-
-    if ( $domain && strpos( $url, 'https' ) === 0 )
-        $url = str_replace( $domain, SSL_DOMAIN_ALIAS, $url );
-
+function _use_ssl_domain_alias_for_https($url) {
+    $domain = parse_url(WP_SITEURL, PHP_URL_HOST);
+    $pattern = '/^https\:\/\/'.$domain.'/';
+    if (preg_match($pattern, $url) === 1) {
+        $url = str_replace($domain, SSL_DOMAIN_ALIAS, $url);
+    }
     return $url;
 }
-add_filter( 'plugins_url', '_use_ssl_domain_alias_for_https', 1 );
-add_filter( 'content_url', '_use_ssl_domain_alias_for_https', 1 );
-add_filter( 'site_url', '_use_ssl_domain_alias_for_https', 1 );
+add_filter('plugins_url', '_use_ssl_domain_alias_for_https', 1);
+add_filter('content_url', '_use_ssl_domain_alias_for_https', 1);
+add_filter('site_url', '_use_ssl_domain_alias_for_https', 1);
