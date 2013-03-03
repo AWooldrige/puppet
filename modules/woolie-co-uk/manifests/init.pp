@@ -2,7 +2,7 @@ class woolie-co-uk {
 
     $wp_id = 'wooliecouk'
 
-    $theme_version = '0.1.0'
+    $theme_version = '0.1.1'
     exec { "download-${wp_id}-theme-${theme_version}":
         command => "curl -L -o /opt/local-zips/${wp_id}-theme-${theme_version}.zip https://s3-eu-west-1.amazonaws.com/woolie-releases/wp_${wp_id}/${wp_id}-theme-${theme_version}.zip",
         creates => "/opt/local-zips/${wp_id}-theme-${theme_version}.zip",

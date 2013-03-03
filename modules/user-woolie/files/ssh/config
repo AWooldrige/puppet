@@ -7,10 +7,15 @@ Host *
 
 
 #########################################################################
-# Misc
+# Git Hosts
 #########################################################################
 Host github
     Hostname github.com
+    User git
+    IdentityFile /home/woolie/.ssh/id_rsa_github
+
+Host bitbucket
+    Hostname bitbucket.org
     User git
     IdentityFile /home/woolie/.ssh/id_rsa_github
 
@@ -18,27 +23,6 @@ Host github
 #########################################################################
 # Personal Machines
 #########################################################################
-Host glen
-    Hostname melbourn.homeunix.net
-    User glen
-    Port 12345
-    IdentityFile /home/woolie/.ssh/id_rsa_glen
-    LocalForward 5900  localhost:5900
-    LocalForward 5800  localhost:5800
-
-Host glen-local
-    Hostname 192.168.1.180
-    User glen
-    Port 12345
-    IdentityFile /home/woolie/.ssh/id_rsa_glen
-    LocalForward 5900  localhost:5900
-    LocalForward 5800  localhost:5800
-
-Host apollo
-    Hostname apollo.woolie.co.uk
-    User woolie
-    IdentityFile /home/woolie/.ssh/id_rsa_apollo
-
 Host devvm
     Hostname devvm.woolie.co.uk
     User woolie
@@ -48,13 +32,13 @@ Host devvm
 #########################################################################
 # Production
 #########################################################################
-Host hera
-    Hostname hera.woolie.co.uk
+Host mon1
+    Hostname mon1.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
-Host mon1
-    Hostname mon1.woolie.co.uk
+Host web1
+    Hostname web1.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
 
