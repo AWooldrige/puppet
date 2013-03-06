@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -o nounset
+set -o errexit
+
+/bin/echo "ssmtp.sent "$(/bin/grep 'Sent' /var/log/mail.log | wc -l)
+/bin/echo "ssmtp.failure "$(wc -l < /var/log/mail.err)

@@ -15,4 +15,12 @@ class ssmtp {
         require => Package['ssmtp'],
         content => template('ssmtp/ssmtp.conf')
     }
+    file { "/usr/share/diamond/user_scripts/ssmtp_metrics":
+        source => 'puppet:///modules/ssmtp/ssmtp_metrics',
+        owner => "root",
+        group => "root",
+        mode  => '744',
+        require => Package["diamond"],
+        notify  => Service["diamond"]
+    }
 }
