@@ -51,13 +51,16 @@ define wordpress::instance (
     }
 
 
-    # Install and Update WordPress using SVN
+    file { "/var/www/${wp_id}":
+        ensure => directory
+    }
     exec { "wp-install-${wp_id}":
-        command => "svn checkout http://core.svn.wordpress.org/tags/${ensure} ${path}",
+        cwd     => $path,
+        command => "wp core download --version=${ensure} && wp core install --url=${domain} --title=${wp_id} --admin_name=AWooldrige --admin_email=alistair@wooldrige.co.uk --admin_password=123",
         creates => "${path}/wp-includes/version.php",
-        require => Package['subversion'],
-        notify => [ Service['varnish'], Exec['wp-set-permissions'] ],
-        path => '/usr/bin'
+        require => [ File["/var/www/${wp_id}"] ,Exec['wpcli-install'] ],
+        notify  => [ Service['varnish'], Exec['wp-set-permissions'] ],
+        path    => [ '/usr/bin', '/bin' ]
     }
     exec { "wp-update-${wp_id}":
         cwd => $path,
