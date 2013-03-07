@@ -35,8 +35,11 @@ define('DB_HOST', '<%= wp_db_host %>');
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
 
-/** Disable WordPress cron requests **/
+//Stop the awful wp-cron script
 define('DISABLE_WP_CRON', true);
+
+//No theme/plugin editing
+define('DISALLOW_FILE_MODS',true);
 
 /**#@+
  * Authentication Unique Keys and Salts.
