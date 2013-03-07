@@ -131,6 +131,11 @@ define wordpress::instance (
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
 
+    wordpress::option { "${title}:users_can_register":
+        ensure => present,
+        value => '0'
+    }
+
     #Gaarg, there's no way to change directory in a cron, and running:
     #   /usr/bin/php /var/www/vhost/wp-cron.php doesn't work because the PHP
     # include path isn't set correctly. For this reason, we have to very hackily
