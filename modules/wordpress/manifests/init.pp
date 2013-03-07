@@ -39,6 +39,16 @@ class wordpress {
         mode => '540'
     }
 
+    file { '/etc/wordpress-shared':
+        source  => 'puppet:///modules/wordpress/shared',
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        recurse => true,
+        purge   => true,
+        force   => true
+    }
 
     httpd::module { [ 'rewrite', 'expires', 'ssl', 'alias', 'headers',
         'authz_host' ]:

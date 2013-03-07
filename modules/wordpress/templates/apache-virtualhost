@@ -110,14 +110,17 @@
         </FilesMatch>
     </Directory>
 
+    Alias /robots.txt /etc/wordpress-shared/static.robots.txt
+    <Directory /etc/wordpress-shared>
+        Order deny,allow
+        Allow from all
+        Header set Cache-control "max-age=86400"
+        ExpiresDefault "access plus 1 day"
+    </Directory>
+
     # All static assets, should have good cache control directives
     Header set Cache-control "max-age=31536000"
     ExpiresDefault "access plus 1 year"
-
-    # Any theme/plugin appended with -dev should not be cacheable
-    <LocationMatch "^/wp-content/(?:plugin|theme)s/(?:.+)-dev">
-        Header set Cache-control "no-cache, no-store, max-age=0, must-revalidate"
-    </LocationMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.error.log
     CustomLog ${APACHE_LOG_DIR}/vhost/<%= wp_id %>/static.access.log combined_varnish
@@ -177,6 +180,12 @@
         RewriteCond %{REQUEST_FILENAME} !-f
         RewriteCond %{REQUEST_FILENAME} !-d
         RewriteRule . /index.php [L]
+    </Directory>
+
+    Alias /robots.txt /etc/wordpress-shared/admin.robots.txt
+    <Directory /etc/wordpress-shared>
+        Order deny,allow
+        Allow from all
     </Directory>
 
     <FilesMatch "\.php$">
