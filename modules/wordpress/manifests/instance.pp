@@ -135,6 +135,14 @@ define wordpress::instance (
         ensure => present,
         value => '0'
     }
+    wordpress::option { "${title}:timezone_string":
+        ensure => present,
+        value => 'Europe/London'
+    }
+    wordpress::option { "${title}:time_format":
+        ensure => present,
+        value => 'g:i a'
+    }
 
     #Gaarg, there's no way to change directory in a cron, and running:
     #   /usr/bin/php /var/www/vhost/wp-cron.php doesn't work because the PHP

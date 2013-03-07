@@ -47,4 +47,9 @@ class onmyplate-co-uk {
             Wordpress::Plugin["${wp_id}:omp-plugin-0.1.0"],
             Exec["download-omp-plugin-${plugin_version}"] ]
     }
+
+    wordpress::option { "${wp_id}:permalink_structure":
+        ensure => present,
+        value => '/%category%/%postname%'
+    }
 }

@@ -30,4 +30,9 @@ class woolie-co-uk {
             Wordpress::Instance[$wp_id],
             Exec["download-${wp_id}-theme-${theme_version}"] ]
     }
+
+    wordpress::option { "${wp_id}:permalink_structure":
+        ensure => present,
+        value => '/%category%/%postname%'
+    }
 }
