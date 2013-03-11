@@ -19,8 +19,8 @@ define wordpress::option($ensure, $value=False) {
     if $ensure == 'present' {
         exec { "wp-option-present-${title}":
             cwd => $wp_path,
-            command => "wp option set ${option} ${value}",
-            unless => "[ $(wp option get ${option}) = '${value}' ]",
+            command => "wp option set ${option} \"${value}\"",
+            unless => "[ \"$(wp option get ${option})\" = \"${value}\" ]",
             path => [ '/usr/bin', '/bin' ],
             require => Exec['wpcli-install'],
             notify => Service['varnish']

@@ -23,6 +23,7 @@ define('WP_HOME','http://<%= domain %>');
 
 define("WP_CONTENT_URL", "http://static.<%= domain %>/wp-content");
 define("COOKIE_DOMAIN", "<%= domain %>");
+define("GOOGLE_ANALYTICS_ID", "<%= google_analytics_id %>");
 
 define('FORCE_SSL_LOGIN', true);
 define('FORCE_SSL_ADMIN', true);

@@ -79,3 +79,26 @@ function _use_ssl_domain_alias_for_https($url) {
 add_filter('plugins_url', '_use_ssl_domain_alias_for_https', 1);
 add_filter('content_url', '_use_ssl_domain_alias_for_https', 1);
 add_filter('site_url', '_use_ssl_domain_alias_for_https', 1);
+
+
+
+function insertGoogleAnalytics() {
+
+    if(defined('GOOGLE_ANALYTICS_ID')) {
+        $ga = '';
+        $ga .= '<script type="text/javascript">';
+
+        $ga .= '  var _gaq = _gaq || [];';
+        $ga .= "  _gaq.push(['_setAccount', '".GOOGLE_ANALYTICS_ID."']);";
+        $ga .= "  _gaq.push(['_trackPageview']);";
+        $ga .= '  (function() {';
+        $ga .= "    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;";
+        $ga .= "    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';";
+        $ga .= "    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);";
+        $ga .= '  })();';
+        $ga .= '</script>';
+
+        echo $ga;
+    }
+}
+add_action('wp_head', 'insertGoogleAnalytics', 99999 );

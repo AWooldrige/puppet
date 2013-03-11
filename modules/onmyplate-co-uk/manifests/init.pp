@@ -17,10 +17,11 @@ class onmyplate-co-uk {
     }
 
     wordpress::instance { $wp_id:
-        ensure  => "3.5.1",
-        domain  => "onmyplate.co.uk",
-        backups => true,
-        http_port => 81
+        ensure              => '3.5.1',
+        domain              => 'onmyplate.co.uk',
+        google_analytics_id => 'UA-31825318-1',
+        backups             => true,
+        http_port           => 81
     }
 
     wordpress::theme { "${wp_id}:omp-theme-${theme_version}":

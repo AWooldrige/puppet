@@ -14,6 +14,7 @@
 define wordpress::instance (
     $ensure='3.3.2',
     $domain,
+    $google_analytics_id,
     $backups='true',
     $http_port=80,
     $https_port=443,
@@ -89,6 +90,13 @@ define wordpress::instance (
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ],
         content => template("wordpress/wp-config.php")
     }
+    file { "${path}/wp-content/uploads":
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '0640',
+        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
+    }
 
     file { [ "${path}/sitemap.xml", "${path}/sitemap.xml.gz" ]:
         ensure => absent,
@@ -97,51 +105,52 @@ define wordpress::instance (
 
     # Add a plugin which helps with the Varnish/WordPress integration
     file { "${path}/wp-content/plugins/wp-varnish":
-        ensure => directory,
-        owner => 'www-data',
-        group => 'www-data',
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
         require => Exec["wp-install-${wp_id}"]
     }
     file { "${path}/wp-content/plugins/wp-varnish/wp-varnish.php":
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '440',
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '0440',
         require =>  File["${path}/wp-content/plugins/wp-varnish"],
-        source => 'puppet:///modules/wordpress/wp-varnish.php',
+        source  => 'puppet:///modules/wordpress/wp-varnish.php',
     }
     wordpress::plugin { "${title}:wp-varnish":
-        ensure => "installed",
-        active => true,
+        ensure  => installed,
+        active  => true,
         require => [
             File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"],
             Exec["wp-install-${wp_id}"],
-            Exec["wp-update-${wp_id}"] ],
+            Exec["wp-update-${wp_id}"]],
     }
-    wordpress::plugin { [ "${title}:google-analytics-for-wordpress",
-                          "${title}:xml-sitemap-feed" ]:
-        ensure => "installed",
-        active => true,
+    wordpress::plugin { "${title}:xml-sitemap-feed":
+        ensure  => installed,
+        active  => true,
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
-    wordpress::plugin { [ "${title}:livefyre-comments",
-                          "${title}:disqus-comment-system",
-                          "${title}:google-sitemap-generator",
-                          "${title}:aksimet" ]:
-        ensure => "removed",
+    wordpress::plugin { [
+            "${title}:google-analytics-for-wordpress",
+            "${title}:livefyre-comments",
+            "${title}:disqus-comment-system",
+            "${title}:google-sitemap-generator",
+            "${title}:aksimet"]:
+        ensure  => removed,
         require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
     }
 
     wordpress::option { "${title}:users_can_register":
         ensure => present,
-        value => '0'
+        value  => '0'
     }
     wordpress::option { "${title}:timezone_string":
         ensure => present,
-        value => 'Europe/London'
+        value  => 'Europe/London'
     }
     wordpress::option { "${title}:time_format":
         ensure => present,
-        value => 'g:i a'
+        value  => 'g:i a'
     }
 
     #Gaarg, there's no way to change directory in a cron, and running:

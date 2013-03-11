@@ -10,10 +10,11 @@ class woolie-co-uk {
     }
 
     wordpress::instance { $wp_id:
-        ensure  => "3.5.1",
-        domain  => "woolie.co.uk",
-        backups => true,
-        http_port => 81
+        ensure              => '3.5.1',
+        domain              => 'woolie.co.uk',
+        google_analytics_id => 'UA-24950612-1',
+        backups             => true,
+        http_port           => 81
     }
 
     wordpress::plugin { "${wp_id}:wp-syntax":
