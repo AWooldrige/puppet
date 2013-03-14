@@ -4,7 +4,14 @@ class php {
                'php5-curl']:
         ensure => installed
     }
-
+    cron { 'upgrade-pear-daily':
+        command => '/usr/bin/chronic /usr/bin/pear upgrade',
+        user    => root,
+        ensure  => present,
+        hour    => 12,
+        minute  => 0,
+        require => Package['php-pear']
+    }
     file { "/etc/php5/apache2/php.ini":
         owner => "root",
         group => "root",
