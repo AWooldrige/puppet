@@ -3,7 +3,7 @@
 Plugin Name: Puppet/Varnish Additions
 Plugin URI: https://github.com/AWooldrige/puppet
 Description: Makes WordPress more Puppet/Varnish friendly.
-Version: 0.1.2
+Version: 0.1.3
 Author: Alistair Wooldrige
 Author URI: http://woolie.co.uk
 License: GPLv2 or later
@@ -19,7 +19,7 @@ What does this plugin do:
 #########################################################################
 */
 
-define('WP_VARNISH_PLUGIN_VERSION', '0.1.2');
+define('WP_VARNISH_PLUGIN_VERSION', '0.1.3');
 define('WP_VARNISH_PLUGIN_URL', plugin_dir_url( __FILE__ ));
 
 /**
@@ -44,6 +44,7 @@ add_action('publish_post', 'wp_varnish_purge_post', 99);
 add_action('edit_post', 'wp_varnish_purge_post', 99);
 add_action('deleted_post', 'wp_varnish_purge_post', 99);
 
+
 /**
  * The default jpeg quality within WordPress is 90, which is a bit high.
  *
@@ -55,7 +56,7 @@ function jpeg_resize_quality($quality){
     return 75;
 }
 add_filter('jpeg_quality', 'jpeg_resize_quality');
-add_filter('wp_editor_set_quality', 'jpeg_resize_quality' );
+add_filter('wp_editor_set_quality', 'jpeg_resize_quality');
 
 
 /**
@@ -81,7 +82,11 @@ add_filter('content_url', '_use_ssl_domain_alias_for_https', 1);
 add_filter('site_url', '_use_ssl_domain_alias_for_https', 1);
 
 
-
+/**
+ * There are plugins available for doing this, but they all seem bloated
+ * for the simple job that they should be doing. This also means the GA ID can
+ * be configured in puppet rather than manually in the DB
+ */
 function insertGoogleAnalytics() {
 
     if(defined('GOOGLE_ANALYTICS_ID')) {
@@ -101,4 +106,4 @@ function insertGoogleAnalytics() {
         echo $ga;
     }
 }
-add_action('wp_head', 'insertGoogleAnalytics', 99999 );
+add_action('wp_head', 'insertGoogleAnalytics', 99999);

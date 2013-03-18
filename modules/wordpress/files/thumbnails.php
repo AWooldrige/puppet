@@ -22,7 +22,6 @@ class Thumbnails_Command extends WP_CLI_Command {
     public function generate() {
 
         WP_CLI::line('%9Syncing to DB%n');
-        WP_CLI::line('%9=============%n');
         self::syncDbToFs();
 
         $images = self::getImageAttachments();
@@ -33,9 +32,7 @@ class Thumbnails_Command extends WP_CLI_Command {
             return;
         }
 
-        WP_CLI::line('');
         WP_CLI::line('%9Generating Thumbnails%n');
-        WP_CLI::line('%9=====================%n');
 
         foreach($images as $image) {
             $imageMeta = wp_get_attachment_metadata($image->ID);
@@ -68,7 +65,6 @@ class Thumbnails_Command extends WP_CLI_Command {
                 );
 
                 $meta = wp_generate_attachment_metadata($image->ID, $originalPath);
-                //print_r($meta);
 
                 if(is_wp_error($meta)) {
                     WP_CLI::warning(
@@ -113,7 +109,6 @@ class Thumbnails_Command extends WP_CLI_Command {
      * @return array of size names, widths, heights and crop toggles.
      */
     protected static function getSizes() {
-
         //Construct array for WordPress default sizes
         $sizes = array();
         foreach(array('thumbnail', 'medium', 'large') as $std_size) {
@@ -123,10 +118,6 @@ class Thumbnails_Command extends WP_CLI_Command {
                 'crop' => False
             );
         }
-
-        //The size name is 'thumb', but the DB stores the size as 'thumbnail'
-        //$sizes['thumb'] = $sizes['thumbnail'];
-        //unset($sizes['thumbnail']);
 
         //Merge with any additional sizes requested by themes
         global $_wp_additional_image_sizes;
@@ -162,8 +153,9 @@ class Thumbnails_Command extends WP_CLI_Command {
                         $resizedFile = $dir . DIRECTORY_SEPARATOR . $size_attrs['file'];
                         if(file_exists($resizedFile) === FALSE) {
                             WP_CLI::line(
-                                $resizedFile . ' - not found (%9' . $size_name . 
-                                '%n size)');
+                                $resizedFile.' not on file system removing size from database (%9'
+                                .$size_name.'%n size)'
+                            );
                         }
                         else {
                             $newSizes[$size_name] = $size_attrs;
@@ -183,8 +175,6 @@ class Thumbnails_Command extends WP_CLI_Command {
                 }
             }
         }
-
-
     }
 
     /**
@@ -207,4 +197,4 @@ class Thumbnails_Command extends WP_CLI_Command {
     }
 }
 
-WP_CLI::add_command( 'thumbnails', 'Thumbnails_Command' );
+WP_CLI::add_command('thumbnails', 'Thumbnails_Command');
