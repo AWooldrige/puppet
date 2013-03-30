@@ -1,4 +1,4 @@
-class woolie-co-uk {
+class wp::wooliecouk {
 
     $wp_id = 'wooliecouk'
 

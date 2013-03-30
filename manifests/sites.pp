@@ -50,8 +50,11 @@ node "agw-inspiron-1720" inherits default-desktop {
 node default-wordpress-server inherits default {
     include zend-framework
     include wordpress
-    include woolie-co-uk
-    include onmyplate-co-uk
+
+    include wp::wooliecouk
+    include wp::ompcouk
+    include wp::bbcom
+    include wp::knck
 
     class {'httpd':
         http_port => 81

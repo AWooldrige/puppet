@@ -1,4 +1,4 @@
-class onmyplate-co-uk {
+class wp::ompcouk {
 
     $wp_id = 'ompcouk'
 
