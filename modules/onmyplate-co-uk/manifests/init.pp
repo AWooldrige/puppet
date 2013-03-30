@@ -23,29 +23,29 @@ class onmyplate-co-uk {
         backups             => true,
         http_port           => 81
     }
+    wordpress::defaults { $wp_id: }
 
     wordpress::theme { "${wp_id}:omp-theme-${theme_version}":
         ensure => 'installed',
         active => true,
         source_file => "/opt/local-zips/omp-theme-${theme_version}.zip",
-        require => [
-            Wordpress::Instance[$wp_id],
-            Exec["download-omp-theme-${theme_version}"] ]
+        require => Exec["download-omp-theme-${theme_version}"]
     }
+
     wordpress::plugin { [
             "${wp_id}:omp-plugin-0.1.0",
             "${wp_id}:omp-plugin-0.2.0"]:
-        ensure => "removed",
-        require => Wordpress::Instance[$wp_id],
+        ensure => 'removed',
         before => Wordpress::Theme["${wp_id}:omp-theme-${theme_version}"]
     }
+
     wordpress::plugin { "${wp_id}:omp-plugin-${plugin_version}":
         ensure => 'installed',
         active => true,
         source_file => "/opt/local-zips/omp-plugin-${plugin_version}.zip",
         require => [
-            Wordpress::Instance[$wp_id],
             Wordpress::Plugin["${wp_id}:omp-plugin-0.1.0"],
+            Wordpress::Plugin["${wp_id}:omp-plugin-0.2.0"],
             Exec["download-omp-plugin-${plugin_version}"] ]
     }
 

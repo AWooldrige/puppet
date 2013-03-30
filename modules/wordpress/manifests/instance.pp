@@ -37,7 +37,6 @@ define wordpress::instance (
         ensure => enabled
     }
 
-
     # MySQL Database setup
     $wp_db_host = "localhost"
     $wp_db_pass = generate("/root/getpassword", "${wp_id}_db_pass")
@@ -55,12 +54,27 @@ define wordpress::instance (
     file { "/var/www/${wp_id}":
         ensure => directory
     }
+    exec { "wp-download-${wp_id}":
+        cwd     => $path,
+        command => "wp core download --version=${ensure}",
+        creates => "${path}/wp-includes/version.php",
+        require => [
+            File["/var/www/${wp_id}"],
+            Exec['wpcli-install'] ],
+        path    => [ '/usr/bin', '/bin' ]
+    }
     exec { "wp-install-${wp_id}":
         cwd     => $path,
-        command => "wp core download --version=${ensure} && wp core install --url=${domain} --title=${wp_id} --admin_name=AWooldrige --admin_email=alistair@wooldrige.co.uk --admin_password=123",
-        creates => "${path}/wp-includes/version.php",
-        require => [ File["/var/www/${wp_id}"] ,Exec['wpcli-install'] ],
-        notify  => [ Service['varnish'], Exec['wp-set-permissions'] ],
+        command => "wp core install --url=${domain} --title=${wp_id} --admin_name=AWooldrige --admin_email=alistair@wooldrige.co.uk --admin_password=123",
+        unless => 'wp core version | grep "\."',
+        require => [
+            Mysql::Db[$wp_id],
+            File["${path}/wp-config.php"],
+            Exec["wp-download-${wp_id}"] ],
+        notify  => [
+            Service['varnish'],
+            Service['apache2'],
+            Exec['wp-set-permissions'] ],
         path    => [ '/usr/bin', '/bin' ]
     }
     exec { "wp-update-${wp_id}":
@@ -87,7 +101,7 @@ define wordpress::instance (
         owner => 'www-data',
         group => 'www-data',
         mode  => '440',
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ],
+        require => Exec["wp-download-${wp_id}"],
         content => template("wordpress/wp-config.php")
     }
     file { "${path}/wp-content/uploads":
@@ -95,12 +109,11 @@ define wordpress::instance (
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '0640',
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
+        require => Exec["wp-download-${wp_id}"]
     }
 
     file { [ "${path}/sitemap.xml", "${path}/sitemap.xml.gz" ]:
-        ensure => absent,
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
+        ensure => absent
     }
 
     # Add a plugin which helps with the Varnish/WordPress integration
@@ -108,7 +121,7 @@ define wordpress::instance (
         ensure  => directory,
         owner   => 'www-data',
         group   => 'www-data',
-        require => Exec["wp-install-${wp_id}"]
+        require => Exec["wp-download-${wp_id}"]
     }
     file { "${path}/wp-content/plugins/wp-varnish/wp-varnish.php":
         owner   => 'www-data',
@@ -116,41 +129,6 @@ define wordpress::instance (
         mode    => '0440',
         require =>  File["${path}/wp-content/plugins/wp-varnish"],
         source  => 'puppet:///modules/wordpress/wp-varnish.php',
-    }
-    wordpress::plugin { "${title}:wp-varnish":
-        ensure  => installed,
-        active  => true,
-        require => [
-            File["${path}/wp-content/plugins/wp-varnish/wp-varnish.php"],
-            Exec["wp-install-${wp_id}"],
-            Exec["wp-update-${wp_id}"]],
-    }
-    wordpress::plugin { "${title}:xml-sitemap-feed":
-        ensure  => installed,
-        active  => true,
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
-    }
-    wordpress::plugin { [
-            "${title}:google-analytics-for-wordpress",
-            "${title}:livefyre-comments",
-            "${title}:disqus-comment-system",
-            "${title}:google-sitemap-generator",
-            "${title}:aksimet"]:
-        ensure  => removed,
-        require => [ Exec["wp-install-${wp_id}"], Exec["wp-update-${wp_id}"] ]
-    }
-
-    wordpress::option { "${title}:users_can_register":
-        ensure => present,
-        value  => '0'
-    }
-    wordpress::option { "${title}:timezone_string":
-        ensure => present,
-        value  => 'Europe/London'
-    }
-    wordpress::option { "${title}:time_format":
-        ensure => present,
-        value  => 'g:i a'
     }
 
     #Gaarg, there's no way to change directory in a cron, and running:
@@ -181,4 +159,6 @@ define wordpress::instance (
             minute => 0
         }
     }
+
+
 }

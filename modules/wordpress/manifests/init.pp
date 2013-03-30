@@ -4,6 +4,11 @@
 # subsequent wordpress::instance(s)
 #
 class wordpress {
+    Wordpress::Instance <| |> -> Wordpress::Defaults <| |>
+    Wordpress::Instance <| |> -> Wordpress::Option <| |>
+    Wordpress::Instance <| |> -> Wordpress::Plugin <| |>
+    Wordpress::Instance <| |> -> Wordpress::Theme <| |>
+
     package{ 'subversion':
         ensure => 'installed'
     }

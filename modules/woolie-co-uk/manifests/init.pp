@@ -16,20 +16,18 @@ class woolie-co-uk {
         backups             => true,
         http_port           => 81
     }
+    wordpress::defaults { $wp_id: }
 
     wordpress::plugin { "${wp_id}:wp-syntax":
         ensure => "installed",
-        active => true,
-        require => Wordpress::Instance[$wp_id]
+        active => true
     }
 
     wordpress::theme { "${wp_id}:${wp_id}-theme-${theme_version}":
         ensure => 'installed',
         active => true,
         source_file => "/opt/local-zips/${wp_id}-theme-${theme_version}.zip",
-        require => [
-            Wordpress::Instance[$wp_id],
-            Exec["download-${wp_id}-theme-${theme_version}"] ]
+        require => Exec["download-${wp_id}-theme-${theme_version}"]
     }
 
     wordpress::option { "${wp_id}:permalink_structure":
