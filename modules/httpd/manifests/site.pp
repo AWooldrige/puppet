@@ -15,16 +15,15 @@ define httpd::site($ensure = 'enabled') {
     case $ensure {
         'enabled' : {
             exec { "/usr/sbin/a2ensite ${title}":
-                unless => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
-                notify => Exec["force-reload-apache2"],
-                require => [ File["/etc/apache2/sites-available/${title}"], Package['apache2'] ]
+                unless  => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
+                notify  => Service['apache2'],
+                require => File["/etc/apache2/sites-available/${title}"]
             }
         }
         'disabled': {
             exec { "/usr/sbin/a2dissite $title":
-                onlyif => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
-                notify => Exec["force-reload-apache2"],
-                require => Package['apache2']
+                onlyif  => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
+                notify  => Service['apache2']
             }
         }
         default: { err ( "Unknown ensure value: '$ensure'" ) }
@@ -34,14 +33,14 @@ define httpd::site($ensure = 'enabled') {
         ensure  => directory,
         owner   => 'www-data',
         group   => 'www-data',
-        mode    => '750',
+        mode    => '0750',
         require => Package['apache2']
     }
     file { "/var/log/apache2/vhost/${title}":
-        ensure => directory,
-        owner => 'www-data',
-        group => 'www-data',
-        mode => '750',
+        ensure  => directory,
+        owner   => 'www-data',
+        group   => 'www-data',
+        mode    => '0750',
         require => File['/var/log/apache2/vhost']
     }
 }

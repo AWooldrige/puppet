@@ -5,7 +5,6 @@
 /var/log/puppet-git/*.log {
     weekly
     rotate 52
-
     compress
     copytruncate
     missingok

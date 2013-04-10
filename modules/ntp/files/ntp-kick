@@ -1,2 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -o nounset
+set -o errexit
 /usr/bin/ntpq -np | /bin/grep '^\\*' > /dev/null || ( /usr/bin/ntpq -np ; /usr/sbin/service ntp restart )

@@ -6,7 +6,7 @@ class tmux {
         source  => 'puppet:///modules/tmux/tmux.conf',
         owner   => 'root',
         group   => 'root',
-        mode    => '644',
+        mode    => '0644',
         require => Package['tmux'],
     }
 }

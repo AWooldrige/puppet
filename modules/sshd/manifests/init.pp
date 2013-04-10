@@ -1,6 +1,6 @@
 class sshd {
-    group { "sshallowedlogin":
-        ensure  => present,
+    group { 'sshallowedlogin':
+        ensure => present,
     }
     package { 'openssh-server':
         ensure => installed,
@@ -9,16 +9,14 @@ class sshd {
         source  => 'puppet:///modules/sshd/sshd_config',
         owner   => 'root',
         group   => 'root',
-        mode    => '400',
-        require => [Package['openssh-server'], Group['sshallowedlogin']],
-        notify  => Service['ssh']
+        mode    => '0400',
+        require => [Package['openssh-server'], Group['sshallowedlogin']]
     }
-    service { "ssh":
-        ensure => running,
-        hasstatus => true,
+    service { 'ssh':
+        ensure     => running,
+        hasstatus  => true,
         hasrestart => true,
-        enable => true,
-        require => File['/etc/ssh/sshd_config']
+        enable     => true,
+        require    => File['/etc/ssh/sshd_config']
     }
-
 }
