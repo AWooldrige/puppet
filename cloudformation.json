@@ -165,7 +165,8 @@
                         "Name" : "static.onmyplate.co.uk.",
                         "Type" : "CNAME",
                         "TTL" : "3600",
-                        "ResourceRecords" : [ "d1e6pgjcu8avav.cloudfront.net" ]
+                        "ResourceRecords" : [ {"Fn::GetAtt" : [
+                            "onmyplatecoukCloudFrontCDN", "DomainName" ] } ]
                     },
                     {
                         "Name" : "static.origin.onmyplate.co.uk.",
@@ -240,6 +241,25 @@
                         "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEgZWLAgAXgZZIkAC4Na4xU3UmFkuIvj3a4AHW3K45vN3BeiBQ5mYC5g/KcrXZhDsaWzp9qgi9chtT3CV/E4ZA8SDeJxmyVCu8PWxXBTc9akFah3lp3mgtLZY+sMrfGlMTdHFzJ1I7FlttFeCAMUXm2ZsQyoXqaIS9Ojjy1ddikQIDAQAB\"" ]
                     }
                 ]
+            }
+        },
+        "onmyplatecoukCloudFrontCDN" : {
+            "Type" : "AWS::CloudFront::Distribution",
+            "Properties" : {
+                "DistributionConfig" : {
+                    "Origins" {
+                        "DomainName" : "static.origin.onmyplate.co.uk",
+                        "Id" : "staticOriginOmpcouk",
+                        "CustomOriginConfig" : {
+                            "HTTPPort" : "80",
+                            "HTTPSPort" : "443",
+                            "OriginProtocolPolicy" : "http-only"
+                        }
+                    },
+                    "Enabled" : "true",
+                    "Comment" : "Static CDN for onmyplate.co.uk",
+                    "Aliases" : [ "static.onmyplate.co.uk" ]
+                }
             }
         }
     }
