@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 import os
 import socket
@@ -7,13 +7,21 @@ import socket
 TERM_WIDTH = 80
 SURROUND = '#'
 
+#Facter facts
+HOSTNAME='<%= @fqdn %>'
+UBUNTU='<%= @lsbdistdescription %>'
+TOTALMEM='<%= @memoryfree %>'
+TOTALSWAP='<%= @swapsize %>'
+PROCESSORCOUNT='<%= @processorcount %>'
+PROCESSORTYPE='<%= @processor0 %>'
+PUPPETVERSION='<%= @puppetversion %>'
 
 def print_s(text):
     print SURROUND + text.center(TERM_WIDTH - 2, ' ') + SURROUND
 
-
 print SURROUND * TERM_WIDTH
-
-print_s("Welcome to %s" % socket.gethostname())
-
+print_s("Welcome to {}".format(HOSTNAME))
+print_s("Running {} - Puppet {}".format(UBUNTU, PUPPETVERSION))
+print_s("{} processors ({})".format(PROCESSORCOUNT, PROCESSORTYPE))
+print_s("{} memory - {} swap".format(TOTALMEM, TOTALSWAP))
 print SURROUND * TERM_WIDTH
