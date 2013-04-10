@@ -9,19 +9,28 @@ function log {
     /bin/echo $(date --rfc-3339=ns)" ${1}" >> $LOGFILE
 }
 
+usage="Usage: $0 [branch]"
+
+if /usr/bin/[ "$#" -gt 1 ]; then
+    /bin/echo $usage
+    exit 1
+fi
 log 'Starting git distributed puppet bootstrap script'
 
-log ' * Installing git if needed'
+log ' * Installing git and puppet if needed'
 /usr/bin/dpkg -s git &> /dev/null || /usr/bin/apt-get install -y -qq git
-
-log ' * Installing puppet if needed'
 /usr/bin/dpkg -s puppet &> /dev/null || /usr/bin/apt-get install -y -qq puppet
 
+log ' * Checking if manifests are checked out'
+if /usr/bin/[ ! -d /etc/puppet-git/.git ]; then
 
-log ' * Checking if git puppet manifests are checked out'
-if [ ! -d /etc/puppet-git/.git ]; then
-    log '   ** No manifests found, cloning github repo'
-    /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    if /usr/bin/[ $# -eq 1 ]; then
+        log "   ** No manifests found, cloning github repo from ${1} branch"
+        /usr/bin/git clone -b $1 http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    else
+        log '   ** No manifests found, cloning github repo from master'
+        /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    fi
 
     log '   ** Initialising/Updating submodules'
     /usr/bin/git submodule init /etc/puppet-git
