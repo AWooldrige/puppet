@@ -53,8 +53,6 @@ node default-wordpress-server inherits default {
 
     include wp::wooliecouk
     include wp::ompcouk
-    include wp::bbcom
-    include wp::knck
 
     class {'httpd':
         http_port => 81
