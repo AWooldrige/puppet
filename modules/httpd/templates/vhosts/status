@@ -2,6 +2,7 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+Listen <%= status_port %>
 <VirtualHost *:<%= status_port %>>
 
     <Location />
