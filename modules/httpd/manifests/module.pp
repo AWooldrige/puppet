@@ -8,7 +8,7 @@ define httpd::module($ensure = 'enabled') {
             exec { "/usr/sbin/a2enmod ${title}":
                 unless  => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
                     && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
-                notify  => Exec['force-reload-apache2'],
+                notify  => Service['apache2'],
                 require => Package['apache2']
             }
         }
@@ -16,7 +16,7 @@ define httpd::module($ensure = 'enabled') {
             exec { "/usr/sbin/a2dismod ${title}":
                 onlyif  => "/bin/sh -c '[ -L /etc/apache2/mods-enabled/${title}.load ] \\
                     && [ /etc/apache2/mods-enabled/${title}.load -ef /etc/apache2/mods-available/${title}.load ]'",
-                notify  => Exec['force-reload-apache2'],
+                notify  => Service['apache2'],
                 require => Package['apache2']
             }
         }
