@@ -14,10 +14,10 @@ function log {
 
 log 'puppet-git-update called'
 
-cd /etc/puppet/git-distributed/puppet/;
+cd /etc/puppet-git;
 
 # Update main repo, check that all submodules are initialised and updated
-MAIN=$(/usr/bin/git pull origin master)
+MAIN=$(/usr/bin/git pull)
 TRIGGER=$(/bin/echo $MAIN | /bin/grep 'Already up-to-date.' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g')
 
 /usr/bin/git submodule init
