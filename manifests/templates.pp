@@ -15,7 +15,6 @@ node static-content-server inherits default {
         http_port => 81,
         webmaster => 'webmaster@woolie.co.uk'
     }
-    class { 'httpd::defaultvhost': }
     class { 'httpd::status': }
 }
 
