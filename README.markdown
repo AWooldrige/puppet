@@ -16,7 +16,7 @@ Set the hostname for the machine:
 
 Run the bootstrap.sh script:
 
-    bash <(curl -s https://raw.github.com/AWooldrige/puppet/gen2/bootstrap.sh gen2)
+    F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/gen2/bootstrap.sh -O $F && chmod +x $F && sudo $F gen2 && rm -f $F
 
 
 
