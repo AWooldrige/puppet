@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+from subprocess import call
+import argparse
+import yaml
+
+
+def make_prepare(path):
+    cmd = "mkdir {0}/BUILD {0}/SOURCES {0}/DEBS".format(path)
+    call(cmd.split(" "))
+
+def make_clean(path):
+    cmd = "rm -r {0}/BUILD {0}/SOURCES {0}/DEBS".format(path)
+    call(cmd.split(" "))
+
+def make_build(path):
+    make_prepare(path)
+    #call(["nanoc compile", args.path])
+
+def make_deb(path):
+    build(path)
+
+
+
+def parse_nanoc_config_yaml(path):
+    with open(path+"/nanoc.yaml") as file:
+        foo = yaml.safe_load(f)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("instruction",
+                        choices=["build", "deb", "install", "clean"],
+                        help="what the nanoc helper should do")
+    parser.add_argument("-p", "--path", default=".",
+                        help="path to compile with nanoc")
+    args = parser.parse_args()
+
+    #trim trailing slash from args.path
+
+    if args.instruction == "build":
+        make_build(args.path)
+
+    if args.instruction == "clean":
+        make_clean(args.path)
