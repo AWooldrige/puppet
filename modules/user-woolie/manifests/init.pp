@@ -33,11 +33,12 @@ class user-woolie {
         owner   => 'woolie',
         group   => 'woolie',
         mode    => '0600',
-        require => File['/home/woolie']
+        require => User['woolie']
     }
 
     file { '/home/woolie/.bashrc':
         ensure => link,
-        target => '/root/.bashrc'
+        target => '/root/.bashrc',
+        require => User['woolie']
     }
 }
