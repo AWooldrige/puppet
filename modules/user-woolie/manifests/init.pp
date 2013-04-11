@@ -39,8 +39,8 @@ class user-woolie {
     }
 
     file { '/home/woolie/.bashrc':
-        ensure => link,
-        target => '/root/.bashrc',
+        ensure  => link,
+        target  => '/etc/custom.bashrc',
         require => User['woolie']
     }
 }
