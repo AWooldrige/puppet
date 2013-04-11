@@ -10,17 +10,15 @@ node default {
     include user-woolie
 }
 
-node static-build-server inherits default {
-}
-
 node static-content-server inherits default {
-    class {'httpd':
+    class { 'httpd':
         http_port => 81,
         webmaster => 'webmaster@woolie.co.uk'
     }
-    class {'httpd::defaultvhost': }
-    class {'httpd::status': }
+    class { 'httpd::defaultvhost': }
+    class { 'httpd::status': }
 }
 
 node static-content-and-build-server inherits static-content-server {
+    include nanoc
 }
