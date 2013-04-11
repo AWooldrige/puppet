@@ -6,7 +6,9 @@ class user-woolie {
         shell      => '/bin/bash',
         home       => '/home/woolie',
         managehome => true,
-        require    => [ Group['woolie'], Group['sshallowedlogin'] ]
+        require    => [ Group['woolie'],
+                        Group['sshallowedlogin'],
+                        Group['nopasswordsudo'] ]
     }
     group { 'woolie':
         ensure  => present,

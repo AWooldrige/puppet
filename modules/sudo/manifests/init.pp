@@ -2,6 +2,9 @@ class sudo {
     package { sudo:
         ensure => installed,
     }
+    group { 'nopasswordsudo':
+        ensure => present
+    }
 
     file { '/etc/sudoers':
         owner   => 'root',
