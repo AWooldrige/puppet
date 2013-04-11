@@ -17,13 +17,15 @@ define httpd::site($ensure = 'enabled') {
             exec { "/usr/sbin/a2ensite ${title}":
                 unless  => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
                 notify  => Service['apache2'],
-                require => File["/etc/apache2/sites-available/${title}"]
+                require => [ Package['apache2'],
+                             File["/etc/apache2/sites-available/${title}"] ]
             }
         }
         'disabled': {
             exec { "/usr/sbin/a2dissite $title":
                 onlyif  => "/bin/sh -c '[ -f /etc/apache2/sites-enabled/${enabled} ]'",
-                notify  => Service['apache2']
+                notify  => Service['apache2'],
+                require => Package['apache2']
             }
         }
         default: { err ( "Unknown ensure value: '$ensure'" ) }

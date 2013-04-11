@@ -1,9 +1,4 @@
 class httpd ($http_port=80, $webmaster='webmaster@example.com') {
-    Httpd <| |> -> Httpd::Module <| |>
-    Httpd <| |> -> Httpd::Site <| |>
-    Httpd <| |> -> Httpd::Status <| |>
-    Httpd <| |> -> Httpd::Defaultvhost <| |>
-
     package { [ 'apache2', 'apache2-mpm-prefork' ]:
         ensure => installed
     }

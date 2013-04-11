@@ -6,7 +6,8 @@ class httpd::status ($status_port=8000) {
         owner   => 'www-data',
         group   => 'www-data',
         mode    => '0400',
-        notify  => Service['apache2']
+        notify  => Service['apache2'],
+        require => Package['apache2']
     }
     httpd::module { 'status':
        ensure  => enabled,
@@ -19,7 +20,8 @@ class httpd::status ($status_port=8000) {
         group   => 'www-data',
         mode    => '0400',
         content => template('httpd/vhosts/status'),
-        notify  => Service['apache2']
+        notify  => Service['apache2'],
+        require => Package['apache2']
     }
     httpd::site { 'status':
         ensure => enabled
@@ -28,6 +30,7 @@ class httpd::status ($status_port=8000) {
         owner   => 'root',
         group   => 'root',
         mode    => '0400',
-        content => template('httpd/diamond/HttpdCollector.conf')
+        content => template('httpd/diamond/HttpdCollector.conf'),
+        require => Package['apache2']
     }
 }
