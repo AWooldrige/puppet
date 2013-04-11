@@ -1,5 +1,5 @@
 class ntp {
-'   package { 'tzdata':
+    package { 'tzdata':
         ensure => installed
     }
     file { '/etc/timezone':
