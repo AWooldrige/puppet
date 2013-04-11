@@ -39,7 +39,7 @@ if /usr/bin/[ ! -d /etc/puppet-git/.git ]; then
 fi
 
 log ' * Running puppet apply'
-/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/sites.pp -vv
+/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
 
 log 'Finished'
 exit 0
