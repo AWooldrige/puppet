@@ -1,23 +1,21 @@
 #!/usr/bin/env python
 from subprocess import call
 import argparse
-import yaml
 
+def scall(cmd):
+    print cmd
+    call(cmd, shell=True)
 
 def make_prepare(path):
-    cmd = "mkdir {0}/BUILD {0}/SOURCES {0}/DEBS".format(path)
-    call(cmd.split(" "))
+    scall("mkdir {0}/SOURCES".format(path))
 
 def make_clean(path):
-    cmd = "rm -r {0}/BUILD {0}/SOURCES {0}/DEBS".format(path)
-    call(cmd.split(" "))
+    scall("rm -rf {0}/SOURCES".format(path))
 
 def make_build(path):
+    make_clean(path)
     make_prepare(path)
-    #call(["nanoc compile", args.path])
-
-def make_deb(path):
-    build(path)
+    scall("(cd {0} && nanoc compile".format(path))
 
 
 
