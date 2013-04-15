@@ -10,7 +10,7 @@ SURROUND = '#'
 #Facter facts
 HOSTNAME='<%= @fqdn %>'
 UBUNTU='<%= @lsbdistdescription %>'
-TOTALMEM='<%= @memoryfree %>'
+TOTALMEM='<%= @memorytotal %>'
 TOTALSWAP='<%= @swapsize %>'
 PROCESSORCOUNT='<%= @processorcount %>'
 PROCESSORTYPE='<%= @processor0 %>'
