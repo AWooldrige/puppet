@@ -11,11 +11,7 @@ node default {
 }
 
 node static-content-server inherits default {
-    class { 'httpd':
-        http_port => 81,
-        webmaster => 'webmaster@woolie.co.uk'
-    }
-    class { 'httpd::status': }
+    class { 'httpd::purge': }
 }
 
 node static-content-and-build-server inherits static-content-server {
