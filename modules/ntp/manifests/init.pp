@@ -2,8 +2,10 @@ class ntp {
     package { 'tzdata':
         ensure => installed
     }
+    #Note that the puppet comment header cannot be placed in this file because
+    #the tzdata reconfigure script rewrites it
     file { '/etc/timezone':
-        content => 'Europe/London',
+        source => 'puppet:///modules/ntp/timezone',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
