@@ -1,4 +1,6 @@
 class user-woolie {
+    #Note that although a password hash is here, the user has passwordless sudo
+    #access, and can only use a private key to SSH in.
     user { 'woolie':
         ensure     => present,
         gid        => 'woolie',
@@ -6,6 +8,7 @@ class user-woolie {
         shell      => '/bin/bash',
         home       => '/home/woolie',
         managehome => true,
+        password   => '$6$wFGJsfWVA$FHdGuY2QpV0V78tKA17wjJtRla4WMvk7Ev9YVAhds6pU8ugiUFMuo1pTWP.Jc1C.8yuf0jVdKZmTC2TXDJu5M1',
         require    => [ Group['woolie'],
                         Group['sshallowedlogin'],
                         Group['nopasswordsudo'] ]
