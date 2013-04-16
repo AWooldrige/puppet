@@ -12,9 +12,9 @@ node default {
 
 node static-content-server inherits default {
     class { 'httpd::purge': }
-    include nginx
+    class { 'nginx': }
     include nanoc
-    nanoc::site { 'kemptstonnurseries.co.uk':
+    nanoc::site { 'kempstonnurseries.co.uk':
         ensure => installed
     }
 }

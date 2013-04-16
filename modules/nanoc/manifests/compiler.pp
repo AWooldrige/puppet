@@ -1,6 +1,6 @@
 class nanoc::compiler {
     package { ['nanoc', 'yuicompressor', 'less']:
-        ensure => latest,
+        ensure => installed,
         provider => gem
     }
 }

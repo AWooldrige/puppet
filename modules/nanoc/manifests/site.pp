@@ -14,24 +14,18 @@ define nanoc::site ($ensure='installed', $http_port=80) {
 
     $domain = $title
 
-    file { "/var/log/nginx/nanoc-sites/${domain}":
-        ensure => directory,
-        owner  => 'www-data',
-        group  => 'www-data',
-        mode   => '0755'
-    }
     file { "/var/nanoc-sites/${domain}":
         ensure => directory,
-        owner  => 'www-data',
-        group  => 'www-data',
+        owner  => 'root',
+        group  => 'root',
         mode   => '0755'
     }
-    file { "/etc/nginx/conf.d/nanoc-sites/${domain}.conf":
+    file { "/etc/nginx/sites-enabled/nanoc-site-${domain}.conf":
         content => template('nanoc/nginx-site-vhost.conf'),
-        owner  => 'www-data',
-        group  => 'www-data',
+        owner  => 'root',
+        group  => 'root',
         mode   => '0644',
         notify  => Service['nginx'],
-        require  => Service['nginx']
+        require  => Package['nginx']
     }
 }

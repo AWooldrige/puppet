@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from subprocess import call
+from subprocess import check_call, CalledProcessError
 import argparse
 
 def scall(cmd):
     print cmd
-    call(cmd, shell=True)
+    check_call(cmd, shell=True)
 
 def make_prepare(path):
     scall("mkdir {0}/SOURCES".format(path))
@@ -28,11 +28,19 @@ if __name__ == "__main__":
     parser.add_argument("instruction",
                         choices=["build", "deb", "install", "clean"],
                         help="what the nanoc helper should do")
-    parser.add_argument("-p", "--path", default=".",
+    parser.add_argument("path", default=".",
                         help="path to compile with nanoc")
     args = parser.parse_args()
 
-    #trim trailing slash from args.path
+    path = args.path.rstrip('/')
+
+
+    try:
+        scall("ls {0}/nanoc.yaml".format(args.path))
+    except CalledProcessError:
+        raise Exception (
+            "'{0}' doesn't seem to be a nanoc site path".format(path))
+
 
     if args.instruction == "build":
         make_build(args.path)
