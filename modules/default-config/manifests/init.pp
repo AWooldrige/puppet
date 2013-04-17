@@ -2,6 +2,7 @@ class default-config {
 
     $enhancers = [
         'moreutils',
+        'git',
         'tree',
         'zip',
         'unzip',
