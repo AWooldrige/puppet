@@ -17,6 +17,9 @@ node static-content-server inherits default {
     nanoc::site { 'kempstonnurseries.co.uk':
         ensure => installed
     }
+    nanoc::site { 'brignellbookbinders.com':
+        ensure => installed
+    }
 }
 
 node static-content-and-build-server inherits static-content-server {
