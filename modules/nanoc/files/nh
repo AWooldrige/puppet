@@ -11,7 +11,7 @@ def make_prepare(path):
     scall("mkdir {}/SOURCES".format(path))
 
 def make_clean(path):
-    scall("rm -rf {}/SOURCES".format(path))
+    scall("rm -rf {0}/SOURCES {0}/output".format(path))
 
 def make_build(path):
     make_clean(path)
@@ -32,7 +32,6 @@ def make_install(path, domain):
         tmpdest))
 
     scall("sudo rm -rf {1} && sudo mv {0} {1}".format(tmpdest, dest))
-    make_clean(path)
 
 
 def get_configuration(path):

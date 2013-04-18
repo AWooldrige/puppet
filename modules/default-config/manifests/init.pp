@@ -19,6 +19,12 @@ class default-config {
     package { $enhancers: ensure => installed }
     package { $notneeded: ensure => purged }
 
+    $buildtools = [
+        'make',
+        'g++'
+    ]
+    package { $buildtools: ensure => installed }
+
     file { '/usr/local/bin/ack':
         ensure => link,
         target => '/usr/bin/ack-grep'
