@@ -11,7 +11,10 @@ class nginx ($http_port=80) {
         require  => Package['nginx']
     }
     service { 'nginx':
-        ensure  => running,
-        require => Package['nginx']
+        ensure     => running,
+        enable     => true,
+        hasstatus  => true,
+        hasrestart => true,
+        require    => Package['nginx']
     }
 }
