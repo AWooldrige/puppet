@@ -14,11 +14,9 @@ node static-content-server inherits default {
     class { 'httpd::purge': }
     class { 'nginx': }
     include nanoc
-    nanoc::site { 'kempstonnurseries.co.uk':
-        ensure => installed
-    }
     nanoc::site { 'brignellbookbinders.com':
-        ensure => installed
+        ensure => installed,
+        repo   => 'https://github.com/AWooldrige/brignellbookbinders.com.git'
     }
 }
 
