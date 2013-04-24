@@ -2,12 +2,13 @@ class nanoc::compiler {
     package { 'ruby-dev':
         ensure => installed
     }
-    package { ['nanoc', 'rainpress', 'less', 'therubyracer']:
+    package { ['nanoc', 'rainpress', 'less', 'therubyracer',
+               'nanoc-cachebuster', 'builder']:
         ensure   => installed,
         provider => gem,
         require  => Package['ruby-dev', 'make', 'g++']
     }
-    package { ['python-yaml']:
+    package { ['python-yaml', 'graphicsmagick']:
         ensure => installed
     }
     file { '/usr/bin/nh':
