@@ -10,11 +10,12 @@
 #    ensure => installed
 # }
 #
-define nanoc::site ($ensure='installed', $http_port=80) {
+define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
 
     $domain = $title
 
-    file { "/var/nanoc-sites/${domain}":
+    file { ["/var/nanoc/content/${domain}",
+            "/var/nanoc/nginx-config/${domain}"]:
         ensure => directory,
         owner  => 'root',
         group  => 'root',
@@ -22,10 +23,34 @@ define nanoc::site ($ensure='installed', $http_port=80) {
     }
     file { "/etc/nginx/sites-enabled/nanoc-site-${domain}.conf":
         content => template('nanoc/nginx-site-vhost.conf'),
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0644',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
         notify  => Service['nginx'],
-        require  => Package['nginx']
+        require => Package['nginx']
+    }
+
+    if $repo != 'none' {
+        $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo}"
+
+        exec { "nanoc-site-download-${domain}":
+            command   => $cmd,
+            creates   => "/var/nanoc-site-checkouts/${domain}",
+            path      => [ '/usr/bin', '/bin' ],
+            require   => File[
+                "/var/nanoc/content/${domain}",
+                "/var/nanoc/nginx-config/${domain}",
+                "/etc/nginx/sites-enabled/nanoc-site-${domain}.conf"],
+            logoutput => "on_failure",
+            tries     => 3,
+            try_sleep => 20,
+            timeout   => 600
+        }
+        cron {"nanoc-site-download-cron-${domain}":
+            ensure  => present,
+            command => "/usr/bin/chronic ${cmd}",
+            user    => root,
+            minute  => 20
+        }
     }
 }

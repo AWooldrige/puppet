@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from subprocess import check_call, CalledProcessError
 import argparse
-import hashlib
 import os
 
 def scall(cmd):
@@ -9,23 +8,22 @@ def scall(cmd):
     check_call(cmd, shell=True)
 
 def file_contents(file):
-    with open(file)) as f:
+    with open(file) as f:
         return f.read()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("repo",
-        help="git repo where the nanoc-site-downloader will download and " +
-             "install from")
+    parser.add_argument("domain", help="domain for the site")
+    parser.add_argument("repo", help="git repo where the " +
+        "nanoc-site-downloader will download and install from")
     args = parser.parse_args()
 
     all_checkouts = "/var/nanoc-site-checkouts"
-    if not os.path.exists(checkouts):
+    if not os.path.exists(all_checkouts):
         scall("mkdir {0} && chmod 755 {0}".format(all_checkouts))
 
-    checkout = "{0}/{1}".format(
-        all_checkouts, hashlib.md5(args.repo).hexdigest())
+    checkout = "{0}/{1}".format(all_checkouts, args.domain)
 
     rebuild = False
     if os.path.exists(checkout):
@@ -33,12 +31,11 @@ if __name__ == "__main__":
         before = file_contents("{0}/{1}".format(checkout, ref_file))
         scall("(cd {} && git pull)".format(checkout))
         after = file_contents("{0}/{1}".format(checkout, ref_file))
-        if before not after:
+        if before != after:
             rebuild = True
     else:
         scall("git clone {0} {1}".format(args.repo, checkout))
         rebuild = True
 
     if rebuild:
-        scall("nh install {}".format(checkout))
-
+        scall("nh install -p {}".format(checkout))

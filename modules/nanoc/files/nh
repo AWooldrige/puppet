@@ -3,8 +3,9 @@ from subprocess import check_call, CalledProcessError
 import argparse
 import yaml
 
+#Need to add logging
 def scall(cmd):
-    print "Running {}".format(cmd)
+    print "-> {0}".format(cmd)
     check_call(cmd, shell=True)
 
 def make_prepare(path):
@@ -23,18 +24,35 @@ def make_install(path, domain):
 
 def make_fast_install(path, domain):
     make_build(path)
-    dest = "/var/nanoc-sites/{}".format(domain)
-    tmpdest = "{}-tmp".format(dest)
 
-    scall("sudo mkdir {}".format(tmpdest))
-    scall("sudo cp -R {0}/output/* {1}".format(path, tmpdest))
-    scall("sudo chown -R root:root {}".format(tmpdest))
+    content_dest = "/var/nanoc/content/{}".format(domain)
+    nginx_config_dest = "/var/nanoc/nginx-config/{}".format(domain)
+    tmp_content_dest = "{}-tmp".format(content_dest)
+    tmp_nginx_config_dest = "{}-tmp".format(nginx_config_dest)
+
+    scall("sudo mkdir {}".format(tmp_content_dest))
+    scall("sudo cp -R {0}/output/* {1}".format(path, tmp_content_dest))
+    scall("sudo chown -R root:root {}".format(tmp_content_dest))
     scall("sudo find {} -type d -print0 | sudo xargs -0 chmod 755".format(
-        tmpdest))
+        tmp_content_dest))
     scall("sudo find {} -type f -print0 | sudo xargs -0 chmod 644".format(
-        tmpdest))
+        tmp_content_dest))
 
-    scall("sudo rm -rf {1} && sudo mv {0} {1}".format(tmpdest, dest))
+    scall("sudo rm -rf {1} && sudo mv {0} {1}".format(
+        tmp_content_dest, content_dest))
+
+    scall("sudo mkdir {}".format(tmp_nginx_config_dest))
+    try:
+        scall("sudo cp -R {0}/nginx-config/* {1}".format(
+            path, tmp_nginx_config_dest))
+        scall("sudo rm -rf {1} && sudo mv {0} {1}".format(
+            tmp_nginx_config_dest, nginx_config_dest))
+        scall("sudo service nginx restart")
+    except:
+        scall("sudo rmdir {}".format(tmp_nginx_config_dest))
+        print "No nginx configuration to copy"
+
+    print "Done!"
 
 
 def get_configuration(path):
@@ -56,6 +74,7 @@ if __name__ == "__main__":
                         help="what the nanoc helper should do")
     parser.add_argument("-p", "--path", default=".",
                         help="path to compile with nanoc")
+    parser.add_argument("-l", "--log", help="file to log output and errors to")
     args = parser.parse_args()
     path = args.path.rstrip('/')
 
