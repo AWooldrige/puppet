@@ -19,7 +19,7 @@ if __name__ == "__main__":
         "nanoc-site-downloader will download and install from")
     args = parser.parse_args()
 
-    all_checkouts = "/var/nanoc-site-checkouts"
+    all_checkouts = "/var/nanoc/repos"
     if not os.path.exists(all_checkouts):
         scall("mkdir {0} && chmod 755 {0}".format(all_checkouts))
 

@@ -35,7 +35,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
 
         exec { "nanoc-site-download-${domain}":
             command   => $cmd,
-            creates   => "/var/nanoc-site-checkouts/${domain}",
+            creates   => "/var/nanoc/repos/${domain}",
             path      => [ '/usr/bin', '/bin' ],
             require   => File[
                 "/var/nanoc/content/${domain}",
