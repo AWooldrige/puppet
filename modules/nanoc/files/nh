@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-from subprocess import check_call, CalledProcessError
+from subprocess import check_output, CalledProcessError
 import argparse
 import yaml
+import logging
 
-#Need to add logging
 def scall(cmd):
-    print "-> {0}".format(cmd)
-    check_call(cmd, shell=True)
+    l = logging.getLogger("nh")
+    l.debug("shell> {0}".format(cmd))
+    stdout = check_output(cmd, shell=True)
+    if stdout:
+        l.debug("> {0}".format(stdout))
 
 def make_prepare(path):
     pass
@@ -52,9 +55,6 @@ def make_fast_install(path, domain):
         scall("sudo rmdir {}".format(tmp_nginx_config_dest))
         print "No nginx configuration to copy"
 
-    print "Done!"
-
-
 def get_configuration(path):
     try:
         scall("ls {}/nanoc.yaml".format(path))
@@ -78,16 +78,35 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path = args.path.rstrip('/')
 
-    config = get_configuration(path)
+    l = logging.getLogger('nh')
+    l.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    l.addHandler(ch)
+    if args.log:
+        fh = logging.FileHandler(args.log)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s'))
+        l.addHandler(fh)
 
-    if args.instruction == "install":
-        make_install(path, config["domain"])
+    try:
+        config = get_configuration(path)
 
-    if args.instruction == "fastinstall":
-        make_fast_install(path, config["domain"])
+        if args.instruction == "install":
+            make_install(path, config["domain"])
 
-    if args.instruction == "build":
-        make_build(path)
+        if args.instruction == "fastinstall":
+            make_fast_install(path, config["domain"])
 
-    if args.instruction == "clean":
-        make_clean(path)
+        if args.instruction == "build":
+            make_build(path)
+
+        if args.instruction == "clean":
+            make_clean(path)
+    except Exception, e:
+        l.exception(e)
+        raise
+
+    l.debug("Done!")

@@ -1,11 +1,15 @@
 #!/usr/bin/env python
-from subprocess import check_call, CalledProcessError
+from subprocess import check_output, CalledProcessError
 import argparse
 import os
+import logging
 
 def scall(cmd):
-    print "Running {}".format(cmd)
-    check_call(cmd, shell=True)
+    l = logging.getLogger("nh")
+    l.debug("shell> {0}".format(cmd))
+    stdout = check_output(cmd, shell=True)
+    if stdout:
+        l.debug("> {0}".format(stdout))
 
 def file_contents(file):
     with open(file) as f:
@@ -17,7 +21,21 @@ if __name__ == "__main__":
     parser.add_argument("domain", help="domain for the site")
     parser.add_argument("repo", help="git repo where the " +
         "nanoc-site-downloader will download and install from")
+    parser.add_argument("-l", "--log", help="file to log output and errors to")
     args = parser.parse_args()
+
+    l = logging.getLogger('nh')
+    l.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    l.addHandler(ch)
+    if args.log:
+        fh = logging.FileHandler(args.log)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s'))
+        l.addHandler(fh)
 
     all_checkouts = "/var/nanoc/repos"
     if not os.path.exists(all_checkouts):
@@ -37,5 +55,6 @@ if __name__ == "__main__":
         scall("git clone {0} {1}".format(args.repo, checkout))
         rebuild = True
 
+    ng_log = "/var/log/nanoc/nh.log"
     if rebuild:
-        scall("nh install -p {}".format(checkout))
+        scall("nh install -p {0} -l {1}".format(checkout, nh_log))
