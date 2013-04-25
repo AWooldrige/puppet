@@ -46,7 +46,7 @@ cd /etc/puppet-git
 cd -
 
 log ' * Running puppet apply'
-/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
+/usr/bin/puppet apply --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
 
 log 'Finished!'
 exit 0
