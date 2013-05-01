@@ -29,6 +29,14 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
         notify  => Service['nginx'],
         require => Package['nginx']
     }
+    file { "/etc/rsyslog.d/nanoc-${domain}.conf":
+        content => template('nanoc/rsyslog.conf.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['rsyslog'],
+        notify  => Service['rsyslog']
+    }
 
     if $repo != 'none' {
         $log = "/var/log/nanoc/nanoc-site-downloader.log"

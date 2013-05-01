@@ -13,10 +13,14 @@ node default {
 node static-content-server inherits default {
     class { 'httpd::purge': }
     class { 'nginx': }
+    include loggly
     include nanoc
     nanoc::site { 'brignellbookbinders.com':
         ensure => installed,
         repo   => 'https://github.com/AWooldrige/brignellbookbinders.com.git'
+    }
+    nanoc::site { 'onmyplate.co.uk':
+        ensure => installed
     }
 }
 
