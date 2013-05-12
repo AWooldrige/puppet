@@ -3,7 +3,7 @@ class nanoc::compiler {
         ensure => installed
     }
     package { ['nanoc', 'rainpress', 'less', 'therubyracer',
-               'nanoc-cachebuster', 'builder']:
+               'nanoc-cachebuster', 'builder', 'kramdown']:
         ensure   => installed,
         provider => gem,
         require  => Package['ruby-dev', 'make', 'g++']
