@@ -20,6 +20,13 @@ node static-content-server inherits default {
         repo   => 'https://github.com/AWooldrige/brignellbookbinders.com.git'
     }
     nanoc::site { 'onmyplate.co.uk':
+        ensure => installed,
+        repo   => 'https://github.com/AWooldrige/onmyplate.co.uk.git'
+    }
+    nanoc::site { 'woolie.co.uk':
+        ensure => installed
+    }
+    nanoc::site { 'kempstonnurseries.co.uk':
         ensure => installed
     }
 }
