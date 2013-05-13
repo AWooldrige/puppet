@@ -55,6 +55,6 @@ if __name__ == "__main__":
         scall("git clone {0} {1}".format(args.repo, checkout))
         rebuild = True
 
-    ng_log = "/var/log/nanoc/nh.log"
+    nh_log = "/var/log/nanoc/nh.log"
     if rebuild:
         scall("nh install -p {0} -l {1}".format(checkout, nh_log))

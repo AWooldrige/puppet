@@ -40,9 +40,9 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
 
     if $repo != 'none' {
         $log = "/var/log/nanoc/nanoc-site-downloader.log"
-        $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo} -l ${log}"
+        $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo} -l ${log} &"
 
-        exec { "nanoc-site-download-${domain}":
+        exec { "BACKGROUND-nanoc-site-download-${domain}":
             command   => $cmd,
             creates   => "/var/nanoc/repos/${domain}",
             path      => [ '/usr/bin', '/bin' ],
@@ -50,10 +50,8 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
                 "/var/nanoc/content/${domain}",
                 "/var/nanoc/nginx-config/${domain}",
                 "/etc/nginx/sites-enabled/nanoc-site-${domain}.conf"],
-            logoutput => "on_failure",
-            tries     => 3,
-            try_sleep => 20,
-            timeout   => 600
+            logoutput => "true",
+            tries     => 3
         }
         cron {"nanoc-site-download-cron-${domain}":
             ensure  => present,
