@@ -242,23 +242,64 @@
                 ]
             }
         },
-        "onmyplatecoukCloudFrontCDN" : {
-            "Type" : "AWS::CloudFront::Distribution",
+        "SCBSEIP" :{
+           "Type" : "AWS::EC2::EIP",
+           "Properties" : { }
+        },
+        "SCBSAutoScalingGroup": {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+                "Properties" : {
+                    "AvailabilityZones" : { "Fn::GetAZs" : "" },
+                    "LaunchConfigurationName" : { "Ref" : "SCBSLaunchConfiguration" },
+                    "MaxSize" : "1",
+                    "MinSize" : "1"
+                 }
+        },
+        "SCBSLaunchConfiguration" : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
             "Properties" : {
-                "DistributionConfig" : {
-                    "Origins" {
-                        "DomainName" : "static.origin.onmyplate.co.uk",
-                        "Id" : "staticOriginOmpcouk",
-                        "CustomOriginConfig" : {
-                            "HTTPPort" : "80",
-                            "HTTPSPort" : "443",
-                            "OriginProtocolPolicy" : "http-only"
-                        }
-                    },
-                    "Enabled" : "true",
-                    "Comment" : "Static CDN for onmyplate.co.uk",
-                    "Aliases" : [ "static.onmyplate.co.uk" ]
+                "ImageId": "ami-3d160149",
+                "InstanceType": "t1.micro",
+                "SecurityGroups": [{
+                    "Ref": "SCBSSecurityGroup"
+                }],
+                "InstanceMonitoring": false,
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -v\n",
+                                "F=/tmp/boostrap.sh && ",
+                                "rm -f $F && ",
+                                "wget --tries=10 https://raw.github.com/AWooldrige/puppet/gen2/bootstrap.sh -O $F && ",
+                                "chmod +x $F && ",
+                                "sudo $F gen2 && ",
+                                "rm -f $F"
+                            ]
+                        ]
+                    }
                 }
+            }
+        },
+        "SCBSSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Only allow HTTP and SSH",
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "80",
+                        "ToPort" : "80",
+                        "CidrIp" : "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "22",
+                        "ToPort" : "22",
+                        "CidrIp" : "0.0.0.0/0"
+                    }
+                ]
             }
         }
     }
