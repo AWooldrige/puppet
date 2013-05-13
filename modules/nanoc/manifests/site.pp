@@ -45,7 +45,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
         exec { "BACKGROUND-nanoc-site-download-${domain}":
             command   => $cmd,
             creates   => "/var/nanoc/repos/${domain}",
-            path      => [ '/usr/bin', '/bin' ],
+            path      => [ '/usr/bin', '/bin', '/usr/local/bin' ],
             require   => File[
                 "/var/nanoc/content/${domain}",
                 "/var/nanoc/nginx-config/${domain}",
