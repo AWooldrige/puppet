@@ -165,8 +165,7 @@
                         "Name" : "static.onmyplate.co.uk.",
                         "Type" : "CNAME",
                         "TTL" : "3600",
-                        "ResourceRecords" : [ {"Fn::GetAtt" : [
-                            "onmyplatecoukCloudFrontCDN", "DomainName" ] } ]
+                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
                     },
                     {
                         "Name" : "static.origin.onmyplate.co.uk.",
