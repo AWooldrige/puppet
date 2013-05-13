@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, STDOUT
 import argparse
 import os
 import logging
 
 def scall(cmd):
     l = logging.getLogger("nh")
-    l.debug("shell> {0}".format(cmd))
-    stdout = check_output(cmd, shell=True)
+    l.debug(cmd)
+    try:
+        stdout = check_output(cmd, stderr=STDOUT, shell=True)
+    except CalledProcessError, e:
+        l.error(e.output)
+        raise e
     if stdout:
-        l.debug("> {0}".format(stdout))
+        l.debug(stdout)
 
 def file_contents(file):
     with open(file) as f:
