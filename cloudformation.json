@@ -163,7 +163,7 @@
                     },
                     {
                         "Name" : "static.onmyplate.co.uk.",
-                        "Type" : "CNAME",
+                        "Type" : "A",
                         "TTL" : "3600",
                         "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
                     },
