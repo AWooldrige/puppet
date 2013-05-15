@@ -1,5 +1,6 @@
 class nanoc {
     Nanoc {} -> Nanoc::Site <| |>
+    Nanoc::Compiler {} -> Nanoc::Site <| |>
 
     file { ['/var/nanoc',
             '/var/nanoc/content',

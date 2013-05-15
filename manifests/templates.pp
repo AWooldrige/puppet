@@ -15,6 +15,8 @@ node static-content-and-build-server inherits default {
     class { 'nginx': }
     include loggly
     include nanoc
+    include nanoc::compiler
+
     nanoc::site { 'brignellbookbinders.com':
         ensure => installed,
         repo   => 'https://github.com/AWooldrige/brignellbookbinders.com.git'
