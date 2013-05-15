@@ -10,7 +10,7 @@ node default {
     include user-woolie
 }
 
-node static-content-server inherits default {
+node static-content-and-build-server inherits default {
     class { 'httpd::purge': }
     class { 'nginx': }
     include loggly
@@ -29,8 +29,4 @@ node static-content-server inherits default {
     nanoc::site { 'kempstonnurseries.co.uk':
         ensure => installed
     }
-}
-
-node static-content-and-build-server inherits static-content-server {
-    include nanoc::compiler
 }
