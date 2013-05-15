@@ -60,4 +60,13 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
             minute  => 20
         }
     }
+    else {
+        file { "/var/nanoc/content/${domain}/index.html":
+            source => 'puppet:///modules/nanoc/coming-soon.html',
+            ensure => present,
+            owner  => 'www-data',
+            group  => 'www-data',
+            mode   => '0644'
+        }
+    }
 }
