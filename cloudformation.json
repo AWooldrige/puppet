@@ -128,6 +128,30 @@
                         "Type" : "CNAME",
                         "TTL" : "86400",
                         "ResourceRecords" : [ "ghs.google.com" ]
+                    },
+                    {
+                        "Name" : "kempstonnurseries.co.uk.preview.woolie.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "60",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "onmyplate.co.uk.preview.woolie.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "60",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "woolie.co.uk.preview.woolie.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "60",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "brignellbookbinders.com.preview.woolie.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "60",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     }
                 ]
             }
@@ -238,6 +262,38 @@
                         "Type" : "TXT",
                         "TTL" : "86400",
                         "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEgZWLAgAXgZZIkAC4Na4xU3UmFkuIvj3a4AHW3K45vN3BeiBQ5mYC5g/KcrXZhDsaWzp9qgi9chtT3CV/E4ZA8SDeJxmyVCu8PWxXBTc9akFah3lp3mgtLZY+sMrfGlMTdHFzJ1I7FlttFeCAMUXm2ZsQyoXqaIS9Ojjy1ddikQIDAQAB\"" ]
+                    }
+                ]
+            }
+        },
+        "kempstonnurseriescoukDNS": {
+            "Type" : "AWS::Route53::RecordSetGroup",
+            "Properties" : {
+                "HostedZoneName" : "kempstonnurseries.co.uk.",
+                "RecordSets" : [
+                    {
+                        "Name" : "kempstonnurseries.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "3600",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "origin.kempstonnurseries.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "3600",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "www.kempstonnurseries.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "3600",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "www.origin.kempstonnurseries.co.uk.",
+                        "Type" : "A",
+                        "TTL" : "3600",
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     }
                 ]
             }
