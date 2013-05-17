@@ -228,6 +228,12 @@
                         "Type" : "TXT",
                         "TTL" : "86400",
                         "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMacew9nMsqyDqfiHyyViASAbAvPix7l+SCMrRnSSDrG6WRMT54btieUmK9tzOi39U8LMi/l29IwJOy908KY+ydkNK2n7AP0I1AJExsdzU/g92L+WMAPEI0UOep+v6i+Plv1zjFLejo0OKy5JHdk3A9PQaOLyOjpxKAN/mNhcMnQIDAQAB\"" ]
+                    },
+                    {
+                        "Name" : "CI4ZOCDZDOYT.onmyplate.co.uk.",
+                        "Type" : "CNAME",
+                        "TTL" : "1209600",
+                        "ResourceRecords" : [ "gv-SBHCIDQ6WSTITK.dv.googlehosted.com." ]
                     }
                 ]
             }
@@ -294,6 +300,12 @@
                         "Type" : "A",
                         "TTL" : "3600",
                         "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                    },
+                    {
+                        "Name" : "ZQJYDD6YQE2G.kempstonnurseries.co.uk.",
+                        "Type" : "CNAME",
+                        "TTL" : "1209600",
+                        "ResourceRecords" : [ "gv-KHYQWCRKN2VBQN.dv.googlehosted.com." ]
                     }
                 ]
             }
