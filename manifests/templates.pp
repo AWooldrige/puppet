@@ -26,7 +26,8 @@ node static-content-and-build-server inherits default {
         repo   => 'https://github.com/AWooldrige/onmyplate.co.uk.git'
     }
     nanoc::site { 'woolie.co.uk':
-        ensure => installed
+        ensure => installed,
+        repo   => 'https://github.com/AWooldrige/woolie.co.uk.git'
     }
     nanoc::site { 'kempstonnurseries.co.uk':
         ensure => installed
