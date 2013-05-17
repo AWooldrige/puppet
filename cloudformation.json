@@ -29,49 +29,37 @@
                         "Name" : "woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "origin.woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "www.woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "www.origin.woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "static.woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "static.origin.woolie.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
-                    },
-                    {
-                        "Name" : "admin.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
-                    },
-                    {
-                        "Name" : "admin.origin.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "graphite.woolie.co.uk.",
