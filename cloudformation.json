@@ -153,49 +153,37 @@
                         "Name" : "onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "origin.onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "www.onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "www.origin.onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "static.onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "static.origin.onmyplate.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
-                    },
-                    {
-                        "Name" : "admin.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
-                    },
-                    {
-                        "Name" : "admin.origin.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "onmyplate.co.uk.",
