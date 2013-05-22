@@ -1,24 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Sets up the DNS entries",
-    "Parameters": {
-        "IPAddressWeb1": {
-            "Description" : "The IP address of the main web hosting machine",
-            "Type": "String",
-            "MinLength": "7",
-            "MaxLength": "15",
-            "Default": "0.0.0.0",
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
-         },
-        "IPAddressMon1": {
-            "Description" : "The IP address of the monitoring machine",
-            "Type": "String",
-            "MinLength": "7",
-            "MaxLength": "15",
-            "Default": "0.0.0.0",
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})"
-         }
-    },
+    "Description": "AWS Infrastructure for Nanoc Sites",
+    "Parameters": { },
     "Resources": {
         "wooliecoukDNS": {
             "Type" : "AWS::Route53::RecordSetGroup",
@@ -60,24 +43,6 @@
                         "Type" : "A",
                         "TTL" : "3600",
                         "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
-                    },
-                    {
-                        "Name" : "graphite.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressMon1" }]
-                    },
-                    {
-                        "Name" : "web1.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
-                    },
-                    {
-                        "Name" : "mon1.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressMon1" }]
                     },
                     {
                         "Name" : "woolie.co.uk.",
@@ -223,7 +188,7 @@
                         "Name" : "wooldrige.co.uk.",
                         "Type" : "A",
                         "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "IPAddressWeb1" }]
+                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
                     },
                     {
                         "Name" : "wooldrige.co.uk.",
@@ -293,7 +258,7 @@
         "SCBSAutoScalingGroup": {
             "Type" : "AWS::AutoScaling::AutoScalingGroup",
                 "Properties" : {
-                    "AvailabilityZones" : { "Fn::GetAZs" : "" },
+                    "AvailabilityZones" : [ "eu-west-1c" ],
                     "LaunchConfigurationName" : { "Ref" : "SCBSLaunchConfiguration" },
                     "MaxSize" : "1",
                     "MinSize" : "1"
