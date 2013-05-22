@@ -4,51 +4,51 @@
     "Parameters": { },
     "Resources": {
         "wooliecoukDNS": {
-            "Type" : "AWS::Route53::RecordSetGroup",
-            "Properties" : {
-                "HostedZoneName" : "woolie.co.uk.",
-                "RecordSets" : [
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": "woolie.co.uk.",
+                "RecordSets": [
                     {
-                        "Name" : "woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "origin.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "origin.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.origin.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.origin.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "static.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "static.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "static.origin.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "static.origin.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "woolie.co.uk.",
-                        "Type" : "MX",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [
+                        "Name": "woolie.co.uk.",
+                        "Type": "MX",
+                        "TTL": "86400",
+                        "ResourceRecords": [
                             "10 ASPMX.L.GOOGLE.COM.",
                             "20 ALT1.ASPMX.L.GOOGLE.COM.",
                             "20 ALT2.ASPMX.L.GOOGLE.COM.",
@@ -59,102 +59,102 @@
                         ]
                     },
                     {
-                        "Name" : "google._domainkey.woolie.co.uk.",
-                        "Type" : "TXT",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCD9iFbc2P35/Uay6FSHGs7hFM0je8NnpjyrAnpJDMnRKFA+5ISUrv9C3IwAQliRUMlzWkwMmFE773i7E3g3/mcyuRZCBTOLJ0WBtSZoqEWyCFG/y8RXIi+Tf0d/qBDzBE+zB8Rjl3XggEwSk7AsKz8YrodzpMI38l0EWlyOFd0tQIDAQAB\"" ]
+                        "Name": "google._domainkey.woolie.co.uk.",
+                        "Type": "TXT",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCD9iFbc2P35/Uay6FSHGs7hFM0je8NnpjyrAnpJDMnRKFA+5ISUrv9C3IwAQliRUMlzWkwMmFE773i7E3g3/mcyuRZCBTOLJ0WBtSZoqEWyCFG/y8RXIi+Tf0d/qBDzBE+zB8Rjl3XggEwSk7AsKz8YrodzpMI38l0EWlyOFd0tQIDAQAB\"" ]
                     },
                     {
-                        "Name" : "mail.woolie.co.uk.",
-                        "Type" : "CNAME",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "ghs.google.com" ]
+                        "Name": "mail.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
                     },
                     {
-                        "Name" : "docs.woolie.co.uk.",
-                        "Type" : "CNAME",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "ghs.google.com" ]
+                        "Name": "docs.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
                     },
                     {
-                        "Name" : "calendar.woolie.co.uk.",
-                        "Type" : "CNAME",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "ghs.google.com" ]
+                        "Name": "calendar.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
                     },
                     {
-                        "Name" : "kempstonnurseries.co.uk.preview.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "60",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "kempstonnurseries.co.uk.preview.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "60",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "onmyplate.co.uk.preview.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "60",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "onmyplate.co.uk.preview.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "60",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "woolie.co.uk.preview.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "60",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "woolie.co.uk.preview.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "60",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "brignellbookbinders.com.preview.woolie.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "60",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "brignellbookbinders.com.preview.woolie.co.uk.",
+                        "Type": "A",
+                        "TTL": "60",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     }
                 ]
             }
         },
         "onmyplatecoukDNS": {
-            "Type" : "AWS::Route53::RecordSetGroup",
-            "Properties" : {
-                "HostedZoneName" : "onmyplate.co.uk.",
-                "RecordSets" : [
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": "onmyplate.co.uk.",
+                "RecordSets": [
                     {
-                        "Name" : "onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "origin.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "origin.onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.origin.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.origin.onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "static.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "static.onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "static.origin.onmyplate.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "static.origin.onmyplate.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "onmyplate.co.uk.",
-                        "Type" : "MX",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [
+                        "Name": "onmyplate.co.uk.",
+                        "Type": "MX",
+                        "TTL": "86400",
+                        "ResourceRecords": [
                             "10 ASPMX.L.GOOGLE.COM.",
                             "20 ALT1.ASPMX.L.GOOGLE.COM.",
                             "20 ALT2.ASPMX.L.GOOGLE.COM.",
@@ -165,36 +165,36 @@
                         ]
                     },
                     {
-                        "Name" : "google._domainkey.onmyplate.co.uk.",
-                        "Type" : "TXT",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMacew9nMsqyDqfiHyyViASAbAvPix7l+SCMrRnSSDrG6WRMT54btieUmK9tzOi39U8LMi/l29IwJOy908KY+ydkNK2n7AP0I1AJExsdzU/g92L+WMAPEI0UOep+v6i+Plv1zjFLejo0OKy5JHdk3A9PQaOLyOjpxKAN/mNhcMnQIDAQAB\"" ]
+                        "Name": "google._domainkey.onmyplate.co.uk.",
+                        "Type": "TXT",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDMacew9nMsqyDqfiHyyViASAbAvPix7l+SCMrRnSSDrG6WRMT54btieUmK9tzOi39U8LMi/l29IwJOy908KY+ydkNK2n7AP0I1AJExsdzU/g92L+WMAPEI0UOep+v6i+Plv1zjFLejo0OKy5JHdk3A9PQaOLyOjpxKAN/mNhcMnQIDAQAB\"" ]
                     },
                     {
-                        "Name" : "CI4ZOCDZDOYT.onmyplate.co.uk.",
-                        "Type" : "CNAME",
-                        "TTL" : "1209600",
-                        "ResourceRecords" : [ "gv-SBHCIDQ6WSTITK.dv.googlehosted.com." ]
+                        "Name": "CI4ZOCDZDOYT.onmyplate.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "1209600",
+                        "ResourceRecords": [ "gv-SBHCIDQ6WSTITK.dv.googlehosted.com." ]
                     }
                 ]
             }
         },
         "wooldrigecoukDNS": {
-            "Type" : "AWS::Route53::RecordSetGroup",
-            "Properties" : {
-                "HostedZoneName" : "wooldrige.co.uk.",
-                "RecordSets" : [
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": "wooldrige.co.uk.",
+                "RecordSets": [
                     {
-                        "Name" : "wooldrige.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "wooldrige.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "wooldrige.co.uk.",
-                        "Type" : "MX",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [
+                        "Name": "wooldrige.co.uk.",
+                        "Type": "MX",
+                        "TTL": "86400",
+                        "ResourceRecords": [
                             "10 ASPMX.L.GOOGLE.COM.",
                             "20 ALT1.ASPMX.L.GOOGLE.COM.",
                             "20 ALT2.ASPMX.L.GOOGLE.COM.",
@@ -205,68 +205,68 @@
                         ]
                     },
                     {
-                        "Name" : "google._domainkey.wooldrige.co.uk.",
-                        "Type" : "TXT",
-                        "TTL" : "86400",
-                        "ResourceRecords" : [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEgZWLAgAXgZZIkAC4Na4xU3UmFkuIvj3a4AHW3K45vN3BeiBQ5mYC5g/KcrXZhDsaWzp9qgi9chtT3CV/E4ZA8SDeJxmyVCu8PWxXBTc9akFah3lp3mgtLZY+sMrfGlMTdHFzJ1I7FlttFeCAMUXm2ZsQyoXqaIS9Ojjy1ddikQIDAQAB\"" ]
+                        "Name": "google._domainkey.wooldrige.co.uk.",
+                        "Type": "TXT",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEgZWLAgAXgZZIkAC4Na4xU3UmFkuIvj3a4AHW3K45vN3BeiBQ5mYC5g/KcrXZhDsaWzp9qgi9chtT3CV/E4ZA8SDeJxmyVCu8PWxXBTc9akFah3lp3mgtLZY+sMrfGlMTdHFzJ1I7FlttFeCAMUXm2ZsQyoXqaIS9Ojjy1ddikQIDAQAB\"" ]
                     }
                 ]
             }
         },
         "kempstonnurseriescoukDNS": {
-            "Type" : "AWS::Route53::RecordSetGroup",
-            "Properties" : {
-                "HostedZoneName" : "kempstonnurseries.co.uk.",
-                "RecordSets" : [
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": "kempstonnurseries.co.uk.",
+                "RecordSets": [
                     {
-                        "Name" : "kempstonnurseries.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "origin.kempstonnurseries.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "origin.kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.kempstonnurseries.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "www.origin.kempstonnurseries.co.uk.",
-                        "Type" : "A",
-                        "TTL" : "3600",
-                        "ResourceRecords" : [{ "Ref" : "SCBSEIP" }]
+                        "Name": "www.origin.kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name" : "ZQJYDD6YQE2G.kempstonnurseries.co.uk.",
-                        "Type" : "CNAME",
-                        "TTL" : "1209600",
-                        "ResourceRecords" : [ "gv-KHYQWCRKN2VBQN.dv.googlehosted.com." ]
+                        "Name": "ZQJYDD6YQE2G.kempstonnurseries.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "1209600",
+                        "ResourceRecords": [ "gv-KHYQWCRKN2VBQN.dv.googlehosted.com." ]
                     }
                 ]
             }
         },
-        "SCBSEIP" :{
-           "Type" : "AWS::EC2::EIP",
-           "Properties" : { }
+        "SCBSEIP":{
+           "Type": "AWS::EC2::EIP",
+           "Properties": { }
         },
         "SCBSAutoScalingGroup": {
-            "Type" : "AWS::AutoScaling::AutoScalingGroup",
-                "Properties" : {
-                    "AvailabilityZones" : [ "eu-west-1c" ],
-                    "LaunchConfigurationName" : { "Ref" : "SCBSLaunchConfiguration" },
-                    "MaxSize" : "1",
-                    "MinSize" : "1"
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+                "Properties": {
+                    "AvailabilityZones": [ "eu-west-1c" ],
+                    "LaunchConfigurationName": { "Ref": "SCBSLaunchConfiguration" },
+                    "MaxSize": "1",
+                    "MinSize": "1"
                  }
         },
-        "SCBSLaunchConfiguration" : {
-            "Type" : "AWS::AutoScaling::LaunchConfiguration",
-            "Properties" : {
+        "SCBSLaunchConfiguration": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
                 "ImageId": "ami-3d160149",
                 "InstanceType": "t1.micro",
                 "SecurityGroups": [{
@@ -291,22 +291,22 @@
                 }
             }
         },
-        "SCBSSecurityGroup" : {
-            "Type" : "AWS::EC2::SecurityGroup",
-            "Properties" : {
-                "GroupDescription" : "Only allow HTTP and SSH",
-                "SecurityGroupIngress" : [
+        "SCBSSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Only allow HTTP and SSH",
+                "SecurityGroupIngress": [
                     {
-                        "IpProtocol" : "tcp",
-                        "FromPort" : "80",
-                        "ToPort" : "80",
-                        "CidrIp" : "0.0.0.0/0"
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": "0.0.0.0/0"
                     },
                     {
-                        "IpProtocol" : "tcp",
-                        "FromPort" : "22",
-                        "ToPort" : "22",
-                        "CidrIp" : "0.0.0.0/0"
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "0.0.0.0/0"
                     }
                 ]
             }
