@@ -15,6 +15,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
     $domain = $title
 
     file { ["/var/nanoc/content/${domain}",
+            "/var/log/nginx/${domain}",
             "/var/nanoc/nginx-config/${domain}"]:
         ensure => directory,
         owner  => 'root',
