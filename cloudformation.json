@@ -315,18 +315,18 @@
             "Type": "AWS::CloudFront::Distribution",
             "Properties": {
                 "DistributionConfig": {
-                    "Aliases": [ "onmyplate.co.uk" ],
+                    "Aliases": [ "www.onmyplate.co.uk" ],
                     "Origins": [
                         {
-                            "DomainName": "origin.onmyplate.co.uk",
-                            "Id": "origin.onmyplate.co.uk",
+                            "DomainName": "www.origin.onmyplate.co.uk",
+                            "Id": "www.origin.onmyplate.co.uk",
                             "CustomOriginConfig": {
                                 "OriginProtocolPolicy": "http-only"
                             }
                         }
                     ],
                     "DefaultCacheBehavior": {
-                        "TargetOriginId": "origin.onmyplate.co.uk",
+                        "TargetOriginId": "www.origin.onmyplate.co.uk",
                         "ForwardedValues": {
                             "QueryString": false
                         },
