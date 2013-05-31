@@ -23,7 +23,7 @@ def make_clean(path):
 
 def make_build(path):
     make_prepare(path)
-    scall("(cd {} && nanoc compile)".format(path))
+    scall("(cd {} && /usr/local/bin/nanoc compile)".format(path))
 
 def make_install(path, domain):
     make_clean(path)
