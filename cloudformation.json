@@ -81,30 +81,6 @@
                         "Type": "CNAME",
                         "TTL": "86400",
                         "ResourceRecords": [ "ghs.google.com" ]
-                    },
-                    {
-                        "Name": "kempstonnurseries.co.uk.preview.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "60",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "onmyplate.co.uk.preview.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "60",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "woolie.co.uk.preview.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "60",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "brignellbookbinders.com.preview.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "60",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     }
                 ]
             }
@@ -247,6 +223,70 @@
                         "Type": "CNAME",
                         "TTL": "1209600",
                         "ResourceRecords": [ "gv-KHYQWCRKN2VBQN.dv.googlehosted.com." ]
+                    }
+                ]
+            }
+        },
+        "brignellbookbindersDNS": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Properties": {
+                "HostedZoneName": "brignellbookbinders.com.",
+                "RecordSets": [
+                    {
+                        "Name": "brignellbookbinders.com.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
+                    },
+                    {
+                        "Name": "origin.brignellbookbinders.com.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
+                    },
+                    {
+                        "Name": "www.brignellbookbinders.com.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
+                    },
+                    {
+                        "Name": "www.origin.brignellbookbinders.com.",
+                        "Type": "A",
+                        "TTL": "3600",
+                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
+                    },
+                    {
+                        "Name": "mail.brignellbookbinders.com.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
+                    },
+                    {
+                        "Name": "docs.brignellbookbinders.com.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
+                    },
+                    {
+                        "Name": "calendar.brignellbookbinders.com.",
+                        "Type": "CNAME",
+                        "TTL": "86400",
+                        "ResourceRecords": [ "ghs.google.com" ]
+                    },
+                    {
+                        "Name": "brignellbookbinders.com.",
+                        "Type": "MX",
+                        "TTL": "86400",
+                        "ResourceRecords": [
+                            "10 ASPMX.L.GOOGLE.COM.",
+                            "20 ALT1.ASPMX.L.GOOGLE.COM.",
+                            "20 ALT2.ASPMX.L.GOOGLE.COM.",
+                            "30 ASPMX2.GOOGLEMAIL.COM.",
+                            "30 ASPMX3.GOOGLEMAIL.COM.",
+                            "30 ASPMX4.GOOGLEMAIL.COM.",
+                            "30 ASPMX5.GOOGLEMAIL.COM."
+                        ]
                     }
                 ]
             }
