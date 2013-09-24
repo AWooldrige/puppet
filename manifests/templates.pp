@@ -11,7 +11,6 @@ node default {
 }
 
 node static-content-and-build-server inherits default {
-    class { 'httpd::purge': }
     class { 'nginx': }
     include loggly
     include nanoc
