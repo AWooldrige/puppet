@@ -14,8 +14,10 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
 
     $domain = $title
 
-    file { ["/var/nanoc/content/${domain}",
-            "/var/nanoc/nginx-config/${domain}"]:
+    $document_root = "/var/nanoc/content/${domain}"
+    $config_root = "/var/nanoc/nginx-config/${domain}"
+
+    file { [$document_root, $config_root]:
         ensure => directory,
         owner  => 'root',
         group  => 'root',
@@ -40,15 +42,15 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
 
     if $repo != 'none' {
         $log = "/var/log/nanoc/nanoc-site-downloader.log"
-        $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo} -l ${log} &"
+        $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo} -l ${log}"
 
-        exec { "BACKGROUND-nanoc-site-download-${domain}":
+        exec { "nanoc-site-download-${domain}":
             command   => $cmd,
             creates   => "/var/nanoc/repos/${domain}",
             path      => [ '/usr/bin', '/bin', '/usr/local/bin' ],
             require   => File[
-                "/var/nanoc/content/${domain}",
-                "/var/nanoc/nginx-config/${domain}",
+                $document_root,
+                $config_root,
                 "/etc/nginx/sites-enabled/nanoc-site-${domain}.conf"],
             logoutput => "true",
             tries     => 3
@@ -57,11 +59,11 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
             ensure  => present,
             command => "/usr/bin/chronic ${cmd}",
             user    => root,
-            minute  => 20
+            minute  => [20, 50]
         }
     }
     else {
-        file { "/var/nanoc/content/${domain}/index.html":
+        file { "${document_root}/index.html":
             source => 'puppet:///modules/nanoc/coming-soon.html',
             ensure => present,
             owner  => 'www-data',
