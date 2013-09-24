@@ -321,9 +321,9 @@
                                 "#!/bin/bash -v\n",
                                 "F=/tmp/boostrap.sh && ",
                                 "rm -f $F && ",
-                                "wget --tries=10 https://raw.github.com/AWooldrige/puppet/gen2/bootstrap.sh -O $F && ",
+                                "wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && ",
                                 "chmod +x $F && ",
-                                "sudo $F gen2 && ",
+                                "sudo $F master && ",
                                 "rm -f $F"
                             ]
                         ]
