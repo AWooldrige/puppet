@@ -41,8 +41,3 @@ Host web1
     Hostname web1.woolie.co.uk
     User woolie
     IdentityFile /home/woolie/.ssh/id_rsa_woolie
-
-Host bakop
-    Hostname host1.bakop.com
-    User woolie
-    IdentityFile /home/woolie/.ssh/id_rsa_bakop

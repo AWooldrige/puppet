@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+from subprocess import check_output, CalledProcessError, STDOUT
+import argparse
+import os
+import logging
+
+def scall(cmd):
+    l = logging.getLogger("nh")
+    l.debug(cmd)
+    try:
+        stdout = check_output(cmd, stderr=STDOUT, shell=True)
+    except CalledProcessError, e:
+        l.error(e.output)
+        raise e
+    if stdout:
+        l.debug(stdout)
+
+def file_contents(file):
+    with open(file) as f:
+        return f.read()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("domain", help="domain for the site")
+    parser.add_argument("repo", help="git repo where the " +
+        "nanoc-site-downloader will download and install from")
+    parser.add_argument("-l", "--log", help="file to log output and errors to")
+    args = parser.parse_args()
+
+    l = logging.getLogger('nh')
+    l.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    l.addHandler(ch)
+    if args.log:
+        fh = logging.FileHandler(args.log)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s'))
+        l.addHandler(fh)
+
+    all_checkouts = "/var/nanoc/repos"
+    if not os.path.exists(all_checkouts):
+        scall("mkdir {0} && chmod 755 {0}".format(all_checkouts))
+
+    checkout = "{0}/{1}".format(all_checkouts, args.domain)
+
+    rebuild = False
+    if os.path.exists(checkout):
+        ref_file = ".git/refs/heads/master"
+        before = file_contents("{0}/{1}".format(checkout, ref_file))
+        scall("(cd {} && git pull)".format(checkout))
+        after = file_contents("{0}/{1}".format(checkout, ref_file))
+        if before != after:
+            rebuild = True
+    else:
+        scall("git clone {0} {1}".format(args.repo, checkout))
+        rebuild = True
+
+    nh_log = "/var/log/nanoc/nh.log"
+    if rebuild:
+        scall("nh install -p {0} -l {1}".format(checkout, nh_log))

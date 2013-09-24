@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+from subprocess import check_output, CalledProcessError, STDOUT
+import argparse
+import os
+import time
+import yaml
+import logging
+import logging.handlers
+
+def scall(cmd):
+    l = logging.getLogger("nh")
+    l.debug(cmd)
+    stdout = check_output(cmd, stderr=STDOUT, shell=True)
+    if stdout:
+        l.debug(stdout)
+
+def make_prepare(path):
+    pass
+
+def make_clean(path):
+    scall("rm -rf {0}/output {0}/tmp {0}/crash.log".format(path))
+
+def make_build(path):
+    make_prepare(path)
+    scall("(cd {} && /usr/local/bin/nanoc compile)".format(path))
+
+def make_install(path, domain):
+    make_clean(path)
+    make_fast_install(path, domain)
+
+def make_fast_install(path, domain):
+    make_build(path)
+
+    content_dest = "/var/nanoc/content/{}".format(domain)
+    nginx_config_dest = "/var/nanoc/nginx-config/{}".format(domain)
+    tmp_content_dest = "{}-tmp".format(content_dest)
+    tmp_nginx_config_dest = "{}-tmp".format(nginx_config_dest)
+
+    scall("sudo mkdir {}".format(tmp_content_dest))
+    scall("sudo cp -R {0}/output/* {1}".format(path, tmp_content_dest))
+    scall("sudo chown -R root:root {}".format(tmp_content_dest))
+    scall("sudo find {} -type d -print0 | sudo xargs -0 chmod 755".format(
+        tmp_content_dest))
+    scall("sudo find {} -type f -print0 | sudo xargs -0 chmod 644".format(
+        tmp_content_dest))
+
+    scall("sudo rm -rf {1} && sudo mv {0} {1}".format(
+        tmp_content_dest, content_dest))
+
+    scall("sudo mkdir {}".format(tmp_nginx_config_dest))
+    try:
+        scall("sudo cp -R {0}/nginx-config/* {1}".format(
+            path, tmp_nginx_config_dest))
+        scall("sudo rm -rf {1} && sudo mv {0} {1}".format(
+            tmp_nginx_config_dest, nginx_config_dest))
+        scall("sudo service nginx restart")
+    except:
+        scall("sudo rmdir {}".format(tmp_nginx_config_dest))
+        print "No nginx configuration to copy"
+
+def get_configuration(path):
+    try:
+        scall("ls {}/nanoc.yaml".format(path))
+    except CalledProcessError:
+        raise Exception (
+            path + " doesn't seem to be a nanoc site path - can't find a " +
+            "nanoc.yaml file.")
+
+    with open("{}/nanoc.yaml".format(path)) as file:
+        return yaml.safe_load(file)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("instruction",
+                        choices=["build", "install", "clean", "fastinstall"],
+                        help="what the nanoc helper should do")
+    parser.add_argument("-p", "--path", default=".",
+                        help="path to compile with nanoc")
+    args = parser.parse_args()
+    path = os.path.abspath(args.path)
+
+    l = logging.getLogger('nh')
+    l.setLevel(logging.DEBUG)
+
+    #Console handler
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    l.addHandler(ch)
+
+    #Syslog handler
+    sh = logging.handlers.SysLogHandler(address='/dev/log')
+    sh.setLevel(logging.INFO)
+    sh.setFormatter(logging.Formatter("NH[" + str(os.getpid()) + ']: %(levelname)s: %(message)s'))
+    l.addHandler(sh)
+
+    l.info("Starting nh '{0}' in '{1}'".format(args.instruction, path))
+
+    start_time = time.time()
+    try:
+        config = get_configuration(path)
+
+        if args.instruction == "install":
+            make_install(path, config["domain"])
+
+        if args.instruction == "fastinstall":
+            make_fast_install(path, config["domain"])
+
+        if args.instruction == "build":
+            make_build(path)
+
+        if args.instruction == "clean":
+            make_clean(path)
+    except Exception, e:
+        l.exception(e)
+        raise
+
+    end_time = time.time()
+    l.info("Completed in {0} seconds".format(time.time() - start_time))

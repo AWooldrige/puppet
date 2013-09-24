@@ -2,30 +2,39 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+#Exit if any unset variables are used, if any command returns an error
+set -o nounset
+set -o errexit
+
 LOGFILE="/var/log/puppet-git/puppet-git-update"
+function log {
+    echo $(date --rfc-3339=ns)" ${1}"
+    echo $(date --rfc-3339=ns)" ${1}" >> $LOGFILE
+}
 
-/bin/echo `/bin/date`" === RUNNING puppet-git-update ===" >> $LOGFILE
+log 'puppet-git-update called'
 
-cd /etc/puppet/git-distributed/puppet/;
+cd /etc/puppet-git;
 
 # Update main repo, check that all submodules are initialised and updated
-MAIN=`/usr/bin/git pull origin master` || exit $?
-TRIGGER=`/bin/echo $MAIN | /bin/grep 'Already up-to-date.' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g'` || exit $?
+MAIN=$(/usr/bin/git pull)
+TRIGGER=$(/bin/echo $MAIN | /bin/grep 'Already up-to-date.' | /usr/bin/head -n 1 | /bin/sed 's/ *$//g')
 
-/usr/bin/git submodule init || exit $?
-/usr/bin/git submodule sync || exit $?
-/usr/bin/git submodule update || exit $?
+/usr/bin/git submodule init
+/usr/bin/git submodule sync
+/usr/bin/git submodule update
 
 # Do we need to run puppet?
 if /usr/bin/[ "$TRIGGER" != "Already up-to-date." ]; then
-/bin/echo `/bin/date`" - update needed" >> $LOGFILE
     UPDATENEEDED=true
 else
-/bin/echo `/bin/date`" - nothing found in git pull of main repo" >> $LOGFILE
+    log 'nothing found in git pull of main repo'
     UPDATENEEDED=false
 fi
 
 if $UPDATENEEDED ; then
-    /bin/echo `/bin/date`" - calling puppet-git-run" >> $LOGFILE
-    /usr/bin/puppet-git-run || exit $?
+    log 'calling puppet-git-run'
+    /usr/bin/puppet-git-run
 fi
+log 'puppet-git-update complete'
+exit 0

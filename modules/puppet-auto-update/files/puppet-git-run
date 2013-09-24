@@ -1,14 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
+#Exit if any unset variables are used, if any command returns an error
+set -o nounset
+set -o errexit
 
 LOGFILE="/var/log/puppet-git/puppet-git-run"
+function log {
+    echo $(date --rfc-3339=ns)" ${1}"
+    echo $(date --rfc-3339=ns)" ${1}" >> $LOGFILE
+}
 
-/bin/echo `/bin/date`" === RUNNING puppet-git-run ===" >> $LOGFILE
+log 'puppet-git-run called'
 
 if /usr/bin/[ `ps a | grep puppe[t] | wc -l` = 0 ]; then
-    exit 1;
+    log 'ABORTING due to puppet already in process list'
+    exit 4;
 fi
 
-/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet/git-distributed/puppet/modules /etc/puppet/git-distributed/puppet/manifests/sites.pp -vv;
+/usr/bin/puppet apply -l $LOGFILE --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
+
+log 'puppet-git-run complete'
+exit 0

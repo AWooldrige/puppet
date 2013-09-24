@@ -2,6 +2,7 @@ class default-config {
 
     $enhancers = [
         'moreutils',
+        'git',
         'tree',
         'zip',
         'unzip',
@@ -10,8 +11,6 @@ class default-config {
         'iotop',
         'powertop',
         'man-db',
-        'rdiff-backup',
-        'pwgen',
         'curl'
     ]
     $notneeded = [
@@ -20,84 +19,26 @@ class default-config {
     package { $enhancers: ensure => installed }
     package { $notneeded: ensure => purged }
 
-    # Alias ack to ack-grep
-    exec { "/bin/ln -sf /usr/bin/ack-grep /usr/local/bin/ack":
-        unless => "/bin/sh -c '[ -L /usr/local/bin/ack ]'",
-        require => Package['ack-grep']
+    $buildtools = [
+        'make',
+        'g++'
+    ]
+    package { $buildtools: ensure => installed }
+
+    file { '/usr/local/bin/ack':
+        ensure => link,
+        target => '/usr/bin/ack-grep'
     }
 
-    file { '/root/extlookup':
-        ensure  => directory,
+    file { '/etc/custom.bashrc':
+        source  => 'puppet:///modules/default-config/bashrc',
         owner   => 'root',
         group   => 'root',
-        mode    => '400',
+        mode    => '0644'
     }
-    file { '/bkps-full':
-        ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '400',
+    file { '/root/.bashrc':
+        ensure  => link,
+        target  => '/etc/custom.bashrc',
+        require => File['/etc/custom.bashrc']
     }
-    file { '/bkps-incremental':
-        ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '400',
-    }
-    file { '/root/extlookup/common.csv':
-        ensure  => present,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '400',
-    }
-    file { "/root/getpassword":
-        source => 'puppet:///modules/default-config/getpassword',
-        owner => 'root',
-        group => 'root',
-        mode => '700',
-        require => [ Package['pwgen'],
-                     File['/root/extlookup'] ]
-    }
-    file { '/usr/bin/transfer-incremental-backups':
-        source => 'puppet:///modules/default-config/transfer-incremental-backups',
-        owner => 'root',
-        group => 'root',
-        mode => '540'
-    }
-    file { "/root/.ssh":
-        ensure => directory,
-        owner => 'root',
-        group => 'root',
-        mode => '700'
-    }
-    file { "/root/.ssh/id_rsa_backup8":
-        owner => 'root',
-        group => 'root',
-        mode => '400'
-    }
-    file { "/etc/ssh/ssh_config":
-        source => 'puppet:///modules/default-config/ssh_config',
-        owner => 'root',
-        group => 'root',
-        mode => '400',
-        require => Package['openssh-server']
-    }
-    file { [ "/opt/local-debs", "/opt/local-zips" ]:
-        ensure => directory,
-        owner => 'root',
-        group => 'root',
-        mode => '700'
-    }
-
-    include stdlib
-    include user-woolie
-    include puppet-auto-update
-    include apt
-    include ntp
-    include tmux
-    include vim
-    include sudo
-    include sshd
-    include motd
-    include bash
 }
