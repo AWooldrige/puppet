@@ -27,6 +27,9 @@ log ' * Installing git and puppet if needed'
 /usr/bin/dpkg -s git &> /dev/null || /usr/bin/apt-get install -y git
 /usr/bin/dpkg -s puppet &> /dev/null || /usr/bin/apt-get install -y puppet
 
+log ' * Installing ruby-hiera until dependency fixed in #1242363'
+/usr/bin/dpkg -s ruby-hiera &> /dev/null || /usr/bin/apt-get install -y ruby-hiera
+
 log ' * Removing any currently manifests'
 rm -rf /etc/puppet-git
 

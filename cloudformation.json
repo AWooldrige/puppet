@@ -308,7 +308,7 @@
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
                 "ImageId": "ami-f4bb5583",
-                "InstanceType": "m1.small",
+                "InstanceType": "t1.micro",
                 "SecurityGroups": [{
                     "Ref": "SCBSSecurityGroup"
                 }],
