@@ -19,7 +19,6 @@ function install {
                 break
             fi
         done
-        log "Failed to install ${1}" && exit 1
     else
         log "${1} package already installed"
     fi

@@ -50,3 +50,7 @@ Each file should be prepended with the following text.
     ##   This file is controlled by Puppet - changes will be overwritten   ##
     #########################################################################
 
+Logging
+------------------------------
+All scripts should log to syslog and to stdout/stderr. This should be managed
+within the scripts themselves.
