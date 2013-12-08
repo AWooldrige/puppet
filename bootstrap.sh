@@ -20,8 +20,8 @@ log 'Starting git distributed puppet bootstrap script'
 log ' * Updating apt repos'
 /usr/bin/apt-get update -y
 
-#log ' * Upgrading apt packages'
-#/usr/bin/apt-get upgrade -y
+log ' * Upgrading apt packages'
+/usr/bin/apt-get upgrade -y
 
 log ' * Installing git and puppet if needed'
 /usr/bin/dpkg -s git &> /dev/null || /usr/bin/apt-get install -y git
