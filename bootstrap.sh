@@ -7,6 +7,24 @@ function log {
     /bin/echo $(date --rfc-3339=ns)" ${1}"
 }
 
+function install {
+    if ! /usr/bin/dpkg -s $1 &> /dev/null; then
+        log "Installing ${1} package"
+        for attempt in {1..5}; do
+            if ! apt-get install -y $1; then
+                log "Could not install ${1} after attempt ${attempt}"
+                apt-get update -y --fix-missing
+                sleep 2
+            else
+                break
+            fi
+        done
+        log "Failed to install ${1}" && exit 1
+    else
+        log "${1} package already installed"
+    fi
+}
+
 usage="Usage: $0 [branch]"
 
 if /usr/bin/[ "$#" -gt 1 ]; then
@@ -22,11 +40,11 @@ log ' * Upgrading apt packages'
 /usr/bin/apt-get upgrade -y
 
 log ' * Installing git and puppet if needed'
-/usr/bin/dpkg -s git &> /dev/null || /usr/bin/apt-get install -y git
-/usr/bin/dpkg -s puppet &> /dev/null || /usr/bin/apt-get install -y puppet
+install git
+install puppet
 
 log ' * Installing ruby-hiera until dependency fixed in #1242363'
-/usr/bin/dpkg -s ruby-hiera &> /dev/null || /usr/bin/apt-get install -y ruby-hiera
+install ruby-hiera
 
 log ' * Removing any currently manifests'
 rm -rf /etc/puppet-git
