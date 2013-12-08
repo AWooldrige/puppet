@@ -33,12 +33,17 @@ log ' * Installing ruby-hiera until dependency fixed in #1242363'
 log ' * Removing any currently manifests'
 rm -rf /etc/puppet-git
 
-if /usr/bin/[ $# -eq 1 ]; then
-    log "   ** No manifests found, cloning github repo from ${1} branch"
-    /usr/bin/git clone -b $1 http://github.com/AWooldrige/puppet.git /etc/puppet-git
+if [ -d "/vagrant" ]; then
+    log "   ** We're on a Vagrant box! Copying over manifests/modules. If this command hangs, see the README"
+    cp -R /vagrant /etc/puppet-git
 else
-    log '   ** No manifests found, cloning github repo from master'
-    /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    if [ $# -eq 1 ]; then
+        log "   ** No manifests found, cloning github repo from ${1} branch"
+        /usr/bin/git clone -b $1 http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    else
+        log '   ** No manifests found, cloning github repo from master'
+        /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
+    fi
 fi
 
 log '   ** Initialising/Updating submodules'

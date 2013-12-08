@@ -19,6 +19,22 @@ Run the bootstrap.sh script:
     F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F master && rm -f $F
 
 
+Get It Running with Vagrant
+--------------------------------
+To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
+
+ * Make sure the host machine is running VirtualBox >= 4.3.0
+ * The guest additions on the guest machines also need updating to >= 4.3.0.
+   This Vagrant plugin automates this. Run this command in the same directory
+   as your Vagrantfile: `vagrant plugin install --plugin-source https://rubygems.org --plugin-prerelease vagrant-vbguest`
+ * Useful bug references: [why vbguest plugin >= 0.10.0 is needed](https://github.com/dotless-de/vagrant-vbguest/issues/88) and [bug on launchpad](https://bugs.launchpad.net/ubuntu/+bug/1239417)
+
+Then run: `vagrant up` in the project directory. The machine can be SSH'd into
+using `vagrant ssh` or on the exposed interface: `ssh woolie@192.168.42.42`.
+
+Get An AMI Built using Packer
+--------------------------------
+From within the project directory: `packer build -var 'aws_access_key=KEY' -var 'aws_secret_key=KEY' packer.json`
 
 Conventions
 ==============================

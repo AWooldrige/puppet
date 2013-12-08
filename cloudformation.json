@@ -1,7 +1,12 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "AWS Infrastructure for Nanoc Sites",
-    "Parameters": { },
+    "Parameters" : {
+        "AMI" : {
+            "Type" : "String",
+            "Description" : "The AMI (e.g. ami-f4bb5583) to launch with"
+        }
+    },
     "Resources": {
         "wooliecoukDNS": {
             "Type": "AWS::Route53::RecordSetGroup",
@@ -307,28 +312,12 @@
         "SCBSLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
-                "ImageId": "ami-f4bb5583",
+                "ImageId": { "Ref": "AMI" },
                 "InstanceType": "t1.micro",
                 "SecurityGroups": [{
                     "Ref": "SCBSSecurityGroup"
                 }],
-                "InstanceMonitoring": false,
-                "UserData": {
-                    "Fn::Base64": {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "#!/bin/bash -v\n",
-                                "F=/tmp/boostrap.sh && ",
-                                "rm -f $F && ",
-                                "wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && ",
-                                "chmod +x $F && ",
-                                "sudo $F master && ",
-                                "rm -f $F"
-                            ]
-                        ]
-                    }
-                }
+                "InstanceMonitoring": false
             }
         },
         "SCBSSecurityGroup": {
