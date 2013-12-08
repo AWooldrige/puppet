@@ -3,9 +3,10 @@ from subprocess import check_output, CalledProcessError, STDOUT
 import argparse
 import os
 import logging
+import logging.handlers
 
 def scall(cmd):
-    l = logging.getLogger("nh")
+    l = logging.getLogger("nanoc-site-downloader")
     l.debug(cmd)
     try:
         stdout = check_output(cmd, stderr=STDOUT, shell=True)
@@ -25,21 +26,22 @@ if __name__ == "__main__":
     parser.add_argument("domain", help="domain for the site")
     parser.add_argument("repo", help="git repo where the " +
         "nanoc-site-downloader will download and install from")
-    parser.add_argument("-l", "--log", help="file to log output and errors to")
     args = parser.parse_args()
 
-    l = logging.getLogger('nh')
+    l = logging.getLogger('nanoc-site-downloader')
     l.setLevel(logging.DEBUG)
+
+    #Console handler
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
     l.addHandler(ch)
-    if args.log:
-        fh = logging.FileHandler(args.log)
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s'))
-        l.addHandler(fh)
+
+    #Syslog handler
+    sh = logging.handlers.SysLogHandler(address='/dev/log')
+    sh.setLevel(logging.INFO)
+    sh.setFormatter(logging.Formatter("NH[" + str(os.getpid()) + ']: %(levelname)s: %(message)s'))
+    l.addHandler(sh)
 
     all_checkouts = "/var/nanoc/repos"
     if not os.path.exists(all_checkouts):
@@ -59,6 +61,5 @@ if __name__ == "__main__":
         scall("git clone {0} {1}".format(args.repo, checkout))
         rebuild = True
 
-    nh_log = "/var/log/nanoc/nh.log"
     if rebuild:
-        scall("nh install -p {0} -l {1}".format(checkout, nh_log))
+        scall("nh install -p {0}".format(checkout))
