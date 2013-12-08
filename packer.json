@@ -19,7 +19,7 @@
         {
             "type": "shell",
             "inline": [
-                "F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F master && rm -f $F"
+                "F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F | tee /var/log/initial-bootstrap && rm -f $F"
             ]
         }
     ]

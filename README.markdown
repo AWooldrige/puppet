@@ -1,26 +1,12 @@
-Puppet Configuration
+Getting A Box Running
 ================================
 This is a masterless puppet configuration and works solely on puppet apply:
 
     puppet apply --modulepath=modules manifests/site.pp -vv
 
 
-Initial System Bootstrap
---------------------------------
-
-Set the hostname for the machine:
-
-    echo 'cloud-local' > /etc/hostname
-    echo '127.0.0.1 cloud-local' >> /etc/hosts
-    service hostname start
-
-Run the bootstrap.sh script:
-
-    F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F master && rm -f $F
-
-
 Get It Running with Vagrant
---------------------------------
+---------------------------
 To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
 
  * Make sure the host machine is running VirtualBox >= 4.3.0
@@ -32,9 +18,26 @@ To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
 Then run: `vagrant up` in the project directory. The machine can be SSH'd into
 using `vagrant ssh` or on the exposed interface: `ssh woolie@192.168.42.42`.
 
+
 Get An AMI Built using Packer
---------------------------------
+-----------------------------
 From within the project directory: `packer build -var 'aws_access_key=KEY' -var 'aws_secret_key=KEY' packer.json`
+
+
+Bootstrap a Physical System From Scratch
+----------------------------------------
+
+Set the hostname for the machine:
+
+    echo 'machine.woolie.co.uk' > /etc/hostname
+    echo '127.0.0.1 machine.woolie.co.uk' >> /etc/hosts
+    service hostname start
+
+Run the bootstrap.sh script:
+
+    F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F master && rm -f $F
+
+
 
 Conventions
 ==============================

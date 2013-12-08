@@ -11,6 +11,8 @@
 # }
 #
 define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
+    require nanoc
+    require nanoc::compiler
 
     $domain = $title
 
@@ -41,6 +43,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
     }
 
     if $repo != 'none' {
+        $log_file = "/var/log/nanoc-site-downloader"
         $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo}"
 
         exec { "nanoc-site-download-${domain}":
@@ -58,7 +61,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
             ensure  => present,
             command => "/usr/bin/chronic ${cmd}",
             user    => root,
-            minute  => [20, 50]
+            minute  => [0, 15, 30, 45]
         }
     }
     else {

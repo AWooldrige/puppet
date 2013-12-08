@@ -3,10 +3,8 @@
 set -o nounset
 set -o errexit
 
-LOGFILE="/var/log/puppet-git-bootstrap"
 function log {
     /bin/echo $(date --rfc-3339=ns)" ${1}"
-    /bin/echo $(date --rfc-3339=ns)" ${1}" >> $LOGFILE
 }
 
 usage="Usage: $0 [branch]"
@@ -37,13 +35,8 @@ if [ -d "/vagrant" ]; then
     log "   ** We're on a Vagrant box! Copying over manifests/modules. If this command hangs, see the README"
     cp -R /vagrant /etc/puppet-git
 else
-    if [ $# -eq 1 ]; then
-        log "   ** No manifests found, cloning github repo from ${1} branch"
-        /usr/bin/git clone -b $1 http://github.com/AWooldrige/puppet.git /etc/puppet-git
-    else
-        log '   ** No manifests found, cloning github repo from master'
-        /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
-    fi
+    log '   ** No manifests found, cloning github repo from master'
+    /usr/bin/git clone http://github.com/AWooldrige/puppet.git /etc/puppet-git
 fi
 
 log '   ** Initialising/Updating submodules'

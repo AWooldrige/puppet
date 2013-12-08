@@ -1,4 +1,3 @@
-#Stolen from https://github.com/grahamlyons/puppet/blob/master/modules/loggly/manifests/init.pp
 class loggly {
 
     package { 'rsyslog':
@@ -6,7 +5,7 @@ class loggly {
     }
 
     file { '/etc/rsyslog.d/loggly.conf':
-        content => '*.*    @@logs.loggly.com:31145',
+        source => 'puppet:///modules/loggly/22-loggly.conf',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',

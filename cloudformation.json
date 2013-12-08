@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS Infrastructure for Nanoc Sites",
+    "Description": "AWS Infrastructure for Public Facing Sites",
     "Parameters" : {
         "AMI" : {
             "Type" : "String",
