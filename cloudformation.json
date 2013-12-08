@@ -307,8 +307,8 @@
         "SCBSLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Properties": {
-                "ImageId": "ami-3d160149",
-                "InstanceType": "t1.micro",
+                "ImageId": "ami-f4bb5583",
+                "InstanceType": "m1.small",
                 "SecurityGroups": [{
                     "Ref": "SCBSSecurityGroup"
                 }],
