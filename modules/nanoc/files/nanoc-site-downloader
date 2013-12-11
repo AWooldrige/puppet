@@ -2,11 +2,13 @@
 from subprocess import check_output, CalledProcessError, STDOUT
 import argparse
 import os
-import logging
-import logging.handlers
+from woolielibs.loghelper import bootstrap_logger
+from logging import getLogger
+
+LOGGER_NAME = "Nanoc_Site_Downloader"
 
 def scall(cmd):
-    l = logging.getLogger("nanoc-site-downloader")
+    l = getLogger(LOGGER_NAME)
     l.debug(cmd)
     try:
         stdout = check_output(cmd, stderr=STDOUT, shell=True)
@@ -28,20 +30,7 @@ if __name__ == "__main__":
         "nanoc-site-downloader will download and install from")
     args = parser.parse_args()
 
-    l = logging.getLogger('nanoc-site-downloader')
-    l.setLevel(logging.DEBUG)
-
-    #Console handler
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    l.addHandler(ch)
-
-    #Syslog handler
-    sh = logging.handlers.SysLogHandler(address='/dev/log')
-    sh.setLevel(logging.INFO)
-    sh.setFormatter(logging.Formatter("NH[" + str(os.getpid()) + ']: %(levelname)s: %(message)s'))
-    l.addHandler(sh)
+    l = bootstrap_logger(LOGGER_NAME)
 
     all_checkouts = "/var/nanoc/repos"
     if not os.path.exists(all_checkouts):

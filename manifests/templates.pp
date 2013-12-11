@@ -1,5 +1,6 @@
 node default {
     include default-config
+    include python
     include motd
     include ntp
     include puppet-auto-update

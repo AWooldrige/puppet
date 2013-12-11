@@ -4,11 +4,13 @@ import argparse
 import os
 import time
 import yaml
-import logging
-import logging.handlers
+from woolielibs.loghelper import bootstrap_logger
+from logging import getLogger
+
+LOGGER_NAME = "Nanoc_Builder"
 
 def scall(cmd):
-    l = logging.getLogger("nh")
+    l = getLogger(LOGGER_NAME)
     l.debug(cmd)
     stdout = check_output(cmd, stderr=STDOUT, shell=True)
     if stdout:
@@ -80,23 +82,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path = os.path.abspath(args.path)
 
-    l = logging.getLogger('nh')
-    l.setLevel(logging.DEBUG)
+    l = bootstrap_logger(LOGGER_NAME)
 
-    #Console handler
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    l.addHandler(ch)
-
-    #Syslog handler
-    sh = logging.handlers.SysLogHandler(address='/dev/log')
-    sh.setLevel(logging.INFO)
-    sh.setFormatter(logging.Formatter("NH[" + str(os.getpid()) + ']: %(levelname)s: %(message)s'))
-    l.addHandler(sh)
-
-    l.info("Starting nh '{0}' in '{1}'".format(args.instruction, path))
-
+    l.info("Starting Nanoc Builder '{0}' in '{1}'".format(args.instruction,
+                                                          path))
     start_time = time.time()
     try:
         config = get_configuration(path)
