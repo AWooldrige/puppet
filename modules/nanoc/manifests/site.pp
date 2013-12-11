@@ -43,7 +43,6 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
     }
 
     if $repo != 'none' {
-        $log_file = "/var/log/nanoc-site-downloader"
         $cmd = "/usr/bin/nanoc-site-downloader ${domain} ${repo}"
 
         exec { "nanoc-site-download-${domain}":

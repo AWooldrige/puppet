@@ -6,49 +6,48 @@ from woolielibs.loghelper import bootstrap_logger
 from logging import getLogger
 
 LOGGER_NAME = "Nanoc_Site_Downloader"
+REPO_PATH = "/var/nanoc/repos"
+
 
 def scall(cmd):
     l = getLogger(LOGGER_NAME)
-    l.debug(cmd)
+    l.debug("running command: " + cmd)
     try:
         stdout = check_output(cmd, stderr=STDOUT, shell=True)
     except CalledProcessError, e:
         l.error(e.output)
         raise e
     if stdout:
-        l.debug(stdout)
+        l.debug(" |- output: " + stdout)
 
-def file_contents(file):
-    with open(file) as f:
+
+def git_head_commit(repo):
+    hash_file = repo + "/.git/refs/heads/master"
+    with open(hash_file) as f:
         return f.read()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("domain", help="domain for the site")
-    parser.add_argument("repo", help="git repo where the " +
+    parser.add_argument("repo", help="git repo where the "
         "nanoc-site-downloader will download and install from")
     args = parser.parse_args()
-
     l = bootstrap_logger(LOGGER_NAME)
 
-    all_checkouts = "/var/nanoc/repos"
-    if not os.path.exists(all_checkouts):
-        scall("mkdir {0} && chmod 755 {0}".format(all_checkouts))
+    if not os.path.exists(REPO_PATH):
+        scall("mkdir {0} && chmod 755 {0}".format(REPO_PATH))
 
-    checkout = "{0}/{1}".format(all_checkouts, args.domain)
+    repo = "{0}/{1}".format(REPO_PATH, args.domain)
 
-    rebuild = False
-    if os.path.exists(checkout):
-        ref_file = ".git/refs/heads/master"
-        before = file_contents("{0}/{1}".format(checkout, ref_file))
-        scall("(cd {} && git pull)".format(checkout))
-        after = file_contents("{0}/{1}".format(checkout, ref_file))
-        if before != after:
-            rebuild = True
+    if not os.path.exists(repo):
+        scall("git clone {0} {1}".format(args.repo, repo))
     else:
-        scall("git clone {0} {1}".format(args.repo, checkout))
-        rebuild = True
+        before = git_head_commit(repo)
+        scall("(cd {} && git pull)".format(repo))
+        if before == git_head_commit(repo):
+            l.debug("Git repo master branch head points to the same commit, "
+                    "no need to rebuild site: {0}".format(before))
+            raise SystemExit
 
-    if rebuild:
-        scall("nh install -p {0}".format(checkout))
+    scall("nh install -p {0}".format(repo))
