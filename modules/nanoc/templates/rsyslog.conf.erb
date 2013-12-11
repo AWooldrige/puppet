@@ -5,7 +5,7 @@
 $ModLoad imfile
 
 #Error Logs
-$InputFileName /var/log/nginx/<%= domain %>.error.log
-$InputFileTag error_log_<%= domain %>:
-$InputFileStateFile error_log_<%= domain %>
+$InputFileName /var/log/nginx/<%= @domain %>.error.log
+$InputFileTag error_log_<%= @domain %>:
+$InputFileStateFile error_log_<%= @domain %>
 $InputRunFileMonitor
