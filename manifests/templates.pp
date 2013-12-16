@@ -1,4 +1,5 @@
 node default {
+    include locale
     include default-config
     include python
     include motd
@@ -11,7 +12,7 @@ node default {
     include user-woolie
 }
 
-node static-content-and-build-server inherits default {
+node headend inherits default {
     class { 'nginx': }
     include loggly
     include nanoc

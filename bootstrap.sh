@@ -4,7 +4,7 @@ set -o nounset
 set -o errexit
 
 function log {
-    /bin/echo $(date --rfc-3339=ns)" ${1}"
+    echo $(date --rfc-3339=ns)" ${1}"
 }
 
 function install {
@@ -33,10 +33,10 @@ fi
 log 'Starting git distributed puppet bootstrap script'
 
 log ' * Updating apt repos'
-/usr/bin/apt-get update -y
+apt-get update -y
 
 log ' * Upgrading apt packages'
-/usr/bin/apt-get upgrade -y
+apt-get upgrade -y
 
 log ' * Installing git and puppet if needed'
 install git
@@ -58,13 +58,13 @@ fi
 
 log '   ** Initialising/Updating submodules'
 cd /etc/puppet-git
-/usr/bin/git submodule init
-/usr/bin/git submodule sync
-/usr/bin/git submodule update
+git submodule init
+git submodule sync
+git submodule update
 cd -
 
 log ' * Running puppet apply'
-/usr/bin/puppet apply --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
+puppet apply --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
 
 log 'Finished!'
 exit 0
