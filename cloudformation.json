@@ -302,12 +302,20 @@
         },
         "SCBSAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
-                "Properties": {
-                    "AvailabilityZones": [ "eu-west-1c" ],
-                    "LaunchConfigurationName": { "Ref": "SCBSLaunchConfiguration" },
-                    "MaxSize": "1",
-                    "MinSize": "1"
-                 }
+            "Properties": {
+                "AvailabilityZones": [ "eu-west-1c" ],
+                "LaunchConfigurationName": { "Ref": "SCBSLaunchConfiguration" },
+                "MaxSize": "2",
+                "MinSize": "1",
+                "DesiredCapacity": "1"
+             },
+            "UpdatePolicy" : {
+                "AutoScalingRollingUpdate" : {
+                    "MaxBatchSize": "1",
+                    "MinInstancesInService": "1",
+                    "PauseTime": "PT0S"
+                }
+            }
         },
         "SCBSLaunchConfiguration": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
