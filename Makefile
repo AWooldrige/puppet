@@ -3,4 +3,4 @@ apply:
 
 vagrant:
 	vagrant up
-	ssh vagrant 'populate-workspace'
+	ssh vagrant -t 'bash -l -c "populate-workspace"'
