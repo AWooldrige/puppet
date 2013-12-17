@@ -12,4 +12,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network "private_network", ip: "192.168.42.42"
 
     config.vm.provision "shell", path: "bootstrap.sh"
+    config.vm.synced_folder "~/.ssh", "/host-ssh-keys", :mount_options => ["dmode=755","fmode=440"]
 end

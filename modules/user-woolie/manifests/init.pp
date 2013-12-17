@@ -4,7 +4,7 @@ class user-woolie {
     user { 'woolie':
         ensure     => present,
         gid        => 'woolie',
-        groups     => ['woolie', 'sshallowedlogin', 'nopasswordsudo'],
+        groups     => ['woolie', 'vagrant', 'sshallowedlogin', 'nopasswordsudo'],
         shell      => '/bin/bash',
         home       => '/home/woolie',
         managehome => true,
@@ -13,7 +13,7 @@ class user-woolie {
                         Group['sshallowedlogin'],
                         Group['nopasswordsudo'] ]
     }
-    group { 'woolie':
+    group { ['woolie', 'vagrant']:
         ensure  => present,
     }
 
@@ -45,5 +45,19 @@ class user-woolie {
         ensure  => link,
         target  => '/etc/custom.bashrc',
         require => User['woolie']
+    }
+
+    file { '/home/woolie/workspace/':
+        ensure => directory,
+        owner  => 'woolie',
+        group  => 'woolie',
+        mode   => '0755'
+    }
+
+    file { '/usr/bin/populate-workspace':
+        source => 'puppet:///modules/user-woolie/populate-workspace',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755'
     }
 }

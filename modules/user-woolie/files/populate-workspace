@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#Exit if any unset variables are used, if any command returns an error
+set -o nounset
+set -o errexit
+#Enable JOB CONTROL and trap CTRL-C
+#set -m
+#trap ctrl_c INT
+
+GITHUB_KEY="/host-ssh-keys/id_rsa_github"
+REPOS=(
+    kempstonnurseries.co.uk
+    brignellbookbinders.com
+    onmyplate.co.uk
+    woolie.co.uk
+)
+
+#------------------------------------------------------------------------------
+
+function log {
+    echo $(date --rfc-3339=ns)" ${1}"
+}
+function die {
+    log "********************************"
+    log "ERROR: ${1}"
+    log "********************************"
+    #For when parallelising
+    #jobs -p | xargs pkill -TERM -P
+    killall ssh-agent
+    exit 1
+}
+
+function checkout_if_needed {
+    repo_name=$1
+    expected_repo_path="${HOME}/workspace/${repo_name}"
+    echo $expected_repo_path
+    if [[ -d $expected_repo_path ]]; then
+        log "Directory ${expected_repo_path} exists, doing nothing"
+    else
+        log "Directory ${expected_repo_path} doesn't exist, doing a git clone"
+
+        #Sleep for some time roughly between 1 and 10 seconds to stop a
+        #thundering herd reaching github.
+        sleep $(shuf -i 1-10 -n 1)
+        until git clone "git@github.com:AWooldrige/${repo_name}.git" $expected_repo_path; do
+            log "Could not clone ${repo_name}, retrying in 10 to 15 seconds"
+            sleep $(shuf -i 10-15 -n 1)
+        done
+    fi
+}
+
+#function ctrl_c() {
+#    die "Trapped CTRL-C"
+#}
+
+#------------------------------------------------------------------------------
+
+log 'Starting populate-workspace script'
+
+#Preflight checks
+[[ $(whoami) == 'woolie' ]] || die 'This script must be run as the "woolie" user'
+[[ -f $GITHUB_KEY ]] || die "Can't find the Github private key '${GITHUB_KEY}'"
+
+#Don't want to be asked for the key password more than once
+eval $(ssh-agent)
+ssh-add $GITHUB_KEY
+
+for repo in "${REPOS[@]}"; do
+    #checkout_if_needed $repo &
+    checkout_if_needed $repo
+done
+wait
+
+log 'All done populating workspace'
