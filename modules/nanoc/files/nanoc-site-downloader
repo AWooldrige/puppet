@@ -41,7 +41,7 @@ if __name__ == "__main__":
     repo = "{0}/{1}".format(REPO_PATH, args.domain)
 
     if not os.path.exists(repo):
-        scall("git clone {0} {1}".format(args.repo, repo))
+        scall("git clone {0} {1} --depth=1".format(args.repo, repo))
     else:
         before = git_head_commit(repo)
         scall("(cd {} && git pull)".format(repo))
