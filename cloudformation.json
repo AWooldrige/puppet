@@ -322,10 +322,16 @@
             "Properties": {
                 "ImageId": { "Ref": "AMI" },
                 "InstanceType": "t1.micro",
+                "IamInstanceProfile": { "Ref": "SCBSIamInstanceProfile" },
                 "SecurityGroups": [{
                     "Ref": "SCBSSecurityGroup"
                 }],
-                "InstanceMonitoring": false
+                "InstanceMonitoring": false,
+                "UserData": {
+                    "Fn::Base64" : {
+                        "Fn::Join" : [ "", [ { "Ref" : "SCBSEIP" } ] ]
+                    }
+                }
             }
         },
         "SCBSSecurityGroup": {
@@ -346,6 +352,38 @@
                         "CidrIp": "0.0.0.0/0"
                     }
                 ]
+            }
+        },
+        "SCBSAllocateEIPRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [ "ec2.amazonaws.com" ]
+                        },
+                        "Action": [ "sts:AssumeRole" ]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "OnlyAllowEIPAllocations",
+                    "PolicyDocument": {
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": ["ec2:AssociateAddress"],
+                            "Resource": ["*"]
+                        }]
+                    }
+                }]
+            }
+        },
+        "SCBSIamInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [{ "Ref": "SCBSAllocateEIPRole" }]
             }
         },
         "onmyplatecoukCloudFrontCDN": {
