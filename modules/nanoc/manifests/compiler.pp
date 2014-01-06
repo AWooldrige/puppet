@@ -1,4 +1,6 @@
 class nanoc::compiler {
+    require locale
+
     package { 'ruby-dev':
         ensure => installed
     }
