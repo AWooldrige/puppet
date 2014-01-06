@@ -35,3 +35,10 @@ node headend inherits default {
         repo   => 'https://github.com/AWooldrige/kempstonnurseries.co.uk.git'
     }
 }
+
+node raspberry-pi inherits default {
+    include puppet-auto-update
+    include raspi
+    include raspi::piface
+    include raspi::piuser
+}
