@@ -2,6 +2,10 @@ class python {
     package { 'python':
         ensure => installed
     }
+    package { 'python-boto':
+        ensure  => installed,
+        require => Package['python']
+    }
     file { '/usr/lib/python2.7/dist-packages/woolielibs':
         source  => 'puppet:///modules/python/woolielibs',
         owner   => 'root',

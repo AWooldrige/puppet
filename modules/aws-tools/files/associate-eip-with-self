@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+from boto.ec2.connection import EC2Connection
+from boto.utils import get_instance_metadata, get_instance_userdata
+
+from woolielibs.loghelper import bootstrap_logger
+from socket import inet_aton
+
+LOGGER_NAME = "ASSOCIATE_EIP_WITH_SELF"
+
+
+if __name__ == "__main__":
+    l = bootstrap_logger(LOGGER_NAME)
+    l.debug("Starting {0} script.".format(LOGGER_NAME))
+
+    meta = get_instance_metadata(timeout=2, num_retries=2)
+    try:
+        this_instance = meta["instance-id"]
+        current_ip = meta["public-ipv4"]
+    except KeyError, e:
+        message = ("This script doesn't seem to be on an EC2 instance. "
+            " It wasn't possible to get the instance metadata")
+        l.error(message)
+        raise Exception(message)
+
+    try:
+        #This is instead of matching against a regex - see:
+        #http://stackoverflow.com/questions/10086572
+        eip = get_instance_userdata()
+        inet_aton(eip)
+    except Exception, e:
+        message = ("UserData for this instance doesn't seem to be an IP: "
+            "nothing to associate!")
+        l.error(message)
+        raise Exception(message)
+
+    if eip != current_ip:
+        l.info("Associating EIP {0} with this instance ({1})".format(
+            eip, this_instance))
+        result = EC2Connection().associate_address(this_instance, eip)
+        l.info("Done. {0} now associated with ({1}).".format(
+            eip, this_instance))
+    else:
+        l.info("EIP {0} already associated with this instance ({1})".format(
+            eip, this_instance))

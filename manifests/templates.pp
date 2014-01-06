@@ -4,7 +4,6 @@ node default {
     include python
     include motd
     include ntp
-    include puppet-auto-update
     include sshd
     include sudo
     include vim
@@ -17,6 +16,7 @@ node headend inherits default {
     include loggly
     include nanoc
     include nanoc::compiler
+    include aws-tools
 
     nanoc::site { 'brignellbookbinders.com':
         ensure => installed,
