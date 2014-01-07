@@ -30,7 +30,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        notify  => [ Service['nginx'], Exec["nanoc-site-download-${domain}" ]
+        notify  => [ Service['nginx'], Exec["nanoc-site-download-${domain}"] ]
         require => Package['nginx']
     }
     file { "/etc/rsyslog.d/nanoc-${domain}.conf":
@@ -55,6 +55,7 @@ define nanoc::site ($ensure='installed', $http_port=80, $repo='none') {
             logoutput   => "true",
             tries       => 3,
             refreshonly => true,
+            environment => ["LANG=en_GB.UTF-8", "LC_ALL=en_GB.UTF-8"],
             timeout     => 1800
         }
         cron {"nanoc-site-download-cron-${domain}":
