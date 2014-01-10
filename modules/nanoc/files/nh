@@ -84,8 +84,7 @@ if __name__ == "__main__":
 
     l = bootstrap_logger(LOGGER_NAME)
 
-    l.info("Starting Nanoc Builder '{0}' in '{1}'".format(args.instruction,
-                                                          path))
+    l.info("Building path '{0}'".format(path))
     start_time = time.time()
     try:
         config = get_configuration(path)

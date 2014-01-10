@@ -10,7 +10,6 @@ LOGGER_NAME = "ASSOCIATE_EIP_WITH_SELF"
 
 if __name__ == "__main__":
     l = bootstrap_logger(LOGGER_NAME)
-    l.debug("Starting {0} script.".format(LOGGER_NAME))
 
     meta = get_instance_metadata(timeout=2, num_retries=2)
     try:

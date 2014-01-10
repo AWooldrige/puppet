@@ -21,4 +21,5 @@ def bootstrap_logger(name):
     sh.setFormatter(logging.Formatter(prefix + LOG_FORMAT))
     l.addHandler(sh)
 
+    l.debug("Starting {0} script...".format(name))
     return l
