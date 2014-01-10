@@ -18,11 +18,4 @@ class aws-tools {
         special => "reboot",
         require => File["/usr/bin/associate-eip-with-self"]
     }
-    cron {"associate-eip-with-self-on-schedule":
-        ensure  => present,
-        command => $cmd,
-        user    => root,
-        minute  => [0, 10, 20, 30, 40, 50],
-        require => File["/usr/bin/associate-eip-with-self"]
-    }
 }
