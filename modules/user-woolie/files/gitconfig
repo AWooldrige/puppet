@@ -13,7 +13,7 @@
     status = auto
 
 [core]
-    editor = vim
+    editor = /usr/bin/vim
 
 [merge]
     tool = vimdiff
