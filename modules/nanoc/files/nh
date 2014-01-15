@@ -7,14 +7,13 @@ import yaml
 from woolielibs.loghelper import bootstrap_logger
 from logging import getLogger
 
-LOGGER_NAME = "Nanoc_Builder"
+l = bootstrap_logger("Nanoc_Builder")
 
 def scall(cmd):
-    l = getLogger(LOGGER_NAME)
-    l.debug(cmd)
+    l.debug("shell: " + cmd)
     stdout = check_output(cmd, stderr=STDOUT, shell=True)
     if stdout:
-        l.debug(stdout)
+        l.debug(" |- output: " + stdout)
 
 def make_prepare(path):
     pass
@@ -55,18 +54,19 @@ def make_fast_install(path, domain):
             path, tmp_nginx_config_dest))
         scall("sudo rm -rf {1} && sudo mv {0} {1}".format(
             tmp_nginx_config_dest, nginx_config_dest))
-        scall("sudo service nginx restart")
     except:
+        l.info("Either no nginx configuration was provided for this site, or "
+               "something went wrong copying it in place.", exc_info=True)
         scall("sudo rmdir {}".format(tmp_nginx_config_dest))
-        print "No nginx configuration to copy"
+    scall("sudo service nginx restart")
 
 def get_configuration(path):
     try:
         scall("ls {}/nanoc.yaml".format(path))
     except CalledProcessError:
-        raise Exception (
-            path + " doesn't seem to be a nanoc site path - can't find a " +
-            "nanoc.yaml file.")
+        l.exception("{0} isn't a nanoc site - no nanoc.yaml file.".format(
+            path))
+        raise SystemExit(1)
 
     with open("{}/nanoc.yaml".format(path)) as file:
         return yaml.safe_load(file)
@@ -82,27 +82,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path = os.path.abspath(args.path)
 
-    l = bootstrap_logger(LOGGER_NAME)
-
     l.info("Building path '{0}'".format(path))
     start_time = time.time()
-    try:
-        config = get_configuration(path)
+    config = get_configuration(path)
 
-        if args.instruction == "install":
-            make_install(path, config["domain"])
+    if args.instruction == "install":
+        make_install(path, config["domain"])
 
-        if args.instruction == "fastinstall":
-            make_fast_install(path, config["domain"])
+    if args.instruction == "fastinstall":
+        make_fast_install(path, config["domain"])
 
-        if args.instruction == "build":
-            make_build(path)
+    if args.instruction == "build":
+        make_build(path)
 
-        if args.instruction == "clean":
-            make_clean(path)
-    except Exception, e:
-        l.exception(e)
-        raise
+    if args.instruction == "clean":
+        make_clean(path)
 
     end_time = time.time()
     l.info("Completed in {0} seconds".format(time.time() - start_time))

@@ -1,22 +1,17 @@
 #!/usr/bin/env python
-from subprocess import check_output, CalledProcessError, STDOUT
+from subprocess import check_output, STDOUT
 import argparse
 import os
 from woolielibs.loghelper import bootstrap_logger
 from logging import getLogger
 
-LOGGER_NAME = "Nanoc_Site_Downloader"
 REPO_PATH = "/var/nanoc/repos"
 
+l = bootstrap_logger("Nanoc_Site_Downloader")
 
 def scall(cmd):
-    l = getLogger(LOGGER_NAME)
-    l.debug("running command: " + cmd)
-    try:
-        stdout = check_output(cmd, stderr=STDOUT, shell=True)
-    except CalledProcessError, e:
-        l.error(e.output)
-        raise e
+    l.debug("shell: " + cmd)
+    stdout = check_output(cmd, stderr=STDOUT, shell=True)
     if stdout:
         l.debug(" |- output: " + stdout)
 
@@ -33,7 +28,6 @@ if __name__ == "__main__":
     parser.add_argument("repo", help="git repo where the "
         "nanoc-site-downloader will download and install from")
     args = parser.parse_args()
-    l = bootstrap_logger(LOGGER_NAME)
 
     if not os.path.exists(REPO_PATH):
         scall("mkdir {0} && chmod 755 {0}".format(REPO_PATH))
