@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+# This script is a modification of https://gist.github.com/mariocesar/4142563
+
+import time
+import sys
+import urllib2
+from urllib2 import urlopen, URLError, HTTPError
+import dns.resolver
+from boto.route53.connection import Route53Connection
+from boto.route53.exception import DNSServerError
+from boto.route53.record import ResourceRecordSets
+
+from woolielibs.loghelper import bootstrap_logger
+from socket import inet_aton
+
+HOSTED_ZONE = 'Z1VIBQX07I3Y3K'
+DOMAIN_NAME = 'home.wooldrige.co.uk'
+EXTERNAL_IP_SERVICE = 'http://curlmyip.com'
+
+l = bootstrap_logger("Update_Dynamic_DNS")
+
+get_change_id = lambda response: response['ChangeInfo']['Id'].split('/')[-1]
+get_change_status = lambda response: response['ChangeInfo']['Status']
+
+def resolve_name_ip(name):
+    resolver = dns.resolver.Resolver()
+    resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+    try:
+        l.debug("Attempting to resolve {0} using {1}".format(
+            name, resolver.nameservers))
+        answer = resolver.query(name)
+    except:
+        l.exception("Couldn't resolve {0}, does the domain exist?".format(
+            name))
+        raise SystemExit(1)
+    return answer.response.answer[0].items[0].address
+
+def get_external_ip():
+    """
+    Queries an external service to determine the public IP address of this
+    network (I.e. the ISP assigned address).
+    """
+    try:
+        l.debug("Contacting external IP service: {0}".format(
+            EXTERNAL_IP_SERVICE))
+        external_ip = urlopen(EXTERNAL_IP_SERVICE).read().strip()
+    except (URLError, HTTPError), e:
+        l.exception("Could not contact external IP service: {0}".format(
+            EXTERNAL_IP_SERVICE))
+        raise SystemExit(1)
+    try:
+        #This is instead of matching against a regex to validate the IP - see:
+        #http://stackoverflow.com/questions/10086572
+        inet_aton(external_ip)
+    except Exception, e:
+        l.exception("Data returned by {0} isn't an IP address: {2}".format(
+            EXTERNAL_IP_SERVICE, external_ip))
+        raise SystemExit(1)
+    l.debug("External IP determined as {0}".format(external_ip))
+    return external_ip
+
+
+if __name__ == '__main__':
+    external_ip = get_external_ip()
+
+    # Avoid hit to the Route53 API if is not necessary.
+    resolved_ip = resolve_name_ip(DOMAIN_NAME)
+    if resolved_ip == external_ip:
+        msg = "DNS response ({0}) and public IP ({1}) are the same. Finished."
+        l.info(msg.format(resolved_ip, external_ip))
+        raise SystemExit(0)
+
+    conn = Route53Connection()
+    try:
+        zone = conn.get_hosted_zone(HOSTED_ZONE)
+    except DNSServerError:
+        l.exception("{0} Zone not found in Route53".format(HOSTED_ZONE))
+        raise SystemExit(1)
+
+    response = conn.get_all_rrsets(HOSTED_ZONE, 'A', DOMAIN_NAME, maxitems=1)[0]
+
+    if external_ip not in response.resource_records:
+        l.info("Found new IP: {0}".format(external_ip))
+
+        # Delete the old record, and create a new one.
+        # This code is from route53.py script, the change record command
+        changes = ResourceRecordSets(conn, HOSTED_ZONE, '')
+        change1 = changes.add_change("DELETE", DOMAIN_NAME, 'A', response.ttl)
+        for old_value in response.resource_records:
+            change1.add_value(old_value)
+        change2 = changes.add_change("CREATE", DOMAIN_NAME, 'A', response.ttl)
+        change2.add_value(external_ip)
+
+        try:
+            commit = changes.commit()
+            l.debug("{0}".format(commit))
+        except:
+            l.exception("Changes can't be made: {0}".format(changes))
+            raise SystemExit(1)
+
+        else:
+            change = conn.get_change(
+                get_change_id(commit['ChangeResourceRecordSetsResponse']))
+            l.debug("{0}".format(change))
+
+            while get_change_status(change['GetChangeResponse']) == 'PENDING':
+                time.sleep(5)
+                change = conn.get_change(
+                    get_change_id(change['GetChangeResponse']))
+                l.debug("{0}".format(change))
+            if get_change_status(change['GetChangeResponse']) == 'INSYNC':
+                l.info("Change {0} A to {1} -> {2}".format(
+                    DOMAIN_NAME, response.resource_records[0], external_ip))
+            else:
+                l.warning(
+                    "Unknown status for the change: {0}".format(change))
+                l.debug("{0}".format(change))

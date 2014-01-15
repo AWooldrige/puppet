@@ -50,6 +50,12 @@
                         "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
+                        "Name": "home.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "3600",
+                        "ResourceRecords": [ "home.wooldrige.co.uk" ]
+                    },
+                    {
                         "Name": "woolie.co.uk.",
                         "Type": "MX",
                         "TTL": "86400",
@@ -170,6 +176,12 @@
                         "Type": "A",
                         "TTL": "3600",
                         "ResourceRecords": [{ "Ref": "SCBSEIP" }]
+                    },
+                    {
+                        "Name": "home.wooldrige.co.uk.",
+                        "Type": "A",
+                        "TTL": "120",
+                        "ResourceRecords": [ "127.0.0.1" ]
                     },
                     {
                         "Name": "wooldrige.co.uk.",
@@ -384,6 +396,41 @@
             "Properties": {
                 "Path": "/",
                 "Roles": [{ "Ref": "SCBSAllocateEIPRole" }]
+            }
+        },
+        "IAMUserRaspberryPi": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "IAMGroupDynamicDNS" }
+                ]
+            }
+        },
+        "IAMGroupDynamicDNS": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "onlyallowtoupdatewooldrigecouk",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "route53:ChangeResourceRecordSets",
+                                    "route53:GetChange",
+                                    "route53:ListResourceRecordSets",
+                                    "route53:GetHostedZone"
+                                ],
+                                "Resource":"arn:aws:route53:::hostedzone/Z1VIBQX07I3Y3K"
+                            },
+                            {
+                                "Effect":"Allow",
+                                "Action":[ "route53:GetChange" ],
+                                "Resource":"arn:aws:route53:::change/*"
+                            }
+                        ]
+                    }
+                } ]
             }
         },
         "onmyplatecoukCloudFrontCDN": {
