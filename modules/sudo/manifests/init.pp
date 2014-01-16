@@ -2,7 +2,7 @@ class sudo {
     package { sudo:
         ensure => installed,
     }
-    group { 'nopasswordsudo':
+    group { ['passwordsudo', 'nopasswordsudo']:
         ensure => present
     }
 

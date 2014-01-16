@@ -17,4 +17,7 @@ root    ALL=(ALL:ALL) ALL
 # Allow members to execute any command without providing a password
 %nopasswordsudo  ALL=(ALL) NOPASSWD:ALL
 
+# Allow members to execute any command after providing a password
+%passwordsudo ALL=(ALL) ALL
+
 #includedir /etc/sudoers.d
