@@ -23,7 +23,6 @@ set background=dark             "For using vim in a dark terminal
 
 
 " ================ Search Settings  =================
-
 set incsearch        "Find the next match as we type the search
 set hlsearch         "Hilight searches by default
 noremap <silent> <Space> :set hlsearch! hlsearch?<CR>
@@ -31,16 +30,12 @@ set viminfo='100,f1  "Save up to 100 marks, enable capital marks
 
 
 " ================ Turn Off Swap Files ==============
-
 set noswapfile
 set nobackup
 set nowb
 
 
 " ================ Persistent Undo ==================
-" Keep undo history across sessions, by storing in file.
-" Only works all the time.
-
 set undodir=~/.vim/backups
 set undofile
 
@@ -87,27 +82,14 @@ set wildignore+=*.png,*.jpg,*.gif
 
 
 " ================ Scrolling ========================
-
-"set scrolloff=8         "Start scrolling when we're 8 lines away from margins
-"set sidescrolloff=15
-"set sidescroll=1
-
-
-" ================ PHPDoc Plugin Settings ========================
-nmap <leader>p :exe PhpDoc()<CR>
-let g:pdv_cfg_Type = "mixed"
-let g:pdv_cfg_Package = ""
-let g:pdv_cfg_Version = "$id$"
-let g:pdv_cfg_Author = "Alistair Wooldrige <agw@woolie.co.uk>"
-let g:pdv_cfg_Copyright = "Copyright (c) 2007 - 2012 Alistair Wooldrige"
-let g:pdv_cfg_License = ""
+set scrolloff=8         "Start scrolling when we're 8 lines away from margins
 
 
 " ================ Set spelling! ========================
 setlocal spell spelllang=en_gb
 set nospell
 " Press Ctrl-Shift-s to toggle spellcheck on/off, and show current value.
-noremap <silent> <C-S> :set spell! spell?<CR>
+noremap <leader>s :set spell! spell?<CR>
 
 
 " ================ Syntax highlighting ========================
@@ -121,13 +103,18 @@ au BufNewFile,BufRead *.vcl set filetype=c
 set colorcolumn=80
 
 
+" ================ File explorer settings ========================
+nnoremap <leader>n :Vexplore<CR>
+let g:netrw_liststyle=3
+
+
+" ================ Window splits ========================
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
 
 " ================ Misc Key mappings ========================
-noremap <leader>t :CommandT<CR>
-noremap <leader>n :NERDTreeToggle<CR>
-noremap <leader>l :TlistToggle<CR>
-noremap <leader>r :TName '
-map <Tab> <C-w>w
-
 " Use sudo to save
 cmap w!! %!sudo tee > /dev/null %
