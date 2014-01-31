@@ -1,5 +1,5 @@
 class python {
-    package { 'python':
+    package { ['python', 'ipython']:
         ensure => installed
     }
     package { 'python-boto':
