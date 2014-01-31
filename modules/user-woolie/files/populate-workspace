@@ -12,6 +12,7 @@ REPOS=(
     brignellbookbinders.com
     onmyplate.co.uk
     woolie.co.uk
+    puppet
 )
 
 #------------------------------------------------------------------------------
