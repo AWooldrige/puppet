@@ -4,6 +4,8 @@
 #########################################################################
 # This script is a modification of https://gist.github.com/mariocesar/4142563
 
+import stun
+
 import time
 import sys
 import urllib2
@@ -18,7 +20,6 @@ from socket import inet_aton
 
 HOSTED_ZONE = 'Z1VIBQX07I3Y3K'
 DOMAIN_NAME = 'home.wooldrige.co.uk'
-EXTERNAL_IP_SERVICE = 'http://curlmyip.com'
 
 l = bootstrap_logger("Update_Dynamic_DNS")
 
@@ -44,20 +45,17 @@ def get_external_ip():
     network (I.e. the ISP assigned address).
     """
     try:
-        l.debug("Contacting external IP service: {0}".format(
-            EXTERNAL_IP_SERVICE))
-        external_ip = urlopen(EXTERNAL_IP_SERVICE).read().strip()
-    except (URLError, HTTPError), e:
-        l.exception("Could not contact external IP service: {0}".format(
-            EXTERNAL_IP_SERVICE))
+        l.debug("Firing up STUN client to determine external IP")
+        _, external_ip, _ = stun.get_ip_info()
+    except:
+        l.exception("Could not determine external IP with STUN")
         raise SystemExit(1)
     try:
         #This is instead of matching against a regex to validate the IP - see:
         #http://stackoverflow.com/questions/10086572
         inet_aton(external_ip)
     except Exception, e:
-        l.exception("Data returned by {0} isn't an IP address: {2}".format(
-            EXTERNAL_IP_SERVICE, external_ip))
+        l.exception("Data STUN returned isn't an IP: {0}".format(external_ip))
         raise SystemExit(1)
     l.debug("External IP determined as {0}".format(external_ip))
     return external_ip

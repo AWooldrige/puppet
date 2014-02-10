@@ -42,6 +42,9 @@ log ' * Installing git and puppet if needed'
 install git
 install puppet
 
+log ' * Installing python-pip (this should be moved to an early puppet stage)'
+install python-pip
+
 log ' * Installing ruby-hiera until dependency fixed in #1242363'
 install ruby-hiera
 
