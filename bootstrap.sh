@@ -69,5 +69,10 @@ cd -
 log ' * Running puppet apply'
 puppet apply --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
 
+if [ -d "/vagrant" ]; then
+    log " * We're on a Vagrant box! Making sure vagrant can SSH."
+    usermod -a -G sshallowedlogin vagrant
+fi
+
 log 'Finished!'
 exit 0
