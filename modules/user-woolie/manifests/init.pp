@@ -4,7 +4,7 @@ class user-woolie {
     user { 'woolie':
         ensure     => present,
         gid        => 'woolie',
-        groups     => ['woolie', 'vagrant', 'sshallowedlogin', 'nopasswordsudo'],
+        groups     => ['woolie', 'sshallowedlogin', 'nopasswordsudo'],
         shell      => '/bin/bash',
         home       => '/home/woolie',
         managehome => true,
@@ -13,7 +13,7 @@ class user-woolie {
                         Group['sshallowedlogin'],
                         Group['nopasswordsudo'] ]
     }
-    group { ['woolie', 'vagrant']:
+    group { ['woolie']:
         ensure  => present,
     }
 
