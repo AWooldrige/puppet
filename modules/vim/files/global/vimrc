@@ -16,9 +16,17 @@ call vundle#rc()
 
 Bundle 'gmarik/vundle'
 Bundle 'tpope/vim-surround'
+Bundle 'flazz/vim-colorschemes'
+Bundle 'scrooloose/nerdtree'
+
 
 filetype plugin indent on     " required!
 
+
+" COLOUR SCHEME
+"==============================================================================
+set background=light
+colorscheme silent
 
 
 " GENERAL SETTINGS
@@ -40,19 +48,6 @@ set history=1000                " history 1000-deep
 " persistent undo
 set undodir=~/.vim/undo
 set undofile
-
-
-" NETRW FILE BROWSER SETTINGS
-"==============================================================================
-let g:netrw_list_hide='\(^\|\s\s\)\zs\.\S\+,^DS_Store$'
-let g:netrw_hide=1              " hide hidden files
-let g:netrw_dirhistmax=100      " keep more history
-let g:netrw_altfile=1           " last edited file '#'
-let g:netrw_liststyle=3         " tree
-let g:netrw_banner=0            " no banner
-let g:netrw_altv=1              " open files on right
-let g:netrw_preview=1           " open previews vertically
-let g:netrw_use_errorwindow=0   " suppress error window
 
 
 " EDITING
@@ -133,13 +128,6 @@ noremap <silent> <Space> :set hlsearch! hlsearch?<CR>
 " toggle spellcheck
 noremap <leader>s :set spell! spell?<CR>
 
-" open netrw file browser
-noremap <silent> <Leader>n :call VexToggle("")<CR>
-noremap <silent> <Leader>e :call ExToggle("")<CR>
-noremap <silent> <Leader>,e :call ExToggle(getcwd())<CR>
-noremap <silent> <Leader><Tab> :call VexToggle("")<CR>
-noremap <silent> <Leader>,<Tab> :call VexToggle(getcwd())<CR>
-
 " quicker navigation of splits
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
@@ -150,78 +138,12 @@ nnoremap <C-l> <C-w>l
 cmap w!! %!sudo tee > /dev/null %
 
 
-" AUTO COMMANDS
+" NERDTree
 "==============================================================================
+" Auto open on startup if no files specified
+autocmd vimenter * if !argc() | NERDTree | endif
 
-" netrw
-augroup NetrwGroup
-  autocmd!
-  autocmd BufEnter          * call NormalizeWidths()
-augroup END
+" Close vim if NERDTree is the only window left
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
-
-
-" FUNCTIONS
-"==============================================================================
-fun! ExToggle(dir)
-  if &filetype != "netrw"
-    call ExOpen(a:dir)
-  else
-    call ExClose()
-  endif
-endf
-
-fun! ExOpen(dir)
-  exe "Explore " . a:dir
-  let g:netrw_browse_split=0    " open files in current window
-endf
-
-fun! ExClose()
-  while &filetype == "netrw"
-    exe "normal! \<C-O>"
-  endw
-endf
-
-fun! VexToggle(dir)
-  if exists("t:vex_buf_nr")
-    call VexClose()
-  else
-    call VexOpen(a:dir)
-  endif
-endf
-
-fun! VexOpen(dir)
-  let g:netrw_browse_split=4    " open files in previous window
-  let vex_width = 27
-
-  exe "Vexplore " . a:dir
-  let t:vex_buf_nr = bufnr("%")
-  wincmd H
-
-  call VexSize(vex_width)
-endf
-
-fun! VexClose()
-  let cur_win_nr = winnr()
-  let target_nr = ( cur_win_nr == 1 ? winnr("#") : cur_win_nr )
-
-  1wincmd w
-  close
-  unlet t:vex_buf_nr
-
-  exe (target_nr - 1) . "wincmd w"
-  call NormalizeWidths()
-endf
-
-fun! VexSize(vex_width)
-  exe "vertical resize" . a:vex_width
-  set winfixwidth
-  call NormalizeWidths()
-endf
-
-fun! NormalizeWidths()
-  let eadir_pref = &eadirection
-  set eadirection=hor
-  set equalalways! equalalways!
-  let &eadirection = eadir_pref
-endf
+map <leader>n :NERDTreeToggle<CR>
