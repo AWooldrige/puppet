@@ -11,7 +11,7 @@ node default {
     include user-woolie
 }
 
-node headend inherits default {
+node webnode inherits default {
     class { 'nginx': }
     include loggly
     include nanoc
@@ -37,6 +37,7 @@ node headend inherits default {
 }
 
 node raspberry-pi inherits default {
+    class { 'nginx': }
     include puppet-auto-update
     include raspi
     include raspi::piface

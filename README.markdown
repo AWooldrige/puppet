@@ -5,8 +5,8 @@ This is a masterless puppet configuration and works solely on puppet apply:
     puppet apply --modulepath=modules manifests/site.pp -vv
 
 
-Get It Running with Vagrant
----------------------------
+Get a Local 'webnode' Running with Vagrant
+----------------------------------------
 To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
 
  * Make sure the host machine is running VirtualBox >= 4.3.0
@@ -15,11 +15,11 @@ To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
    as your Vagrantfile: `vagrant plugin install --plugin-source https://rubygems.org --plugin-prerelease vagrant-vbguest`
  * Useful bug references: [why vbguest plugin >= 0.10.0 is needed](https://github.com/dotless-de/vagrant-vbguest/issues/88) and [bug on launchpad](https://bugs.launchpad.net/ubuntu/+bug/1239417)
 
-Then run: `vagrant up` in the project directory. The machine can be SSH'd into
-using `vagrant ssh` or on the exposed interface: `ssh woolie@192.168.42.42`.
+Then run: `vagrant up webnode` in the project directory. The machine can be
+SSH'd into using `vagrant ssh webnode` or on the exposed interface: `ssh
+woolie@192.168.42.1`.
 
-
-Get An AMI Built using Packer
+Build a 'webnode' AMI using Packer
 -----------------------------
 From within the project directory: `packer build -var 'aws_access_key=KEY' -var 'aws_secret_key=KEY' packer.json`
 
