@@ -14,7 +14,7 @@ class vim {
         require => Package['vim']
     }
 
-    file { '/home/woolie/.vim',
+    file { '/home/woolie/.vim':
         ensure  => directory,
         owner   => 'woolie',
         group   => 'woolie',
@@ -27,7 +27,7 @@ class vim {
         owner   => 'woolie',
         group   => 'woolie',
         mode    => '0755',
-        require => File['/home/woolie.vim']
+        require => File['/home/woolie/.vim']
     }
     exec { 'install-vundle':
         command     => 'git clone https://github.com/gmarik/vundle.git /home/woolie/.vim/bundle/vundle',
