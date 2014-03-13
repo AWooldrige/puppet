@@ -44,4 +44,5 @@ node raspberry-pi inherits default {
     include raspi::piuser
     include raspi::vnc
     include raspi::dynamic-dns
+    include raspi::information-radiator
 }
