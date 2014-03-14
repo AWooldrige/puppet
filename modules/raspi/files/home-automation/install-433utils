@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -o nounset
+set -o errexit
+
+TMP_DIR=$(mktemp -d)
+cd $TMP_DIR
+git clone https://github.com/ninjablocks/433Utils
+cd 433Utils/RPi_utils
+make
+sudo cp codesend RFSniffer /usr/bin/
+sudo chown root:root /usr/bin/codesend /usr/bin/RFSniffer
+rm -rf $TMP_DIR

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -o nounset
+set -o errexit
+
+TMP_DIR=$(mktemp -d)
+cd $TMP_DIR
+git clone git://git.drogon.net/wiringPi
+cd wiringPi
+./build
+rm -rf $TMP_DIR

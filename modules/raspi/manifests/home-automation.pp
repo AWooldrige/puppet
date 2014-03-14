@@ -1,31 +1,40 @@
 class raspi::home-automation {
 
-    #Install wiringPi: Git shallow clone, call build, delete directory
-
-    #Install wiringPi
-    $cmd = 'git clone git://git.drogon.net/wiringPi && cd wiringPi && ./build'
-    exec { 'install-wiringpi-manually':
-        creates => '/usr/local/lib/libwiringPi.so',
-        command => $cmd,
-        cwd => '/tmp/'
-        user => 'woolie',
-        path        => [ '/usr/local/bin', '/opt/local/bin', '/usr/bin',
-                         '/usr/sbin', '/bin', '/sbin' ],
-        require   => [Package['openssl'],
-                      File['/etc/nginx/ssl'],
-                      Class['user-woolie']]
+    package { ['openssl']:
+        ensure => installed
     }
 
-    #Install 433Utils
-    $cmd = 'git clone TODO && cd wiringPi && ./build'
-    exec { 'install-433utils-manually':
-        #creates => '/usr/local/lib/libwiringPi.so',
-        #command => $cmd,
-        #cwd => '/tmp/'
-        user => 'woolie',
-        path     => [ '/usr/local/bin', '/opt/local/bin', '/usr/bin',
+    file { '/usr/bin/install-wiringpi':
+        source => 'puppet:///modules/raspi/home-automation/install-wiringpi',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '755'
+    }
+    exec { 'install-wiringpi':
+        creates => '/usr/local/lib/libwiringPi.so',
+        command => '/usr/bin/install-wiringpi',
+        user    => 'woolie',
+        path    => [ '/usr/local/bin', '/opt/local/bin', '/usr/bin',
                          '/usr/sbin', '/bin', '/sbin' ],
-        require   => Exec['install-wiringpi-manually']
+        require => [File['/usr/bin/install-wiringpi'],
+                    Package['openssl'],
+                    File['/etc/nginx/ssl'],
+                    Class['user-woolie']]
+    }
+    file { '/usr/bin/install-433utils':
+        source => 'puppet:///modules/raspi/home-automation/install-433utils',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '755'
+    }
+    exec { 'install-433utils':
+        creates => '/usr/bin/RFSniffer',
+        command => '/usr/bin/install-433utils',
+        user    => 'woolie',
+        path    => ['/usr/local/bin', '/opt/local/bin', '/usr/bin',
+                    '/usr/sbin', '/bin', '/sbin' ],
+        require => [File['/usr/bin/install-433utils'],
+                    Exec['install-wiringpi']]
     }
 
     #Generate server certificate and private key
@@ -34,7 +43,7 @@ class raspi::home-automation {
         owner   => 'root',
         group   => 'root',
         mode    => '0755',
-        require => Class['nginx']
+        require => Package['nginx']
     }
     $command = "openssl req -new -newkey rsa:2048 -x509 -days 3650 -nodes \
                 -out /etc/nginx/ssl/self-signed-server.crt \
@@ -48,6 +57,22 @@ class raspi::home-automation {
         require   => [ Package['openssl'], File['/etc/nginx/ssl']]
     }
 
+    #Allow www-data to call codesend
+    file { '/etc/sudoers.d/home-automation-www-data':
+        source => 'puppet:///modules/raspi/home-automation/sudoers-www-data',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '440'
+    }
+
+    #Place to store .htpasswd
+    file { '/etc/nginx/authfiles':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        require => Package['nginx']
+    }
 
     #Add nginx config that is dependant on the server cert and private key
     file { '/etc/nginx/sites-enabled/home-automation.conf':
@@ -75,10 +100,5 @@ class raspi::home-automation {
         ensure  => running,
         require => File['/etc/uwsgi/apps-enabled/home-automation.ini']
         #Get this running on startup
-    }
-
-    package { ['flask-login', 'flask-sqlalchemy']:
-        ensure   => installed,
-        provider => pip
     }
 }
