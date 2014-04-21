@@ -54,3 +54,10 @@ Logging
 ------------------------------
 All scripts should log to syslog and to stdout/stderr. This should be managed
 within the scripts themselves.
+
+
+CloudFormation Issues
+=======================
+* "Currently, Amazon Route 53 supports aliases only for Elastic Load Balancing." -  This means that all DNS entries for S3 (and CloudFronted) sites have to be added manaully to allow A records to be aliased to CloudFront distributions and S3 buckets.
+* Price classes can't be set in CloudFront - these are done manually.
+* You can't set an S3 bucket up up redirect all requests to another domain - this is done manually.

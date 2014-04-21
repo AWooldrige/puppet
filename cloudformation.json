@@ -14,42 +14,6 @@
                 "HostedZoneName": "woolie.co.uk.",
                 "RecordSets": [
                     {
-                        "Name": "woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "origin.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.origin.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "static.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "static.origin.woolie.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
                         "Name": "home.woolie.co.uk.",
                         "Type": "CNAME",
                         "TTL": "3600",
@@ -433,30 +397,154 @@
                 } ]
             }
         },
-        "onmyplatecoukCloudFrontCDN": {
+        "WerckerUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "WoolieCoUkS3BucketGroup" },
+                    { "Ref": "OnmyplateCoUkS3BucketGroup" }
+                ]
+            }
+        },
+        "WwwWoolieCoUkCloudFrontCDN": {
             "Type": "AWS::CloudFront::Distribution",
             "Properties": {
                 "DistributionConfig": {
-                    "Aliases": [ "www.onmyplate.co.uk" ],
+                    "Aliases": [ "www.woolie.co.uk" ],
                     "Origins": [
                         {
-                            "DomainName": "www.origin.onmyplate.co.uk",
-                            "Id": "www.origin.onmyplate.co.uk",
+                            "DomainName": "www.woolie.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "www.woolie.co.uk",
                             "CustomOriginConfig": {
                                 "OriginProtocolPolicy": "http-only"
                             }
                         }
                     ],
                     "DefaultCacheBehavior": {
-                        "TargetOriginId": "www.origin.onmyplate.co.uk",
+                        "TargetOriginId": "www.woolie.co.uk",
                         "ForwardedValues": {
                             "QueryString": false
                         },
-                        "ViewerProtocolPolicy": "allow-all",
-                        "MinTTL": "86400"
+                        "ViewerProtocolPolicy": "allow-all"
                     },
                     "Enabled": "true"
                 }
+            }
+        },
+        "WwwOnmyplateCoUkCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Origins": [
+                        {
+                            "DomainName": "www.onmyplate.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "www.onmyplate.co.uk",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "TargetOriginId": "www.onmyplate.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": false
+                        },
+                        "ViewerProtocolPolicy": "allow-all"
+                    },
+                    "Enabled": "true"
+                }
+            }
+        },
+       "WwwWoolieCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "www.woolie.co.uk",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html"
+                }
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "WwwOnmyplateCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "www.onmyplate.co.uk",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html"
+                }
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "WoolieCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "woolie.co.uk"
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "OnmyplateCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "onmyplate.co.uk"
+            },
+            "DeletionPolicy" : "Retain"
+        },
+        "WoolieCoUkS3BucketGroup": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "AllowWriteAccessToWoolieCoUkBucket",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:ListBucket",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:GetObjectAcl",
+                                    "s3:PutObjectAcl",
+                                    "s3:DeleteObject",
+                                    "s3:ListMultipartUploadParts"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "WwwWoolieCoUkWebsiteBucket" } , "/*" ]
+                                ] }
+                            }
+                        ]
+                    }
+                } ]
+            }
+        },
+        "OnmyplateCoUkS3BucketGroup": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "AllowWriteAccessToOnmyplateCoUkBucket",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:ListBucket",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:GetObjectAcl",
+                                    "s3:PutObjectAcl",
+                                    "s3:DeleteObject",
+                                    "s3:ListMultipartUploadParts"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "WwwOnmyplateCoUkWebsiteBucket" } , "/*" ]
+                                ] }
+                            }
+                        ]
+                    }
+                } ]
             }
         }
     }
