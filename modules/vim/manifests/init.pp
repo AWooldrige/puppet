@@ -1,43 +1,35 @@
 class vim {
-    package { 'vim':
-        ensure => installed,
+
+    package { ['vim', 'vim-common', 'vim-gtk']:
+        ensure => installed
     }
 
-    file { '/etc/vim':
-        source  => 'puppet:///modules/vim/global',
+    file { '/etc/vim/vimrc.local':
+        source  => 'puppet:///modules/vim/vimrc.local',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        recurse => true,
-        purge   => true,
-        force   => true,
-        require => Package['vim']
+        require => Package['vim-common']
     }
 
-    file { '/home/woolie/.vim':
+    file { '/etc/vim/bundle':
         ensure  => directory,
-        owner   => 'woolie',
-        group   => 'woolie',
+        owner   => 'root',
+        group   => 'root',
         mode    => '0755',
-        require => Package['vim']
+        require => Package['vim-common']
     }
-    file { ['/home/woolie/.vim/bundle', '/home/woolie/.vim/backup',
-           '/home/woolie/.vim/tmp', '/home/woolie/.vim/undo']:
-        ensure  => directory,
-        owner   => 'woolie',
-        group   => 'woolie',
-        mode    => '0755',
-        require => File['/home/woolie/.vim']
-    }
+
+    # Sometimes the git command will fail, but will still create the vundle
+    # directory. This is why the directory is removed as part of the command,
+    # and the README.md file is used to determine a successful clone.
     exec { 'install-vundle':
-        command     => 'git clone https://github.com/gmarik/vundle.git /home/woolie/.vim/bundle/vundle',
-        path        => [ '/usr/bin', '/bin', '/usr/local/bin' ],
-        require     => [
-            Package['git', 'vim'],
-            File['/home/woolie/.vim/bundle']],
+        command     => 'rm -rf /etc/vim/bundle/vundle && git clone https://github.com/gmarik/vundle.git /etc/vim/bundle/vundle',
+        path        => ['/usr/bin', '/bin', '/usr/local/bin'],
+        require     => [Package['git', 'vim-gtk'], File['/etc/vim/bundle']],
         logoutput   => 'true',
-        user        => 'woolie',
+        user        => 'root',
         tries       => 3,
-        creates     => '/home/woolie/.vim/bundle/vundle'
+        creates     => '/etc/vim/bundle/vundle/README.md'
     }
 }

@@ -11,14 +11,14 @@ set nocompatible
 "==============================================================================
 filetype off                  " required!
 
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+set rtp+=/etc/vim/bundle/vundle/
+" Default - call vundle#rc()
+call vundle#rc('/etc/vim/bundle')   " Use a shared folder instead of ~/.vimrc/bundle
 
 Bundle 'gmarik/vundle'
 Bundle 'tpope/vim-surround'
 Bundle 'flazz/vim-colorschemes'
 Bundle 'scrooloose/nerdtree'
-
 
 filetype plugin indent on     " required!
 
@@ -31,23 +31,13 @@ colorscheme silent
 
 " GENERAL SETTINGS
 "==============================================================================
-
 let mapleader = ","             "Set the leader key
 
 " notifications
 set shortmess+=I                " disable intro message
 set showcmd                     " show incomplete commands down bottom
 set visualbell                  " don't beep
-
-" backups and swap files
-set backup                      " backup files
-set backupdir=~/.vim/backup     " backups here
-set directory=~/.vim/tmp        " temp files here
 set history=1000                " history 1000-deep
-
-" persistent undo
-set undodir=~/.vim/undo
-set undofile
 
 
 " EDITING
@@ -142,8 +132,5 @@ cmap w!! %!sudo tee > /dev/null %
 "==============================================================================
 " Auto open on startup if no files specified
 autocmd vimenter * if !argc() | NERDTree | endif
-
-" Close vim if NERDTree is the only window left
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
 map <leader>n :NERDTreeToggle<CR>

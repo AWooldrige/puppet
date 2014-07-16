@@ -59,9 +59,9 @@ DEFAULT_COLOR="\[\033[00m\]"
 
 export PS1="\`if [ \$? = 0 ];
     then
-        echo -e '\n$GREEN[$LIGHT_GRAY\u$GREEN@$LIGHT_GRAY\h$GREEN] [$LIGHT_GRAY\w$GREEN]\n\\$ $DEFAULT_COLOR';
+        echo -e '\n$GREEN[$DEFAULT_COLOR\t$GREEN - $DEFAULT_COLOR\u$GREEN@$DEFAULT_COLOR\H$GREEN] {$DEFAULT_COLOR\w$GREEN}\n\\$ $DEFAULT_COLOR';
     else
-        echo -e '\n$RED[$LIGHT_GRAY\u$RED@$LIGHT_GRAY\h$RED] [$LIGHT_GRAY\w$RED]\n\\$ $DEFAULT_COLOR';
+        echo -e '\n$RED[$DEFAULT_COLOR\t$RED - $DEFAULT_COLOR\u$RED@$DEFAULT_COLOR\H$RED] {$DEFAULT_COLOR\w$RED}\n\\$ $DEFAULT_COLOR';
     fi;
      \`"
 

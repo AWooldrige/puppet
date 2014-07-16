@@ -1,42 +1,26 @@
-node default {
+class basenode {
+    include base::packages
+    include base::bashcustomisations
     include locale
-    include default-config
     include python
     include motd
     include ntp
     include sshd
-    include sudo
+    include sudo-groups
     include vim
     include tmux
     include user-woolie
 }
 
-node webnode inherits default {
-    class { 'nginx': }
-    include loggly
-    include nanoc
-    include nanoc::compiler
-    include aws-tools
-
-    nanoc::site { 'brignellbookbinders.com':
-        ensure => installed,
-        repo   => 'https://github.com/AWooldrige/brignellbookbinders.com.git'
-    }
-    nanoc::site { 'onmyplate.co.uk':
-        ensure => installed,
-        repo   => 'https://github.com/AWooldrige/onmyplate.co.uk.git'
-    }
-    nanoc::site { 'woolie.co.uk':
-        ensure => installed,
-        repo   => 'https://github.com/AWooldrige/woolie.co.uk.git'
-    }
-    nanoc::site { 'kempstonnurseries.co.uk':
-        ensure => installed,
-        repo   => 'https://github.com/AWooldrige/kempstonnurseries.co.uk.git'
-    }
+class basenode::desktop inherits basenode {
+    include user-woolie::unmanaged-password
 }
 
-node raspberry-pi inherits default {
+class basenode::server inherits basenode {
+    include user-woolie::managed-password
+}
+
+class basenode::desktop::raspi inherits basenode::desktop {
     class { 'nginx': }
     include puppet-auto-update
     include raspi
@@ -47,3 +31,4 @@ node raspberry-pi inherits default {
     include raspi::information-radiator
     include raspi::home-automation
 }
+class basenode::desktop::developmentmachine inherits basenode::desktop { }

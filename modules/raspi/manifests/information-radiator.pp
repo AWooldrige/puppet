@@ -1,5 +1,4 @@
 class raspi::information-radiator {
-    file { '/home/pi/browser.sh': ensure => removed }
     file { '/usr/bin/launch-information-radiator':
         source => 'puppet:///modules/raspi/launch-information-radiator.sh',
         owner  => 'root',

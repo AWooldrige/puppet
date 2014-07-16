@@ -1,17 +1,14 @@
-###############################################################################
-# WEBNODES
-###############################################################################
-#Local webnode Vagrant spinups
-node "webnode.local.woolie.co.uk" inherits webnode { }
+# DNS naming convention: <name>.[phys|virt].woolie.co.uk
 
-#Actual EC2 webnode
-node /^ip-\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}$/ inherits webnode { }
+node /^nc10.(phys|virt).woolie.co.uk$/ {
+    include basenode::desktop::developmentmachine
+}
 
-###############################################################################
-# RASPBERRY PI
-###############################################################################
-#Local pi Vagrant spinups
-node /^pi.local.woolie.co.uk$/ inherits raspberry-pi { }
-
-#Actual Raspberry PI
-node /^pi-\d{1,3}.woolie.co.uk$/ inherits raspberry-pi { }
+# Note that I haven't got round to changing the hostname of that
+# actual PI to fit the convention
+node /^pi-\d{1,3}.woolie.co.uk$/ {
+    include basenode::desktop::raspi
+}
+node /^pi-\d{1,3}.(phys|virt).woolie.co.uk$/ {
+    include basenode::desktop::raspi
+}

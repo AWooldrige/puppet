@@ -1,10 +1,12 @@
 class motd {
+
     file { '/etc/issue':
         source => 'puppet:///modules/motd/issue',
         owner  => 'root',
         group  => 'root',
         mode   => '0644'
     }
+
     file { '/etc/issue.net':
         source => 'puppet:///modules/motd/issue',
         owner  => 'root',
