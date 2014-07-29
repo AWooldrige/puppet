@@ -1,7 +1,7 @@
 class base::packages {
 
     package { [
-	'moreutils',
+        'moreutils',
         'git',
         'tree',
         'zip',
@@ -9,18 +9,18 @@ class base::packages {
         'strace',
         'ack-grep',
         'iotop',
+        'htop',
         'powertop',
         'man-db',
         'make',
         'g++',
         'curl']:
-	ensure => installed
+    ensure => installed
     }
 
     package { 'ack':
-	ensure => purged
+        ensure => purged
     }
-
     file { '/usr/local/bin/ack':
         ensure => link,
         target => '/usr/bin/ack-grep'
