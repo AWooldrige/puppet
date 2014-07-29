@@ -14,6 +14,7 @@ class basenode {
 
 class basenode::desktop inherits basenode {
     include user-woolie::unmanaged-password
+    include desktop::powermanagement
 }
 
 class basenode::server inherits basenode {
