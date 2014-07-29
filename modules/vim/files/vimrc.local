@@ -16,9 +16,11 @@ set rtp+=/etc/vim/bundle/vundle/
 call vundle#rc('/etc/vim/bundle')   " Use a shared folder instead of ~/.vimrc/bundle
 
 Bundle 'gmarik/vundle'
+Bundle 'Valloric/YouCompleteMe'
 Bundle 'tpope/vim-surround'
 Bundle 'flazz/vim-colorschemes'
 Bundle 'scrooloose/nerdtree'
+Bundle 'scrooloose/syntastic'
 
 filetype plugin indent on     " required!
 
