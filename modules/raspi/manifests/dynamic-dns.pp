@@ -20,4 +20,11 @@ class raspi::dynamic-dns {
         minute  => [0, 10, 20, 30, 40, 50],
         require => File['/usr/bin/update-dynamic-dns']
     }
+    cron {"update-dynamic-dns-at-boot":
+        ensure  => present,
+        command => "/usr/bin/chronic /usr/bin/update-dynamic-dns",
+        user    => root,
+        special => 'reboot',
+        require => File['/usr/bin/update-dynamic-dns']
+    }
 }
