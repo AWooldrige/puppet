@@ -3,9 +3,9 @@ class raspi::information-radiator {
         source => 'puppet:///modules/raspi/launch-information-radiator.sh',
         owner  => 'root',
         group  => 'root',
-        mode   => '755'
+        mode   => '0755'
     }
-    cron { 'launch-afternoon-pages':
+    cron { ['launch-afternoon-pages', 'relaunch-information-radiator-at-boot']:
         ensure  => absent
     }
     cron { 'relaunch-information-radiator-every-so-often':
@@ -15,11 +15,11 @@ class raspi::information-radiator {
         hour    => [6, 17],
         require => User['pi']
     }
-    cron { 'relaunch-information-radiator-at-boot':
-        ensure  => present,
-        command => "/usr/bin/launch-information-radiator",
-        user    => pi,
-        special => 'reboot',
+    file { '/home/pi/.config/autostart':
+        source => 'puppet:///modules/raspi/lxde-autostart',
+        owner  => 'pi',
+        group  => 'pi',
+        mode   => '0644',
         require => User['pi']
     }
 }
