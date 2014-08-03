@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
 set -e
 
 function log {

@@ -48,7 +48,7 @@ install python-pip
 log ' * Installing ruby-hiera until dependency fixed in #1242363'
 install ruby-hiera
 
-log ' * Removing any currently manifests'
+log ' * Removing any current manifests'
 rm -rf /etc/puppet-git
 
 if [ -d "/vagrant" ]; then
