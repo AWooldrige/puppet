@@ -25,6 +25,7 @@ class basenode::desktop::raspi inherits basenode::desktop {
     class { 'nginx': }
     include puppet-auto-update
     include raspi
+    include raspi::boot-configuration
     include raspi::piface
     include raspi::piuser
     include raspi::vnc
@@ -32,4 +33,6 @@ class basenode::desktop::raspi inherits basenode::desktop {
     include raspi::information-radiator
     include raspi::home-automation
 }
-class basenode::desktop::developmentmachine inherits basenode::desktop { }
+class basenode::desktop::developmentmachine inherits basenode::desktop {
+    include desktop::graphicspackages
+}
