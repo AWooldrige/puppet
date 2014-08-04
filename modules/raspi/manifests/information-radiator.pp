@@ -5,9 +5,14 @@ class raspi::information-radiator {
         group  => 'root',
         mode   => '0755'
     }
-    cron { ['launch-afternoon-pages', 'relaunch-information-radiator-at-boot']:
-        ensure  => absent
+    file { '/usr/share/applications/information-radiator.desktop':
+        source  => 'puppet:///modules/raspi/information-radiator.desktop',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => File['/usr/bin/launch-information-radiator]
     }
+
     cron { 'relaunch-information-radiator-every-so-often':
         ensure  => present,
         command => "/usr/bin/launch-information-radiator",
@@ -16,10 +21,18 @@ class raspi::information-radiator {
         require => User['pi']
     }
     file { '/home/pi/.config/autostart':
-        source => 'puppet:///modules/raspi/lxde-autostart',
+        ensure => 'directory,
         owner  => 'pi',
         group  => 'pi',
-        mode   => '0644',
+        mode   => '0755',
         require => User['pi']
+    }
+    file { '/home/pi/.config/autostart/information-radiator.desktop':
+        ensure  => link,
+        target  => '/usr/share/applications/information-radiator.desktop',
+        require => [
+            File['/home/pi/.config/autostart'],
+            File['/usr/share/applications/information-radiator.desktop']
+        ]
     }
 }

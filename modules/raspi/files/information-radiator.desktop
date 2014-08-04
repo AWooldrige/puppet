@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.1
+Name=Information Radiator
+Comment=Launch chromium in kiosk mode to display information full screen
+Type=Application
+Terminal=false
+Categories=WebBrowser;
+Icon=chromium
+Exec=/usr/bin/launch-information-radiator
