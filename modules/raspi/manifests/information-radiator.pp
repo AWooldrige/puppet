@@ -18,6 +18,7 @@ class raspi::information-radiator {
         command => "/usr/bin/launch-information-radiator",
         user    => pi,
         hour    => [6, 17],
+        minute  => 0,
         require => User['pi']
     }
     file { '/home/pi/.config/autostart':
