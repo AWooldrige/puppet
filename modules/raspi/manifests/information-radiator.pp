@@ -10,7 +10,7 @@ class raspi::information-radiator {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => File['/usr/bin/launch-information-radiator]
+        require => File['/usr/bin/launch-information-radiator']
     }
 
     cron { 'relaunch-information-radiator-every-so-often':
