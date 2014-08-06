@@ -22,7 +22,7 @@ class raspi::information-radiator {
         require => User['pi']
     }
     file { '/home/pi/.config/autostart':
-        ensure => 'directory,
+        ensure => 'directory',
         owner  => 'pi',
         group  => 'pi',
         mode   => '0755',
