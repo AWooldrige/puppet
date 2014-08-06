@@ -2,17 +2,14 @@
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
-#Exit if any unset variables are used, if any command returns an error
-set -o nounset
-set -o errexit
+set -e
 
 LOGFILE="/var/log/puppet-git/puppet-git-update"
 function log {
-    echo $(date --rfc-3339=ns)" ${1}"
-    echo $(date --rfc-3339=ns)" ${1}" >> $LOGFILE
+    echo $(date --rfc-3339=ns)" ${1}" | tee -a $LOGFILE
 }
 
-log 'puppet-git-update called'
+log $0' called'
 
 cd /etc/puppet-git;
 
