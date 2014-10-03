@@ -14,10 +14,10 @@
                 "HostedZoneName": "woolie.co.uk.",
                 "RecordSets": [
                     {
-                        "Name": "home.woolie.co.uk.",
+                        "Name": "cg.woolie.co.uk.",
                         "Type": "CNAME",
                         "TTL": "3600",
-                        "ResourceRecords": [ "home.wooldrige.co.uk" ]
+                        "ResourceRecords": [ "cg.wooldrige.co.uk" ]
                     },
                     {
                         "Name": "woolie.co.uk.",
@@ -142,7 +142,7 @@
                         "ResourceRecords": [{ "Ref": "SCBSEIP" }]
                     },
                     {
-                        "Name": "home.wooldrige.co.uk.",
+                        "Name": "cg.wooldrige.co.uk.",
                         "Type": "A",
                         "TTL": "120",
                         "ResourceRecords": [ "127.0.0.1" ]
