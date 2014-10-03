@@ -37,26 +37,6 @@ class raspi::home-automation {
                     Exec['install-wiringpi']]
     }
 
-    #Generate server certificate and private key
-    file { '/etc/nginx/ssl':
-        ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        require => Package['nginx']
-    }
-    $command = "openssl req -new -newkey rsa:2048 -x509 -days 3650 -nodes \
-                -out /etc/nginx/ssl/self-signed-server.crt \
-                -keyout /etc/nginx/ssl/server.key  -subj \
-                '/C=UK/ST=UK/L=PI/O=Personal/OU=PI/CN=home.wooldrige.co.uk'"
-    exec { 'create-self-signed-server-certificate':
-        creates => '/etc/nginx/ssl/self-signed-server.crt',
-        command     => $command,
-        path        => [ '/usr/local/bin', '/opt/local/bin', '/usr/bin',
-                         '/usr/sbin', '/bin', '/sbin' ],
-        require   => [ Package['openssl'], File['/etc/nginx/ssl']]
-    }
-
     #Allow www-data to call codesend
     file { '/etc/sudoers.d/home-automation-www-data':
         source => 'puppet:///modules/raspi/home-automation/sudoers-www-data',
