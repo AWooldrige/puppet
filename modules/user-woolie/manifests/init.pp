@@ -6,7 +6,7 @@ class user-woolie {
     ssh_authorized_key { 'woolie':
         ensure  => present,
         type    => 'ssh-rsa',
-        key     => 'AAAAB3NzaC1yc2EAAAADAQABAAACAQDGoNr/PhMh2XEjsEgEGQApvcnp7AKTDyHt3A97OQTdcZ+lG5Ywx4jDpymsKU6qw9yxpElZVNIP/HLiJlfVzRlF636PIjtAyZtaoujeQGuaGp+YalqaD/YKD2LlqqHZZnsxv63IPHy7NFvpasJdHlRlaGBdLfpqvMIGgQOYlHK3M9+UDcMBK1EpftzM4x1VqGY9exs0d8bqQtIBwi7/3gVK+FymG6LM3pYnAMuCIs98T/6rwbysxV7ojogWOI5mX7uPrQhwz65AUn6PlB2LhNPhSYUAjWGePlEXG7vNMSPXyX51ZZwn4q7gAgxN9H5zi7nYQATstY6jwX7He88pvoBYxsogRQcp9TaN3gYtdEbW/HbS4v2qp2H+OuhXnMAnmejZ5Sl5FFxJIEFhbaXxBk71B9+7uX+4I3la5PZ6k7jcJMNy/RLs6xW2fBEVplMjZJQcFbmDopq03/H+v0lsXOYLdBbTF2lHadeyHNtPLeGstYWHutGsMMqSyKLF/lLgJ1tPWsj9xOAsh+iZtczmr8Wb4updr9qWw8xef5EzDyPS3RfEdYCuQ5GrwzHxWmhdK2JG998a0sv87xMGVD7D6J50jYSvgGYqbIXM6VlOfrrS/fD0Y3wBeQDnCLB7lay+USA06YTvwrvw2RxIkKSe2jseLM47nxGAjSLUj58rRyz5GQ==',
+        key     => 'AAAAB3NzaC1yc2EAAAADAQABAAACAQDgBdC9rm9eDIOPKcGNRjz5j/M7wVM+TQjN5oAY/ExyZ1WM7yBkdvepqlDScdUgkpY7+HQLtJ2PDqOk0fRh0JZ7fDKT5glhhtwAokU4CbRpRZFLrL/Vdyumyql2cTvYXhMqkymhVnz9Za4K48EbbTQSU/tjy2Mv3rm1RgDaBXhuVPbZ/k53SxL7zxlxowEu6kClGfCnV2uLhyjAU93gxhPmPd11j02NAtoTAIiQEYm79cWKYcsZZlLXc17z89kpNrRJF+Edu/cekO2/gCF2LWXQzuG0dfs/9fFr4dhMEYavYcK1uvxJGkb0p9G7VZ9UVj3UpKSMK87Hz8on588wC9CLBcs4/029yXZDmywiyDuyomDuPFSnw1cH7vEX9s3rISpx6+PD/+veDsCIAGn2ACyS9M7yBCwDHrdWhdcFcV4JM0Act1bRs3MUQCBzxw8Klh5nSfLBuof4olmSQe3N2eDpHcTLh/CE5B356tSsM5/lGSb/axV7saSefKXild87COaFwSdJDlKO9Iylma82RVY8bMS3SphSrD8MLFURRsnVFxR7JwpV2zMiAx6h/RUZpCYiu4YAYQWWvdLF2wQHjwx4Zf377volNwhWOua7NoBtcX32EBIVqhH44RahXgMzEEtbPu086s3mcpTgTg1i4Hnw9CbS11xNH9UCazL2aOX01Q==',
         user    => 'woolie',
         require => User['woolie']
     }
