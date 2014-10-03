@@ -19,7 +19,7 @@ from woolielibs.loghelper import bootstrap_logger
 from socket import inet_aton
 
 HOSTED_ZONE = 'Z1VIBQX07I3Y3K'
-DOMAIN_NAME = 'home.wooldrige.co.uk'
+DOMAIN_NAME = 'cg.wooldrige.co.uk'
 
 l = bootstrap_logger("Update_Dynamic_DNS")
 
