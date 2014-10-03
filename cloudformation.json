@@ -1,12 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "AWS Infrastructure for Public Facing Sites",
-    "Parameters" : {
-        "AMI" : {
-            "Type" : "String",
-            "Description" : "The AMI (e.g. ami-f4bb5583) to launch with"
-        }
-    },
+    "Parameters" : { },
     "Resources": {
         "wooliecoukDNS": {
             "Type": "AWS::Route53::RecordSetGroup",
@@ -67,42 +62,6 @@
                 "RecordSets": [
                     {
                         "Name": "onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "origin.onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.origin.onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "static.onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "static.origin.onmyplate.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "onmyplate.co.uk.",
                         "Type": "MX",
                         "TTL": "86400",
                         "ResourceRecords": [
@@ -137,18 +96,6 @@
                 "RecordSets": [
                     {
                         "Name": "wooldrige.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "cg.wooldrige.co.uk.",
-                        "Type": "A",
-                        "TTL": "120",
-                        "ResourceRecords": [ "127.0.0.1" ]
-                    },
-                    {
-                        "Name": "wooldrige.co.uk.",
                         "Type": "MX",
                         "TTL": "86400",
                         "ResourceRecords": [
@@ -176,30 +123,6 @@
                 "HostedZoneName": "kempstonnurseries.co.uk.",
                 "RecordSets": [
                     {
-                        "Name": "kempstonnurseries.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "origin.kempstonnurseries.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.kempstonnurseries.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.origin.kempstonnurseries.co.uk.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
                         "Name": "ZQJYDD6YQE2G.kempstonnurseries.co.uk.",
                         "Type": "CNAME",
                         "TTL": "1209600",
@@ -213,30 +136,6 @@
             "Properties": {
                 "HostedZoneName": "brignellbookbinders.com.",
                 "RecordSets": [
-                    {
-                        "Name": "brignellbookbinders.com.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "origin.brignellbookbinders.com.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.brignellbookbinders.com.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
-                    {
-                        "Name": "www.origin.brignellbookbinders.com.",
-                        "Type": "A",
-                        "TTL": "3600",
-                        "ResourceRecords": [{ "Ref": "SCBSEIP" }]
-                    },
                     {
                         "Name": "mail.brignellbookbinders.com.",
                         "Type": "CNAME",
@@ -270,96 +169,6 @@
                         ]
                     }
                 ]
-            }
-        },
-        "SCBSEIP":{
-           "Type": "AWS::EC2::EIP",
-           "Properties": { }
-        },
-        "SCBSAutoScalingGroup": {
-            "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "Properties": {
-                "AvailabilityZones": [ "eu-west-1c" ],
-                "LaunchConfigurationName": { "Ref": "SCBSLaunchConfiguration" },
-                "MaxSize": "2",
-                "MinSize": "1",
-                "DesiredCapacity": "1"
-             },
-            "UpdatePolicy" : {
-                "AutoScalingRollingUpdate" : {
-                    "MaxBatchSize": "1",
-                    "MinInstancesInService": "1",
-                    "PauseTime": "PT0S"
-                }
-            }
-        },
-        "SCBSLaunchConfiguration": {
-            "Type": "AWS::AutoScaling::LaunchConfiguration",
-            "Properties": {
-                "ImageId": { "Ref": "AMI" },
-                "InstanceType": "t1.micro",
-                "IamInstanceProfile": { "Ref": "SCBSIamInstanceProfile" },
-                "SecurityGroups": [{
-                    "Ref": "SCBSSecurityGroup"
-                }],
-                "InstanceMonitoring": false,
-                "UserData": {
-                    "Fn::Base64" : {
-                        "Fn::Join" : [ "", [ { "Ref" : "SCBSEIP" } ] ]
-                    }
-                }
-            }
-        },
-        "SCBSSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup",
-            "Properties": {
-                "GroupDescription": "Only allow HTTP and SSH",
-                "SecurityGroupIngress": [
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
-                        "CidrIp": "0.0.0.0/0"
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": "0.0.0.0/0"
-                    }
-                ]
-            }
-        },
-        "SCBSAllocateEIPRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "AssumeRolePolicyDocument": {
-                    "Statement": [{
-                        "Effect": "Allow",
-                        "Principal": {
-                            "Service": [ "ec2.amazonaws.com" ]
-                        },
-                        "Action": [ "sts:AssumeRole" ]
-                    }]
-                },
-                "Path": "/",
-                "Policies": [{
-                    "PolicyName": "OnlyAllowEIPAllocations",
-                    "PolicyDocument": {
-                        "Statement": [{
-                            "Effect": "Allow",
-                            "Action": ["ec2:AssociateAddress"],
-                            "Resource": ["*"]
-                        }]
-                    }
-                }]
-            }
-        },
-        "SCBSIamInstanceProfile": {
-            "Type": "AWS::IAM::InstanceProfile",
-            "Properties": {
-                "Path": "/",
-                "Roles": [{ "Ref": "SCBSAllocateEIPRole" }]
             }
         },
         "IAMUserRaspberryPi": {
@@ -397,12 +206,35 @@
                 } ]
             }
         },
-        "WerckerUser": {
+        "WwwWoolieCoUkWerckerDeployUser": {
             "Type": "AWS::IAM::User",
             "Properties": {
                 "Groups": [
-                    { "Ref": "WoolieCoUkS3BucketGroup" },
-                    { "Ref": "OnmyplateCoUkS3BucketGroup" }
+                    { "Ref": "WwwWoolieCoUkBucketReadWriteGroup" }
+                ]
+            }
+        },
+        "WwwOnmyplateCoUkWerckerDeployUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "WwwOnmyplateCoUkBucketReadWriteGroup" }
+                ]
+            }
+        },
+        "WwwKempstonnurseriesCoUkWerckerDeployUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "WwwKempstonnurseriesCoUkBucketReadWriteGroup" }
+                ]
+            }
+        },
+        "WwwBrignellbookbindersComWerckerDeployUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "WwwBrignellbookbindersComBucketReadWriteGroup" }
                 ]
             }
         },
@@ -435,6 +267,7 @@
             "Type": "AWS::CloudFront::Distribution",
             "Properties": {
                 "DistributionConfig": {
+                    "Aliases": [ "www.onmyplate.co.uk" ],
                     "Origins": [
                         {
                             "DomainName": "www.onmyplate.co.uk.s3-website-eu-west-1.amazonaws.com",
@@ -446,6 +279,56 @@
                     ],
                     "DefaultCacheBehavior": {
                         "TargetOriginId": "www.onmyplate.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": false
+                        },
+                        "ViewerProtocolPolicy": "allow-all"
+                    },
+                    "Enabled": "true"
+                }
+            }
+        },
+        "WwwKempstonnurseriesCoUkCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Aliases": [ "www.kempstonnurseries.co.uk" ],
+                    "Origins": [
+                        {
+                            "DomainName": "www.kempstonnurseries.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "www.kempstonnurseries.co.uk",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "TargetOriginId": "www.kempstonnurseries.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": false
+                        },
+                        "ViewerProtocolPolicy": "allow-all"
+                    },
+                    "Enabled": "true"
+                }
+            }
+        },
+        "WwwBrignellbookbindersComCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Aliases": [ "www.brignellbookbinders.com" ],
+                    "Origins": [
+                        {
+                            "DomainName": "www.brignellbookbinders.com.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "www.brignellbookbinders.com",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "TargetOriginId": "www.brignellbookbinders.com",
                         "ForwardedValues": {
                             "QueryString": false
                         },
@@ -477,7 +360,29 @@
             },
             "DeletionPolicy" : "Retain"
         },
-       "WoolieCoUkWebsiteBucket" : {
+       "WwwKempstonnurseriesCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "www.kempstonnurseries.co.uk",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html"
+                }
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "WwwBrignellbookbindersComWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "www.brignellbookbinders.com",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html"
+                }
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "WoolieCoUkRedirectBucket" : {
             "Type" : "AWS::S3::Bucket",
             "Properties" : {
                 "AccessControl" : "PublicRead",
@@ -485,7 +390,7 @@
             },
             "DeletionPolicy" : "Retain"
         },
-       "OnmyplateCoUkWebsiteBucket" : {
+       "OnmyplateCoUkRedirectBucket" : {
             "Type" : "AWS::S3::Bucket",
             "Properties" : {
                 "AccessControl" : "PublicRead",
@@ -493,11 +398,27 @@
             },
             "DeletionPolicy" : "Retain"
         },
-        "WoolieCoUkS3BucketGroup": {
+       "KempstonnurseriesCoUkRedirectBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "kempstonnurseries.co.uk"
+            },
+            "DeletionPolicy" : "Retain"
+        },
+       "BrignellbookbindersComRedirectBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "brignellbookbinders.com"
+            },
+            "DeletionPolicy" : "Retain"
+        },
+        "WwwWoolieCoUkBucketReadWriteGroup": {
             "Type": "AWS::IAM::Group",
             "Properties": {
                 "Policies": [ {
-                    "PolicyName" : "AllowWriteAccessToWoolieCoUkBucket",
+                    "PolicyName" : "AllowReadWriteAccessToWwwWoolieCoUkBucket",
                     "PolicyDocument": {
                         "Statement" : [
                             {
@@ -520,11 +441,11 @@
                 } ]
             }
         },
-        "OnmyplateCoUkS3BucketGroup": {
+        "WwwOnmyplateCoUkBucketReadWriteGroup": {
             "Type": "AWS::IAM::Group",
             "Properties": {
                 "Policies": [ {
-                    "PolicyName" : "AllowWriteAccessToOnmyplateCoUkBucket",
+                    "PolicyName" : "AllowReadWriteAccessToWwwOnmyplateCoUkBucket",
                     "PolicyDocument": {
                         "Statement" : [
                             {
@@ -546,6 +467,62 @@
                     }
                 } ]
             }
+        },
+        "WwwKempstonnurseriesCoUkBucketReadWriteGroup": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "AllowReadWriteAccessToWwwKempstonnurseriesCoUkBucket",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:ListBucket",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:GetObjectAcl",
+                                    "s3:PutObjectAcl",
+                                    "s3:DeleteObject",
+                                    "s3:ListMultipartUploadParts"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "WwwKempstonnurseriesCoUkWebsiteBucket" } , "/*" ]
+                                ] }
+                            }
+                        ]
+                    }
+                } ]
+            }
+        },
+        "WwwBrignellbookbindersComBucketReadWriteGroup": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "AllowReadWriteAccessToWwwBrignellbookbindersComBucket",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:ListBucket",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:GetObjectAcl",
+                                    "s3:PutObjectAcl",
+                                    "s3:DeleteObject",
+                                    "s3:ListMultipartUploadParts"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "WwwBrignellbookbindersComWebsiteBucket" } , "/*" ]
+                                ] }
+                            }
+                        ]
+                    }
+                } ]
+            }
         }
     }
 }
+
+
