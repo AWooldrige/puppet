@@ -4,7 +4,7 @@ class raspi::boot-configuration {
         source  => 'puppet:///modules/raspi/config.txt',
         owner   => 'root',
         group   => 'root',
-        mode    => '0644'
+        mode    => '0755'
     }
 
 }
