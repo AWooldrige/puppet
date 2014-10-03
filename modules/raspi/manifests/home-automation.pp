@@ -18,7 +18,6 @@ class raspi::home-automation {
                          '/usr/sbin', '/bin', '/sbin' ],
         require => [File['/usr/bin/install-wiringpi'],
                     Package['openssl'],
-                    File['/etc/nginx/ssl'],
                     Class['user-woolie']]
     }
     file { '/usr/bin/install-433utils':
@@ -60,7 +59,6 @@ class raspi::home-automation {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Exec['create-self-signed-server-certificate'],
         notify  => Service['nginx']
     }
 
