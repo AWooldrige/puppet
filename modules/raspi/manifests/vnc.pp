@@ -10,3 +10,11 @@ class raspi::vnc {
         require => Package['x11vnc']
     }
 }
+class raspi::vnc::remove {
+    package { 'x11vnc':
+        ensure => absent
+    }
+    file { '/home/pi/.xsessionrc':
+        ensure => absent
+    }
+}

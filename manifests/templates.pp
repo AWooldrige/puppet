@@ -28,10 +28,13 @@ class basenode::desktop::raspi inherits basenode::desktop {
     include raspi::boot-configuration
     include raspi::piface
     include raspi::piuser
-    include raspi::vnc
     include raspi::dynamic-dns
-    include raspi::information-radiator
     include raspi::home-automation
+
+    # Thing that shouldn't be installed
+    include raspi::vnc::remove
+    include raspi::information-radiator::remove
+
 }
 class basenode::desktop::developmentmachine inherits basenode::desktop {
     include desktop::graphicspackages

@@ -37,3 +37,14 @@ class raspi::information-radiator {
         ]
     }
 }
+class raspi::information-radiator::remove {
+    file { ['/usr/bin/launch-information-radiator',
+            '/usr/share/applications/information-radiator.desktop',
+            '/home/pi/.config/autostart',
+            '/home/pi/.config/autostart/information-radiator.desktop']:
+        ensure => absent
+    }
+    cron { 'relaunch-information-radiator-every-so-often':
+        ensure  => absent
+    }
+}
