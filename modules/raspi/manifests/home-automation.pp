@@ -44,15 +44,6 @@ class raspi::home-automation {
         mode   => '440'
     }
 
-    #Place to store .htpasswd
-    file { '/etc/nginx/authfiles':
-        ensure  => directory,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        require => Package['nginx']
-    }
-
     #Add nginx config that is dependant on the server cert and private key
     file { '/etc/nginx/sites-enabled/home-automation.conf':
         source  => 'puppet:///modules/raspi/home-automation/nginx.conf',
