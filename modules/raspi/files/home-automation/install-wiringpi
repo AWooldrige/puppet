@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -o nounset
-set -o errexit
+set -eu
 
 TMP_DIR=$(mktemp -d)
 cd $TMP_DIR
