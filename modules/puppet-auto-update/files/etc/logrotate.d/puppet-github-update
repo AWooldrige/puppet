@@ -2,9 +2,9 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
-/var/log/puppet-git/*.log {
+/var/log/puppet-github-update.log {
     weekly
-    rotate 52
+    rotate 300
     compress
     copytruncate
     missingok
