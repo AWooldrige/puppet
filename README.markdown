@@ -1,38 +1,41 @@
-Getting A Box Running
+Bootstrapping a system from scratch
+============================================
+
+1) Install OS
+-------------
+ 1. If boostrapping a physical machine (not a VM), enable full drive
+    encryption. This reduces risk from hardware theft. There's no point
+    encrypting a VM drive, the host has full access anyway.
+ 2. Do not create a user named `woolie` as part of setup, instead create a
+    temporary user which will only be used to run puppet and will be removed
+    after. Puppet needs to create the `woolie` user to keep UIDs/GIDs in sync.
+ 3. Set hostname if asked, following scheme of {model}{increment}.
+
+
+2) Run puppet
+-------------
+Set the hostname for the machine if not set during OS install, following the
+scheme of {model}{increment}:
+
+    $ sudo hostnamectl set-hostname hplaptop1
+
+Run the bootstrap script:
+
+    curl -L https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo
+    bash
+
+
+3) Remove temporary user
+------------------------
+ 1. Log in as woolie, check that sudo works correctly.
+ 2. Remove the temporary user that was only for puppet install.
+
+
+Development
 ================================
 This is a masterless puppet configuration and works solely on puppet apply:
 
     make apply
-
-
-Get a Local 'webnode' Running with Vagrant
-----------------------------------------
-To fix the VirtualBox bug which causes an `ls /vagrant` to hang:
-
- * Make sure the host machine is running VirtualBox >= 4.3.0
- * The guest additions on the guest machines also need updating to >= 4.3.0.
-   This Vagrant plugin automates this. Run this command in the same directory
-   as your Vagrantfile: `vagrant plugin install --plugin-source https://rubygems.org --plugin-prerelease vagrant-vbguest`
- * Useful bug references: [why vbguest plugin >= 0.10.0 is needed](https://github.com/dotless-de/vagrant-vbguest/issues/88) and [bug on launchpad](https://bugs.launchpad.net/ubuntu/+bug/1239417)
-
-Then run: `vagrant up webnode` in the project directory. The machine can be
-SSH'd into using `vagrant ssh webnode` or on the exposed interface: `ssh
-woolie@192.168.42.1`.
-
-
-
-Bootstrap a Physical System From Scratch
-----------------------------------------
-
-Set the hostname for the machine:
-
-    echo 'machine.phys.woolie.co.uk' > /etc/hostname
-    echo '127.0.0.1 machine.woolie.co.uk' >> /etc/hosts
-    service hostname start
-
-Run the bootstrap.sh script:
-
-    F=/tmp/boostrap.sh && rm -f $F && wget --tries=10 https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh -O $F && chmod +x $F && sudo $F master && rm -f $F
 
 
 
@@ -53,6 +56,11 @@ All scripts should log to syslog and to stdout/stderr. This should be managed
 within the scripts themselves.
 
 
-CloudFormation Issues
-=======================
- * You can't set an S3 bucket up up redirect all requests to another domain - this is done manually.
+Documentation
+==============================
+
+User strategy
+------------------------------
+Each machine has one main user, `woolie`. This user is used for SSH remote
+access and local access. The user should always have a password set and should
+also require it for sudo (no passwordless sudo, even on remote machines).

@@ -1,78 +1,52 @@
 #!/usr/bin/env bash
-#Exit if any unset variables are used, if any command returns an error
-set -o nounset
-set -o errexit
+set -eu
 
 function log {
-    echo $(date --rfc-3339=ns)" ${1}"
+    echo "[$(date --rfc-3339=ns)] ${1}"
 }
 
 function install {
-    if ! /usr/bin/dpkg -s $1 &> /dev/null; then
-        log "Installing ${1} package"
-        for attempt in {1..5}; do
-            if ! apt-get install -y $1; then
-                log "Could not install ${1} after attempt ${attempt}"
-                apt-get update -y --fix-missing
-                sleep 2
-            else
-                break
-            fi
-        done
-    else
-        log "${1} package already installed"
-    fi
+    /usr/bin/dpkg -s "$1" && return 0
+    for attempt in {1..5}; do
+        if ! apt install -y "$1"; then
+            log "Could not install ${1} after attempt ${attempt}"
+            apt update -y --fix-missing
+            sleep 2
+        else
+            break
+        fi
+    done
 }
 
-usage="Usage: $0 [branch]"
+log 'Updating apt repos'
+apt update -y
 
-if /usr/bin/[ "$#" -gt 1 ]; then
-    /bin/echo $usage
-    exit 1
-fi
-log 'Starting git distributed puppet bootstrap script'
+log 'Upgrading apt packages'
+apt upgrade -y
 
-log ' * Updating apt repos'
-apt-get update -y
-
-log ' * Upgrading apt packages'
-apt-get upgrade -y
-
-log ' * Installing git and puppet if needed'
+log 'Installing git and puppet'
 install git
 install puppet
 
-log ' * Installing python-pip (this should be moved to an early puppet stage)'
-install python-pip
+log 'Removing any current puppet code from /etc/gdpup'
+rm -rf /etc/gdpup
 
-log ' * Installing ruby-hiera until dependency fixed in #1242363'
-install ruby-hiera
+log 'Shallow cloning puppet git repo from master'
+/usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /etc/gdpup
 
-log ' * Removing any current manifests'
-rm -rf /etc/puppet-git
+log 'Running puppet'
+puppet apply --modulepath=/etc/gdpup/modules /etc/gdpup/manifests -vv
 
-if [ -d "/vagrant" ]; then
-    log " * We're on a Vagrant box! Copying over manifests/modules. If this command hangs, see the README"
-    cp -R /vagrant /etc/puppet-git
-else
-    log ' * Shallow cloning puppet github repo from master'
-    /usr/bin/git clone --depth=1 http://github.com/AWooldrige/puppet.git /etc/puppet-git
-fi
+# https://unix.stackexchange.com/a/465438
+case $(passwd --status woolie | awk '{print $2}') in
+    NP)  log "No password set for 'woolie', set one:"
+        passwd woolie
+        ;;
+    L)  log "Account 'woolie' is locked, set password"
+        passwd woolie
+        ;;
+    P)  log "Password already set for 'woolie'" ;;
+esac
+exit 1
 
-log ' * Initialising/Updating git submodules'
-cd /etc/puppet-git
-git submodule init
-git submodule sync
-git submodule update
-cd -
-
-log ' * Running puppet apply'
-puppet apply --modulepath=/etc/puppet-git/modules /etc/puppet-git/manifests/site.pp -vv
-
-if [ -d "/vagrant" ]; then
-    log " * We're on a Vagrant box! Making sure vagrant can SSH."
-    usermod -a -G sshallowedlogin vagrant
-fi
-
-log 'Finished!'
-exit 0
+log 'Finished. Remember to delete temporary user.'

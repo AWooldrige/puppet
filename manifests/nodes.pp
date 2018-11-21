@@ -1,7 +1,5 @@
-# DNS naming convention: <name>.[phys|virt].woolie.co.uk
-
-node /^nc10.(phys|virt).woolie.co.uk$/ {
-    include basenode::desktop::developmentmachine
+node /^hplaptop\d+$/ {
+    include basenode::laptop
 }
 
 # Note that I haven't got round to changing the hostname of that

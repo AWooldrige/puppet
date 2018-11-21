@@ -1,6 +1,7 @@
 class sshd {
     group { 'sshallowedlogin':
-        ensure => present,
+        ensure  => present,
+        gid     => 19003
     }
     package { 'openssh-server':
         ensure => installed,

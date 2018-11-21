@@ -17,6 +17,13 @@ class basenode::desktop inherits basenode {
     include desktop::powermanagement
 }
 
+class basenode::laptop {
+    include sshd
+    include sudo
+    include woolie
+    include tmux
+}
+
 class basenode::server inherits basenode {
     include user-woolie::managed-password
 }
