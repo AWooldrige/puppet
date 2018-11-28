@@ -1,0 +1,176 @@
+set encoding=utf8
+set nocompatible  " also require for vundle
+
+" Useful for :find command
+set path=$PWD/**
+
+
+" VUNDLE
+"========
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/vundle
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+Plugin 'bling/vim-airline'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'scrooloose/nerdtree'
+Plugin 'flazz/vim-colorschemes'
+Plugin 'scrooloose/syntastic'
+
+call vundle#end()            " required
+filetype plugin indent on    " required
+
+
+" COLOUR SCHEME
+"===============
+"set background=dark
+"colorscheme molokai
+
+set laststatus=2
+
+
+" GENERAL SETTINGS
+"==================
+" notifications
+set shortmess+=I                " disable intro message
+set showcmd                     " show incomplete commands down bottom
+set visualbell                  " don't beep
+set history=10000                " history 1000-deep
+
+" Keep all swap and backup files nested away (these directories must exist)
+set backupdir=~/.vim/backup/
+set directory=~/.vim/swap/
+
+
+" EDITING
+"=========
+set textwidth=79                 " autowrap
+set formatoptions=""
+set wrapmargin=0
+
+set backspace=indent,eol,start  "Allow backspace in insert mode
+set autoread                    "Reload files changed outside vim
+set hidden                      "Allow vim to maintain background buffers
+
+" indentation
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set autoindent
+set smartindent
+set smarttab
+set expandtab                   " convert tabs to spaces
+
+" trailing whitespace
+set list!
+set listchars=tab:>-,trail:$,extends:>,precedes:<,nbsp:_
+
+" appearance
+if exists('+colorcolumn')
+    set colorcolumn=+1          " Vertical line on textwidth+1
+else
+    " colorcolumn is only available in >= vim 7.3
+    au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+endif
+set number                      "Line numbers are good
+set title                       "Set the terminal title
+set fillchars+=vert:\           " clean dividers
+set cursorline                  " cursorline on
+set foldmethod=marker           " fold markers
+
+" spelling
+setlocal spell spelllang=en_gb
+set nospell
+
+" syntax highlighting
+syntax on
+
+" syntax enable
+au BufNewFile,BufRead *.pp set filetype=puppet
+au BufNewFile,BufRead *.md set filetype=markdown
+au BufNewFile,BufRead *.markdown set filetype=markdown
+
+
+
+" COMPLETION SETTINGS
+"=====================
+set wildmenu                "enable ctrl-n and ctrl-p to scroll thru matches
+set wildmode=list:longest
+
+" output and VCS
+set wildignore+=*.o,*.out,*.obj,.git,*.rbc,*.rbo,*.class,.svn,*.gem
+" archives
+set wildignore+=*.zip,*.tar.gz,*.tar.bz2,*.rar,*.tar.xz
+" bundler and sass
+set wildignore+=*/vendor/gems/*,*/vendor/cache/*,*/.bundle/*,*/.sass-cache/*
+" librarian-chef, vagrant, test-kitchen and Berkshelf
+set wildignore+=*/tmp/librarian/*,*/.vagrant/*,*/.kitchen/*,*/vendor/cookbooks/*
+" rails temporary asset caches
+set wildignore+=*/tmp/cache/assets/*/sprockets/*,*/tmp/cache/assets/*/sass/*
+" temp and backup files
+set wildignore+=*.swp,*~,._*
+" OSX bullshit
+set wildignore+=*.DS_Store
+
+" http://stackoverflow.com/questions/2169645
+set complete-=i
+set foldmethod=manual
+
+
+" SEARCHING
+"===========
+set incsearch        "Find the next match as we type the search
+set ignorecase                  " searches are case insensitive...
+set smartcase                   " ...unless they contain a capital letter
+set hlsearch         "Hilight searches by default
+set viminfo='50,f1  "Save up to 50 marks, enable capital marks
+
+
+" SYNTASTIC
+"==============================================================================
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+
+" This is a bit slow so disable it
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+
+let g:syntastic_python_checkers = ['flake8', 'python']
+let g:syntastic_c_checkers = ['gcc', 'clang_check', 'clang_tidy']
+
+
+" MAPPINGS
+"==========
+let mapleader = ","
+
+" toggle highliting of search terms
+noremap <silent> <Space> :set hlsearch! hlsearch?<CR>
+
+" toggle spellcheck
+noremap <leader>s :set spell! spell?<CR>
+
+nnoremap <Leader>w :w<CR>
+nnoremap <Leader>q :q<CR>
+
+" Use sudo to save
+cmap w!! %!sudo tee > /dev/null %
+
+" Making tabs more useful
+nnoremap <leader>t :tabnew<CR>:set guitablabel=%N\ %f<CR>
+nnoremap <leader>1 1gt<CR>
+nnoremap <leader>2 2gt<CR>
+nnoremap <leader>3 3gt<CR>
+nnoremap <leader>4 4gt<CR>
+nnoremap <leader>5 5gt<CR>
+nnoremap <leader>6 6gt<CR>
+nnoremap <leader>7 7gt<CR>
+nnoremap <leader>8 8gt<CR>
+nnoremap <leader>9 9gt<CR>
+
+" NERDTree
+noremap <leader>n :NERDTreeToggle<CR>

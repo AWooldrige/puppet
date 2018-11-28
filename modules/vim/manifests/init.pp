@@ -1,6 +1,6 @@
 class vim {
 
-    package { ['vim', 'vim-common', 'vim-gtk']:
+    package { ['vim', 'vim-common', 'vim-gnome']:
         ensure => installed
     }
 

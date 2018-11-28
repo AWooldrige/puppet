@@ -19,10 +19,11 @@ scheme of {model}{increment}:
 
     $ sudo hostnamectl set-hostname hplaptop1
 
+Make sure hostname is captured by one of the matchers in `manifests/nodes.pp`
+
 Run the bootstrap script:
 
-    curl -L https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo
-    bash
+    wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
 
 
 3) Remove temporary user

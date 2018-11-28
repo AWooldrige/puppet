@@ -12,13 +12,9 @@ class base::packages {
         'powertop',
         'man-db',
         'make',
+        'vim',
+        'vim-common',
         'curl']:
         ensure => installed
     }
-
-    file { '/usr/local/bin/ack':
-        ensure => link,
-        target => '/usr/bin/ack-grep'
-    }
-
 }

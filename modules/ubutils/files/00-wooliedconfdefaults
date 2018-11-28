@@ -1,0 +1,12 @@
+[org/gnome/desktop/input-sources]
+xkb-options=['caps:ctrl_modifier', 'numpad:mac', 'altwin:menu']
+
+[org/gnome/desktop/peripherals/mouse]
+accel-profile='adaptive'
+
+[org/gnome/desktop/interface]
+clock-show-date=true
+clock-show-seconds=true
+font-name='Garuda 11'
+document-font-name='Garuda 11'
+show-battery-percentage=true

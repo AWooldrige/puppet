@@ -1,5 +1,5 @@
 apply:
-	sudo puppet apply --modulepath=modules/ manifests/ -vv
+	sudo puppet apply --modulepath=modules/ manifests/ -vvv
 
 vagrant:
 	vagrant up

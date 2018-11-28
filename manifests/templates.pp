@@ -18,9 +18,12 @@ class basenode::desktop inherits basenode {
 }
 
 class basenode::laptop {
+    include base::packages
     include sshd
     include sudo
     include woolie
+    include woolie::ubuntuprefs
+    include ubutils::sysctl
     include tmux
 }
 
