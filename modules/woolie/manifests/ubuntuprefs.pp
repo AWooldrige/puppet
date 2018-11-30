@@ -1,5 +1,4 @@
 class woolie::ubuntuprefs {
-    include ubutils::dconf
     include woolie
 
     $uname = $woolie::uname

@@ -1,0 +1,12 @@
+[org/gnome/desktop/interface]
+enable-animations=false
+
+[org/gnome/desktop/background]
+color-shading-type='solid'
+primary-color='#ab2876'
+secondary-color='#ab2876'
+
+[org/gnome/desktop/screensaver]
+color-shading-type='solid'
+primary-color='#ab2876'
+secondary-color='#ab2876'

@@ -19,7 +19,17 @@ class sudo {
         owner   => 'root',
         group   => 'root',
         mode    => '0440',
-        require => Package['sudo']
+        require => [ Package['sudo'],
+                     Group['passwordsudo'],
+                     Group['nopasswordsudo'] ]
+    }
+
+    file { '/etc/polkit-1/localauthority.conf.d/61-woolie-admin.conf':
+        source  => 'puppet:///modules/sudo/61-woolie-admin.conf.pollkit',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [Group['passwordsudo'], Group['nopasswordsudo']]
     }
 
 }

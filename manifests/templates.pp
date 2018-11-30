@@ -19,12 +19,16 @@ class basenode::desktop inherits basenode {
 
 class basenode::laptop {
     include base::packages
+    include dconf
     include sshd
     include sudo
     include woolie
     include woolie::ubuntuprefs
     include ubutils::sysctl
     include tmux
+
+    # Laptop specific
+    include dconf::lowmemmachine
 }
 
 class basenode::server inherits basenode {

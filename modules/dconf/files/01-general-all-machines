@@ -7,6 +7,16 @@ accel-profile='adaptive'
 [org/gnome/desktop/interface]
 clock-show-date=true
 clock-show-seconds=true
+show-battery-percentage=true
 font-name='Garuda 11'
 document-font-name='Garuda 11'
-show-battery-percentage=true
+monospace-font-name='Ubuntu Mono 11'
+
+[org/gnome/desktop/peripherals/touchpad]
+two-finger-scrolling-enabled=true
+speed=0.44
+natural-scroll=false
+
+[org/gnome/shell/extensions/dash-to-dock]
+dash-max-icon-size=32
+dock-fixed=false
