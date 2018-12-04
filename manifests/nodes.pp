@@ -2,6 +2,10 @@ node /^hplaptop\d+$/ {
     include basenode::laptop
 }
 
+node /^desktop\d+$/ {
+    include basenode::desktop
+}
+
 # Note that I haven't got round to changing the hostname of that
 # actual PI to fit the convention
 node /^pi-\d{1,3}.woolie.co.uk$/ {

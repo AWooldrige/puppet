@@ -1,21 +1,11 @@
 class basenode {
-    include base::packages
-    include base::bashcustomisations
-    include locale
-    include python
-    include motd
-    include ntp
-    include sshd
-    include sudo-groups
-    include user-woolie
-}
+    # include base::packages
+    # include base::bashcustomisations
+    # include locale
+    # include python
+    # include motd
+    # include ntp
 
-class basenode::desktop inherits basenode {
-    include user-woolie::unmanaged-password
-    include desktop::powermanagement
-}
-
-class basenode::laptop {
     include base::packages
     include dconf
     include sshd
@@ -23,10 +13,16 @@ class basenode::laptop {
     include woolie
     include woolie::ubuntuprefs
     include ubutils::sysctl
+}
 
-    # Laptop specific
+class basenode::desktop inherits basenode {
+    # include desktop::powermanagement
+}
+class basenode::laptop inherits basenode {
+    # Laptop specific (usually for now)
     include dconf::lowmemmachine
 }
+
 
 class basenode::server inherits basenode {
     include user-woolie::managed-password
@@ -46,7 +42,4 @@ class basenode::desktop::raspi inherits basenode::desktop {
     include raspi::vnc::remove
     include raspi::information-radiator::remove
 
-}
-class basenode::desktop::developmentmachine inherits basenode::desktop {
-    include desktop::graphicspackages
 }
