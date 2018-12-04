@@ -2,10 +2,6 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
-Compression yes
-CompressionLevel 9
-
-
 # A lot of the below is clobbered from:
 # https://infosec.mozilla.org/guidelines/openssh
 

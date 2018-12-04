@@ -7,7 +7,6 @@ class basenode {
     include ntp
     include sshd
     include sudo-groups
-    include vim
     include user-woolie
 }
 
