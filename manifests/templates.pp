@@ -8,7 +8,6 @@ class basenode {
     include sshd
     include sudo-groups
     include vim
-    include tmux
     include user-woolie
 }
 
@@ -25,7 +24,6 @@ class basenode::laptop {
     include woolie
     include woolie::ubuntuprefs
     include ubutils::sysctl
-    include tmux
 
     # Laptop specific
     include dconf::lowmemmachine

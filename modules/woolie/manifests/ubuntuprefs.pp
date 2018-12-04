@@ -4,28 +4,46 @@ class woolie::ubuntuprefs {
     $uname = $woolie::uname
     $homedir = $woolie::homedir
 
-
     exec { 'Set account full name':
         command  => "/usr/bin/chfn -f 'Alistair Wooldrige' ${uname}",
         unless => "/bin/egrep '^${uname}:.*Alistair Wooldrige,' /etc/passwd"
     }
 
+
+    ###########################################################################
+    # SSH
+    ###########################################################################
+    ssh_authorized_key { $uname:
+        ensure  => present,
+        user    => $uname,
+        type    => 'ssh-ed25519',
+        key     => 'AAAAC3NzaC1lZDI1NTE5AAAAIGZexCanfqleYleuE4foaxv/vciAOkukYdecrYqH1OW+',
+        require => User[$uname]
+    }
     file { "${homedir}/.ssh/config":
-        source  => 'puppet:///modules/woolie/ssh/config',
+        source  => 'puppet:///modules/woolie/dotfiles/ssh_config',
         owner   => $uname,
         group   => $uname,
         mode    => '0644',
         require => Ssh_authorized_key[$uname]
     }
 
+
+    ###########################################################################
+    # Git
+    ###########################################################################
     file { "${homedir}/.gitconfig":
-        source  => 'puppet:///modules/woolie/gitconfig',
+        source  => 'puppet:///modules/woolie/dotfiles/gitconfig',
         owner   => $uname,
         group   => $uname,
         mode    => '0644',
         require => User[$uname]
     }
 
+
+    ###########################################################################
+    # VIM
+    ###########################################################################
     file { "${homedir}/.vim":
         ensure  => directory,
         owner   => $uname,
@@ -42,7 +60,7 @@ class woolie::ubuntuprefs {
         mode    => '0755'
     } ->
     file { "${homedir}/.vimrc":
-        source  => 'puppet:///modules/woolie/vimrc',
+        source  => 'puppet:///modules/woolie/dotfiles/vimrc',
         owner   => $uname,
         group   => $uname,
         mode    => '0644',
@@ -74,5 +92,41 @@ class woolie::ubuntuprefs {
         tries       => 3,
         refreshonly => true,
         require     => [Exec["install-vundle"]]
+    }
+
+
+    ###########################################################################
+    # Bash
+    ###########################################################################
+    file { "${homedir}/.bash_aliases":
+        source  => 'puppet:///modules/woolie/dotfiles/bash_aliases',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0644',
+        require => User[$uname]
+    }
+
+    # Ubuntu's default ~/.profile adds ~/bin to the PATH
+    file { "${homedir}/bin":
+        source  => 'puppet:///modules/woolie/bin',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0744',
+        recurse => true,
+        purge   => true,
+        force   => true,
+        require => User[$uname]
+    }
+
+
+    ###########################################################################
+    # Tmux
+    ###########################################################################
+    file { "${homedir}/.tmux.conf":
+        source  => 'puppet:///modules/woolie/dotfiles/tmux.conf',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0644',
+        require => [ User[$uname], Package['tmux'] ]
     }
 }

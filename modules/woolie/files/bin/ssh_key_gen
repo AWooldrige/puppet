@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Usage: ./ssh_key_gen
+set -eu
+
+read -r -p 'Enter key purpose, e.g. "github_work" (filename suitable): ' purpose
+
+read -r -p 'Enter key type, "rsa" or "ec": ' key_type
+
+now=$(date '+%Y_%m_%d')
+fname="id_${purpose}_${now}_${key_type}"
+fpath="${HOME}/.ssh/${fname}"
+comment="alistair_wooldrige_${fname}"
+
+if [ "$key_type" == "rsa" ]; then
+    ssh-keygen -t rsa -b 4096 -f "$fpath" -C "$comment"
+fi
+if [ "$key_type" == "ec" ]; then
+    ssh-keygen -t ed25519 -f "$fpath" -C "$comment"
+fi
+
+echo "Keys generated, see ${fname}{,.pub}"

@@ -31,5 +31,4 @@ class sudo {
         mode    => '0644',
         require => [Group['passwordsudo'], Group['nopasswordsudo']]
     }
-
 }

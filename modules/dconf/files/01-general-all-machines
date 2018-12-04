@@ -1,4 +1,5 @@
 [org/gnome/desktop/input-sources]
+sources=[('xkb', 'gb')]
 xkb-options=['caps:ctrl_modifier', 'numpad:mac', 'altwin:menu']
 
 [org/gnome/desktop/peripherals/mouse]

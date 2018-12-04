@@ -1,6 +1,3 @@
 #########################################################################
-##   This file is controlled by Puppet - changes will be overwritten   ##
+## This directory is controlled by Puppet - changes will be overwritten #
 #########################################################################
-Host *
-    Compression yes
-    CompressionLevel 9
