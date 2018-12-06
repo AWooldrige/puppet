@@ -8,6 +8,7 @@ class base::packages {
         'make',
         'vim',
         'vim-common',
+        'gpg',
         'tmux',
         'curl']:
         ensure => installed

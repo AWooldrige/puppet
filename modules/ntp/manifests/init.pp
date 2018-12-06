@@ -1,57 +1,25 @@
 class ntp {
-    package { 'tzdata':
-        ensure => installed
-    }
-    #Note that the puppet comment header cannot be placed in this file because
-    #the tzdata reconfigure script rewrites it
-    file { '/etc/timezone':
-        source => 'puppet:///modules/ntp/timezone',
+
+    file { '/etc/systemd/timesyncd.conf':
+        source  => 'puppet:///modules/ntp/timesyncd.conf',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['tzdata'],
-        notify  => Exec['tzdata-reconfigure']
-    }
-    exec { 'tzdata-reconfigure':
-        refreshonly => true,
-        command     => 'dpkg-reconfigure -f noninteractive tzdata',
-        path        => [
-            '/usr/local/bin',
-            '/opt/local/bin',
-            '/usr/bin',
-            '/usr/sbin',
-            '/bin',
-            '/sbin' ]
-    }
-
-    package { 'ntp':
-        ensure => installed
-    }
-    file { '/etc/ntp.conf':
-        source  => 'puppet:///modules/ntp/ntp.conf',
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => Package['ntp']
-    }
-    service { 'ntp':
-        ensure  => running,
-        enable  => true,
-        require => [ Package['ntp'], File['/etc/ntp.conf'] ]
+        notify  => Service['systemd-timesyncd']
+    } ->
+    service { 'systemd-timesyncd':
+        ensure     => running,
+        enable     => true
+    } ->
+    exec { 'Set correct timezone':
+        command  => "timedatectl set-timezone Europe/London",
+        unless => "timedatectl show --property=Timezone | grep 'Timezone=Europe/London'",
+        provider => "shell"
+    } ->
+    exec { 'Make sure NTP running':
+        command  => "timedatectl set-timezone Europe/London",
+        unless => "timedatectl show --property=NTP | grep 'NTP=yes'",
+        provider => "shell"
     }
 
-    file { '/usr/bin/ntp-kick':
-        source => 'puppet:///modules/ntp/ntp-kick',
-        owner  => 'root',
-        group  => 'root',
-        mode   => '744'
-    }
-    cron { 'ntp-kick' :
-        command => '/usr/bin/chronic /usr/bin/ntp-kick',
-        user    => 'root',
-        ensure  => present,
-        minute  => 0,
-        hour    => 5,
-        require => [ Service['ntp'], File['/usr/bin/ntp-kick'] ]
-    }
 }

@@ -11,15 +11,8 @@ class locale {
         notify  => Exec['locale-reconfigure']
     }
     exec { 'locale-reconfigure':
+        command     => '/usr/sbin/locale-gen en_GB.UTF-8',
         refreshonly => true,
-        command     => 'locale-gen en_GB.UTF-8 && dpkg-reconfigure locales',
-        path        => [
-            '/usr/local/bin',
-            '/opt/local/bin',
-            '/usr/bin',
-            '/usr/sbin',
-            '/bin',
-            '/sbin' ],
-        require => Package['locales']
+        require     => Package['locales']
     }
 }

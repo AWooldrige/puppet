@@ -1,12 +1,9 @@
 class basenode {
-    # include base::packages
-    # include base::bashcustomisations
-    # include locale
-    # include python
-    # include motd
-    # include ntp
-
     include base::packages
+
+    include motd
+    include ntp
+    include locale
     include dconf
     include sshd
     include sudo
