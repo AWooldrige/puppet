@@ -1,6 +1,6 @@
 class basenode {
     include base::packages
-
+    include gdpup
     include motd
     include ntp
     include locale

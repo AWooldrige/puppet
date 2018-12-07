@@ -1,0 +1,33 @@
+#!/bin/bash
+FORCE="no"
+[ "$1" == "-f" ] && FORCE="yes"
+
+set -eu
+
+# Config
+GDIR="/etc/gdpup"
+
+# Runtime flags
+GIT_CHANGES="no"
+
+if [ -f "$GDIR/manifests/nodes.pp" ]; then
+    cd "$GDIR"
+    OLD_HEAD=$(cat "$GDIR/.git/refs/heads/master")
+    git pull
+    NEW_HEAD=$(cat "$GDIR/.git/refs/heads/master")
+    [ "$OLD_HEAD" != "$NEW_HEAD" ] && GIT_CHANGES="yes"
+else
+    rm -rf "$GDIR"
+    git clone --depth=1 https://github.com/AWooldrige/puppet.git "$GDIR"
+    GIT_CHANGES="yes"
+fi
+cd "$GDIR"
+
+if [ "$FORCE" == "no" ]; then
+    if [ "$GIT_CHANGES" == "no" ]; then
+        echo "No git changes, not running puppet apply"
+        exit 0
+    fi
+fi
+
+puppet apply -v "--modulepath=${GDIR}/modules" "${GDIR}/manifests"

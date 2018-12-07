@@ -17,7 +17,7 @@ class ntp {
         provider => "shell"
     } ->
     exec { 'Make sure NTP running':
-        command  => "timedatectl set-timezone Europe/London",
+        command  => "timedatectl set-ntp true",
         unless => "timedatectl show --property=NTP | grep 'NTP=yes'",
         provider => "shell"
     }
