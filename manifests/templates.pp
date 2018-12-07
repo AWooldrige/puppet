@@ -13,30 +13,21 @@ class basenode {
 }
 
 class basenode::desktop inherits basenode {
-    # include desktop::powermanagement
 }
+
 class basenode::laptop inherits basenode {
-    # Laptop specific (usually for now)
+}
+
+class basenode::laptop::lowpwr inherits basenode::laptop {
     include dconf::lowmemmachine
 }
 
-
-class basenode::server inherits basenode {
-    include user-woolie::managed-password
-}
-
-class basenode::desktop::raspi inherits basenode::desktop {
-    class { 'nginx': }
-    include puppet-auto-update
+class basenode::raspi inherits basenode {
+    # class { 'nginx': }
     include raspi
     include raspi::boot-configuration
     include raspi::piface
     include raspi::piuser
     include raspi::dynamic-dns
     include raspi::home-automation
-
-    # Thing that shouldn't be installed
-    include raspi::vnc::remove
-    include raspi::information-radiator::remove
-
 }
