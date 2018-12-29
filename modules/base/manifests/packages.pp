@@ -22,6 +22,7 @@ class base::packages {
         'iotop',
         'htop',
         'powertop',
+        'rename',
         'man-db']:
         ensure => installed
     }

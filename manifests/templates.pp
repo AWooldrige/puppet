@@ -9,13 +9,16 @@ class basenode {
     include sudo
     include woolie
     include woolie::ubuntuprefs
-    include ubutils::sysctl
 }
 
-class basenode::desktop inherits basenode {
-    # include desktop::powermanagement
+class basenode::workstation {
+    include ubutils::sysctl
+    include ubutils::epsonscanner
 }
-class basenode::laptop inherits basenode {
+
+class desktop inherits basenode::workstation {
+}
+class laptop inherits basenode::workstation {
     # Laptop specific (usually for now)
     include dconf::lowmemmachine
 }
@@ -25,7 +28,7 @@ class basenode::server inherits basenode {
     include user-woolie::managed-password
 }
 
-class basenode::desktop::raspi inherits basenode::desktop {
+class raspi inherits basenode::desktop {
     class { 'nginx': }
     include puppet-auto-update
     include raspi
