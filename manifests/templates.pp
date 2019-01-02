@@ -4,7 +4,6 @@ class basenode {
     include motd
     include ntp
     include locale
-    include dconf
     include sshd
     include sudo
     include woolie
@@ -14,6 +13,9 @@ class basenode {
 class basenode::workstation {
     include ubutils::sysctl
     include ubutils::epsonscanner
+
+    # dconf not used by lightdm
+    include dconf
 }
 
 class desktop inherits basenode::workstation {
@@ -24,22 +26,11 @@ class laptop inherits basenode::workstation {
 }
 
 
-class basenode::server inherits basenode {
-    include user-woolie::managed-password
-}
-
-class raspi inherits basenode::desktop {
-    class { 'nginx': }
-    include puppet-auto-update
+class pi inherits basenode {
     include raspi
-    include raspi::boot-configuration
-    include raspi::piface
-    include raspi::piuser
-    include raspi::dynamic-dns
-    include raspi::home-automation
+    include raspi::autologin
 
-    # Thing that shouldn't be installed
-    include raspi::vnc::remove
-    include raspi::information-radiator::remove
-
+    #include raspi::piface
+    #include raspi::dynamic-dns
+    #include raspi::home-automation
 }

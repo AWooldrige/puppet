@@ -30,14 +30,21 @@ class woolie::ubuntuprefs {
 
 
     ###########################################################################
-    # SSH
+    # GPG
     ###########################################################################
+    file { "${homedir}/.gnupg":
+        ensure  => directory,
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0755',
+        require => [ User[$uname], Package['gnupg'] ]
+    } ->
     file { "${homedir}/.gnupg/gpg.conf":
         source  => 'puppet:///modules/woolie/dotfiles/gpg.conf',
         owner   => $uname,
         group   => $uname,
         mode    => '0644',
-        require => [ User[$uname], Package['gpg'] ]
+        require => [ User[$uname], Package['gnupg'] ]
     }
 
 
