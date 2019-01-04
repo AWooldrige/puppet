@@ -8,7 +8,7 @@ class base::packages {
         'make',
         'vim',
         'vim-common',
-        'gpg',
+        'gnupg',
         'tmux',
         'curl']:
         ensure => installed
@@ -22,7 +22,7 @@ class base::packages {
         'iotop',
         'htop',
         'powertop',
-        'linux-tools', # Has perf in
+        'rename',
         'man-db']:
         ensure => installed
     }

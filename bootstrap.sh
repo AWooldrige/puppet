@@ -19,22 +19,28 @@ function install {
     done
 }
 
-echo 'Upgrading packages'
-apt update -y
-apt upgrade -y
+if [ -f "/etc/gdpup/.git/HEAD" ]; then
+    log "/etc/gdpup/ already exists, not re-cloning"
+else
+    log 'Updating apt repos'
+    apt update -y
 
-echo 'Installing git and puppet'
-install git
-install puppet
+    log 'Upgrading apt packages'
+    apt upgrade -y
 
-echo "Removing any current puppet code from $GPATH"
-rm -rf "$GPATH"
+    log 'Installing git and puppet'
+    install git
+    install puppet
 
-echo 'Shallow cloning puppet git repo from master'
-git clone --depth=1 https://github.com/AWooldrige/puppet.git "$GPATH"
+    log 'Installing puppet modules'
+    puppet module install puppetlabs-stdlib
 
-echo 'Running puppet'
-puppet apply -v "--modulepath=${GPATH}/modules" "${GPATH}/manifests"
+    log 'Removing any current puppet code from /etc/gdpup'
+    rm -rf /etc/gdpup
+
+    log 'Shallow cloning puppet git repo from master'
+    /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /etc/gdpup
+fi
 
 echo "Removing $GPATH"
 rm -rf "$GPATH"
@@ -47,8 +53,7 @@ case $(passwd --status woolie | awk '{print $2}') in
     L)  echo "Account 'woolie' is locked, set password"
         passwd woolie
         ;;
-    P)  echo "Password already set for 'woolie'" ;;
+    P)  log "Password already set for 'woolie', no need to change." ;;
 esac
-exit 1
 
-echo 'Finished. Remember to delete temporary user.'
+log 'Finished. Remember to delete temporary user. E.g. userdel -r pi'

@@ -1,11 +1,10 @@
-node /^desktop\d+$/ {
-    include basenode::desktop
-}
-
 node /^hplaptop\d+$/ {
-    include basenode::laptop::lowpwr
+    include laptop
+}
+node /^desktop\d+$/ {
+    include desktop
 }
 
-node /^pi\d+$/ {
-    include basenode::raspi
+node /^pi\d{1,3}$/ {
+    include pi
 }

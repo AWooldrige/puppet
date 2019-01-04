@@ -4,30 +4,33 @@ class basenode {
     include motd
     include ntp
     include locale
-    include dconf
     include sshd
     include sudo
     include woolie
     include woolie::ubuntuprefs
+}
+
+class basenode::workstation {
     include ubutils::sysctl
+    include ubutils::epsonscanner
+
+    # dconf not used by lightdm
+    include dconf
 }
 
-class basenode::desktop inherits basenode {
+class desktop inherits basenode::workstation {
 }
-
-class basenode::laptop inherits basenode {
-}
-
-class basenode::laptop::lowpwr inherits basenode::laptop {
+class laptop inherits basenode::workstation {
+    # Laptop specific (usually for now)
     include dconf::lowmemmachine
 }
 
-class basenode::raspi inherits basenode {
-    # class { 'nginx': }
+
+class pi inherits basenode {
     include raspi
-    include raspi::boot-configuration
-    include raspi::piface
-    include raspi::piuser
-    include raspi::dynamic-dns
-    include raspi::home-automation
+    include raspi::autologin
+
+    #include raspi::piface
+    #include raspi::dynamic-dns
+    #include raspi::home-automation
 }
