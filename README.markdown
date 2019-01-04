@@ -32,6 +32,15 @@ Run the bootstrap script:
  2. Remove the temporary user that was only for puppet install.
 
 
+4) Add credentials not managed by Puppet
+----------------------------------------
+Add the following as applicable:
+
+ 1. Transfer SSH keys from another machine if a workstation.
+ 2. Set `[ddns]` in `/home/woolie/.aws/credentials` if the machine uses
+    raspi::ddns
+
+
 Development
 ================================
 This is a masterless puppet configuration and works solely on puppet apply:

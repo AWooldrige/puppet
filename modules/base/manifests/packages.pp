@@ -22,6 +22,7 @@ class base::packages {
         'iotop',
         'htop',
         'powertop',
+        'linux-tools', # Has perf in
         'man-db']:
         ensure => installed
     }

@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+import random
+import socket
+
+import dns.resolver
+import boto3
+import click
+import miniupnpc
+import requests
+
+
+CONF = {
+    'aws': {
+        'credentials_profile': 'ddns'
+    },
+    'dns_name': 'h.wooldrige.co.uk.',
+    'dns_ttl': 60,
+    'dns_resolvers': [
+        '8.8.8.8',
+        '8.8.4.4'
+    ],
+    'hosted_zone': 'Z1VIBQX07I3Y3K',
+    'web_services': [
+        'https://api.ipify.org',
+        'https://bot.whatismyipaddress.com/',
+        'https://ifconfig.co/ip',
+        'https://api.ip.sb/ip'
+    ]
+}
+
+
+def validate_ip(ip):
+    try:
+        socket.inet_aton(ip)
+    except Exception:
+        click.echo('{0} not recognised as an IP'.format(ip))
+        raise
+
+
+def try_upnp():
+    u = miniupnpc.UPnP(discoverdelay=500)
+    devices = u.discover()
+    click.echo(' * Found devices: {0}'.format(devices))
+    u.selectigd()
+    click.echo(' * Using IGD: {0} - {1}'.format(u.lanaddr, u.statusinfo()))
+    ip = u.externalipaddress()
+    validate_ip(ip)
+    return ip
+
+
+def try_webservices():
+    min_agree = 2
+    # These web services must respond with a plain text IP
+    u = miniupnpc.UPnP(discoverdelay=500)
+    results = []
+    web_services = CONF['web_services'][:]
+    # This shuffles in-place :(
+    random.shuffle(web_services)
+    for ws in web_services:
+        try:
+            click.echo(" * Trying {0}".format(ws))
+            r = requests.get(ws).text.strip()
+            validate_ip(r)
+            click.echo('   - returned {0}'.format(r))
+        except Exception as e:
+            click.echo(" * Tried {0} but failed: {1}".format(ws, e), err=True)
+        results.append(r)
+        if results.count(r) >= min_agree:
+            click.echo(' * {0} web services agree on {1} - success'.format(
+                min_agree, r))
+            return r
+    raise Exception('No web services left to try')
+
+def determine_external_ip():
+    funcs = [
+        ('UPnP', try_upnp),
+        ('Web wervices', try_webservices),
+        # pystun not 3.7 compatible yet :(
+    ]
+    for name, f in funcs:
+        click.echo("Trying {0} to find external IP".format(name))
+        try:
+            return f()
+        except Exception as e:
+            click.echo(" * Could not find addr using {0}: {1}".format(name, e),
+                err=True)
+            pass
+    raise Exception('Could not determine external IP address')
+
+
+def resolve_dns_name(name):
+    resolver = dns.resolver.Resolver()
+    resolver.nameservers = CONF['dns_resolvers']
+    try:
+        answer = resolver.query(name)
+    except Exception as e:
+        click.echo("Could not resolve {0}".format(name), err=True)
+        raise
+    return answer.response.answer[0].items[0].address
+
+
+def get_current_r53_ip(r53_client):
+    dn = CONF['dns_name']
+    rrs = r53_client.list_resource_record_sets(
+        HostedZoneId=CONF['hosted_zone'],
+        StartRecordType='A',
+        StartRecordName=dn
+    )
+    rr = [r for r in rrs['ResourceRecordSets'] if r['Name'] == dn][0]
+    current_ip = rr['ResourceRecords'][0]['Value']
+    return current_ip
+
+
+def upsert_r53_record(r53_client, to_ip):
+    dn = CONF['dns_name']
+    response = r53_client.change_resource_record_sets(
+        HostedZoneId=CONF['hosted_zone'],
+        ChangeBatch={
+            'Comment': 'Update {0} to {1}'.format(dn, to_ip),
+            'Changes': [
+                {
+                    'Action': 'UPSERT',
+                    'ResourceRecordSet': {
+                        'Name': dn,
+                        'Type': 'A',
+                        'TTL': CONF['dns_ttl'],
+                        'ResourceRecords': [{'Value': to_ip }],
+                    }
+                }
+            ]
+        }
+    )
+    click.echo("Route53 change submitted: {0}".format(response))
+    change_id = response['ChangeInfo']['Id']
+    click.echo("Waiting for Route53 to update: {0}".format(change_id))
+    waiter = r53_client.get_waiter('resource_record_sets_changed')
+    waiter.wait(
+        Id=change_id,
+        WaiterConfig={'Delay': 15, 'MaxAttempts': 120}
+    )
+
+
+def update_dns_record(to_ip, dryrun=False, forceupdate=False):
+    sess = boto3.Session(profile_name=CONF['aws']['credentials_profile'])
+    r53_client = sess.client('route53')
+    current_ip = get_current_r53_ip(r53_client)
+    if (current_ip == to_ip) and not forceupdate:
+        click.echo("Current Route53 entry already up to date")
+        return
+    click.echo("Current Route53 entry {0} does not match {1}".format(
+        current_ip, to_ip))
+    if dryrun:
+        click.echo("Not updating Route53 as this is a dry run")
+        return
+    upsert_r53_record(r53_client, to_ip)
+    click.echo("Route53 update complete")
+
+
+@click.command()
+@click.option('--dryrun', '-d', is_flag=True)
+@click.option('--forceupdate', '-f', is_flag=True)
+def check_and_update(dryrun, forceupdate):
+    current_dns_ip = resolve_dns_name(CONF['dns_name'])
+    click.echo('{0} currently at: {1}'.format(
+        CONF['dns_name'], current_dns_ip))
+
+    current_external_ip = determine_external_ip()
+    click.echo('Determined external IP: {0}'.format(current_external_ip))
+
+    if current_dns_ip != current_external_ip:
+        update_dns_record(current_external_ip, dryrun, forceupdate)
+
+
+if __name__ == '__main__':
+    check_and_update()
