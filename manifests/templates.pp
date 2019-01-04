@@ -29,6 +29,7 @@ class laptop inherits basenode::workstation {
 class pi inherits basenode {
     include raspi
     include raspi::autologin
+    include ddns
 
     #include raspi::piface
     #include raspi::dynamic-dns
