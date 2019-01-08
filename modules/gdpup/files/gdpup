@@ -7,27 +7,47 @@ set -eu
 # Config
 GDIR="/etc/gdpup"
 
-# Runtime flags
-GIT_CHANGES="no"
+# Functions
+function log {
+    echo "[$(date --rfc-3339=ns)] ${1}"
+}
 
-if [ -f "$GDIR/manifests/nodes.pp" ]; then
-    cd "$GDIR"
+# Runtime flags
+GIT_REMOTE_CHANGES="no"
+
+# -----------
+
+if [ ! -f "$GDIR/manifests/nodes.pp" ]; then
+    log "Cloning repo to ${GDIR}."
+    rm -rf "$GDIR"
+    git clone --depth=1 https://github.com/AWooldrige/puppet.git "$GDIR"
+    GIT_REMOTE_CHANGES="yes"
+fi
+
+cd "$GDIR"
+
+if [ "$(git diff-index --exit-code --quiet HEAD)" ]; then
+    log "Local git changes to ${GDIR}, Aborting."
+    exit 1
+fi
+
+if [ "$GIT_REMOTE_CHANGES" == "no" ]; then
+    log "Checking git remote for repo changes"
     OLD_HEAD=$(cat "$GDIR/.git/refs/heads/master")
     git pull
     NEW_HEAD=$(cat "$GDIR/.git/refs/heads/master")
-    [ "$OLD_HEAD" != "$NEW_HEAD" ] && GIT_CHANGES="yes"
-else
-    rm -rf "$GDIR"
-    git clone --depth=1 https://github.com/AWooldrige/puppet.git "$GDIR"
-    GIT_CHANGES="yes"
-fi
-cd "$GDIR"
-
-if [ "$FORCE" == "no" ]; then
-    if [ "$GIT_CHANGES" == "no" ]; then
-        echo "No git changes, not running puppet apply"
-        exit 0
+    if [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
+        log " -> Updated to $NEW_HEAD"
+        GIT_REMOTE_CHANGES="yes"
+    else
+        log " -> No updates available"
     fi
 fi
 
+if [ "$FORCE" == "no" ] && [ "$GIT_REMOTE_CHANGES" == "no" ]; then
+    log "No changes, not running puppet apply."
+    exit 0
+fi
+
+log "Running puppet apply"
 puppet apply -v "--modulepath=${GDIR}/modules" "${GDIR}/manifests"

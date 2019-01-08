@@ -5,6 +5,9 @@ GPATH="/etc/gdpup-bootstrap"
 
 # Script principle:
 # 1) Idempotent. It should be possible to run this script multiple times.
+function log {
+    echo "[$(date --rfc-3339=ns)] ${1}"
+}
 
 function install {
     dpkg -s "$1" && return 0

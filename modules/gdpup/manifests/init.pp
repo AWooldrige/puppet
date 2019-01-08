@@ -9,11 +9,11 @@ class gdpup {
     cron { 'Full puppet run once per night':
         command => '/usr/local/sbin/gdpup -f',
         user    => root,
-        hour    => 3,
+        hour    => 5,
         minute  => 15
     } ->
-    cron { 'Check for git updates once per hour':
-        command => '/usr/local/sbin/gdpup -f',
+    cron { 'Check for updates once per hour, only run puppet if changed':
+        command => '/usr/local/sbin/gdpup',
         user    => root,
         hour    => absent,
         minute  => 39
