@@ -10,7 +10,7 @@ class basenode {
     include woolie::ubuntuprefs
 }
 
-class basenode::workstation {
+class basenode::workstation inherits basenode {
     include ubutils::sysctl
     include ubutils::epsonscanner
 

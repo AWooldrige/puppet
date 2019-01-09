@@ -12,11 +12,11 @@ class gdpup {
         hour    => 5,
         minute  => 15
     } ->
-    cron { 'Check for updates once per hour, only run puppet if changed':
+    cron { 'Check for updates regularly, only run puppet if changed':
         command => '/usr/local/sbin/gdpup',
         user    => root,
         hour    => absent,
-        minute  => 39
+        minute  => [19, 39]
     }
 
 }
