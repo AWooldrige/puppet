@@ -1,0 +1,64 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS Infrastructure for Public Facing Sites",
+    "Parameters" : { },
+    "Resources": {
+        "WwwWooldrigeCoUkCertificate" : {
+            "Type" : "AWS::CertificateManager::Certificate",
+            "Properties" : {
+                "DomainName" : "wooldrige.co.uk",
+                "SubjectAlternativeNames": [
+                    "wooldrige.co.uk",
+                    "www.wooldrige.co.uk"
+                ],
+                "ValidationMethod": "DNS"
+            }
+        },
+        "WoolieCoUkCertificate" : {
+            "Type" : "AWS::CertificateManager::Certificate",
+            "Properties" : {
+                "DomainName" : "woolie.co.uk",
+                "SubjectAlternativeNames": [
+                    "woolie.co.uk",
+                    "www.woolie.co.uk"
+                ],
+                "ValidationMethod": "DNS"
+            }
+        },
+        "OnmyplateCoUkCertificate" : {
+            "Type" : "AWS::CertificateManager::Certificate",
+            "Properties" : {
+                "DomainName" : "onmyplate.co.uk",
+                "SubjectAlternativeNames": [
+                    "onmyplate.co.uk",
+                    "www.onmyplate.co.uk"
+                ],
+                "ValidationMethod": "DNS"
+            }
+        },
+        "KempstonnurseriesCoUkCertificate" : {
+            "Type" : "AWS::CertificateManager::Certificate",
+            "Properties" : {
+                "DomainName" : "kempstonnurseries.co.uk",
+                "SubjectAlternativeNames": [
+                    "kempstonnurseries.co.uk",
+                    "www.kempstonnurseries.co.uk"
+                ],
+                "ValidationMethod": "DNS"
+            }
+        },
+        "BrignellbookbindersComCertificate" : {
+            "Type" : "AWS::CertificateManager::Certificate",
+            "Properties" : {
+                "DomainName" : "brignellbookbinders.com",
+                "SubjectAlternativeNames": [
+                    "brignellbookbinders.com",
+                    "www.brignellbookbinders.com"
+                ],
+                "ValidationMethod": "DNS"
+            }
+        }
+    }
+}
+
+

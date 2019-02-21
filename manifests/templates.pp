@@ -13,6 +13,7 @@ class basenode {
 class basenode::workstation inherits basenode {
     include ubutils::sysctl
     include ubutils::epsonscanner
+    include workstation::packages
 
     # dconf not used by lightdm
     include dconf

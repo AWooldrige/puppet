@@ -51,6 +51,18 @@
                         "Type": "CNAME",
                         "TTL": "86400",
                         "ResourceRecords": [ "ghs.google.com" ]
+                    },
+                    {
+                        "Name": "_6890b44703dfb25f9a7c85924dacc0c0.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_e804161c9c96c72d37fde708e5f9e457.hkvuiqjoua.acm-validations.aws." ]
+                    },
+                    {
+                        "Name": "_6fd081d5a91665e96a3bf4e80195193e.www.woolie.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_266bff546b5c58cc45a8452540392f62.hkvuiqjoua.acm-validations.aws." ]
                     }
                 ]
             }
@@ -85,6 +97,18 @@
                         "Type": "CNAME",
                         "TTL": "1209600",
                         "ResourceRecords": [ "gv-SBHCIDQ6WSTITK.dv.googlehosted.com." ]
+                    },
+                    {
+                        "Name": "_7e5d86009dbd94e07aa5ef6377050335.onmyplate.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_b97c01b666ba19d308b65f719b4a6e62.hkvuiqjoua.acm-validations.aws." ]
+                    },
+                    {
+                        "Name": "_5f4a213b8498f84376cf4799056f0b2c.www.onmyplate.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_98663272d14ad71051d032422a847aa0.hkvuiqjoua.acm-validations.aws." ]
                     }
                 ]
             }
@@ -109,10 +133,44 @@
                         ]
                     },
                     {
+                        "Name": "wooldrige.co.uk.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "WooldrigeCoUkCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
+                        "Name": "www.wooldrige.co.uk.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "WwwWooldrigeCoUkCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
                         "Name": "google._domainkey.wooldrige.co.uk.",
                         "Type": "TXT",
                         "TTL": "86400",
                         "ResourceRecords": [ "\"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEgZWLAgAXgZZIkAC4Na4xU3UmFkuIvj3a4AHW3K45vN3BeiBQ5mYC5g/KcrXZhDsaWzp9qgi9chtT3CV/E4ZA8SDeJxmyVCu8PWxXBTc9akFah3lp3mgtLZY+sMrfGlMTdHFzJ1I7FlttFeCAMUXm2ZsQyoXqaIS9Ojjy1ddikQIDAQAB\"" ]
+                    },
+                    {
+                        "Name": "_7ed1703fdaa9c6334e5b106750e9bdb9.wooldrige.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_664e534f42e84c801b012c47baa1d539.hkvuiqjoua.acm-validations.aws." ]
+                    },
+                    {
+                        "Name": "_ba782779eb4245f59f3efd2ec879c6c2.www.wooldrige.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_9f2941a51f8e1cab8a3651aab4ae6832.hkvuiqjoua.acm-validations.aws." ]
                     }
                 ]
             }
@@ -127,6 +185,18 @@
                         "Type": "CNAME",
                         "TTL": "1209600",
                         "ResourceRecords": [ "gv-KHYQWCRKN2VBQN.dv.googlehosted.com." ]
+                    },
+                    {
+                        "Name": "_a87daaa3fc6deb4f13a3f767685c58f8.kempstonnurseries.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_3006821cccf83e1a8d2f645a80321d41.hkvuiqjoua.acm-validations.aws." ]
+                    },
+                    {
+                        "Name": "_5f706c7c437e292348dd0dfc3dc96749.www.kempstonnurseries.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_c4ccdbf0b806a5ad6c9c5f01e819e53f.hkvuiqjoua.acm-validations.aws." ]
                     }
                 ]
             }
@@ -167,7 +237,35 @@
                             "30 ASPMX4.GOOGLEMAIL.COM.",
                             "30 ASPMX5.GOOGLEMAIL.COM."
                         ]
+                    },
+                    {
+                        "Name": "_9025736d62de242aba2cd978ca63e1e6.brignellbookbinders.com.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_87634a28d025b3df3ec714a67f0eb096.hkvuiqjoua.acm-validations.aws." ]
+                    },
+                    {
+                        "Name": "_4c01cf53a050542ed7b7adb841cf7a51.www.brignellbookbinders.com.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "_7bc553845e84284d892677bca0188698.hkvuiqjoua.acm-validations.aws." ]
                     }
+                ]
+            }
+        },
+        "IAMUserWoolie": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Groups": [
+                    { "Ref": "IAMGroupFullAdmin" }
+                ]
+            }
+        },
+        "IAMGroupFullAdmin": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AdministratorAccess"
                 ]
             }
         },
@@ -381,6 +479,107 @@
                 }
             },
             "DeletionPolicy" : "Retain"
+        },
+
+        "WwwWooldrigeCoUkWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "www.wooldrige.co.uk",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html",
+                    "ErrorDocument" : "error.html"
+                }
+            },
+            "DeletionPolicy" : "Delete"
+        },
+       "WooldrigeCoUkRedirectBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "wooldrige.co.uk",
+                "WebsiteConfiguration" : {
+                    "RedirectAllRequestsTo": {
+                        "HostName": "www.wooldrige.co.uk"
+                    }
+                }
+            },
+            "DeletionPolicy" : "Delete"
+        },
+        "WooldrigeCoUkCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Enabled": "true",
+                    "Aliases": [ "wooldrige.co.uk" ],
+                    "Origins": [
+                        {
+                            "DomainName": "wooldrige.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "wooldrige.co.uk",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "Compress": true,
+                        "TargetOriginId": "wooldrige.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/570a62d9-bca9-4153-9ce2-13d847b41d90",
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            },
+            "DependsOn": [
+                "WooldrigeCoUkRedirectBucket"
+            ]
+        },
+        "WwwWooldrigeCoUkCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Enabled": "true",
+                    "Aliases": [ "www.wooldrige.co.uk" ],
+                    "DefaultRootObject": "index.html",
+                    "Origins": [
+                        {
+                            "DomainName": "www.wooldrige.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "www.wooldrige.co.uk",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "Compress": true,
+                        "TargetOriginId": "www.wooldrige.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/570a62d9-bca9-4153-9ce2-13d847b41d90",
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            },
+            "DependsOn": [
+                "WwwWooldrigeCoUkWebsiteBucket"
+            ]
         },
        "WoolieCoUkRedirectBucket" : {
             "Type" : "AWS::S3::Bucket",
