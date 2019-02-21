@@ -133,13 +133,16 @@ set viminfo='50,f1  "Save up to 50 marks, enable capital marks
 
 " SYNTASTIC
 "==============================================================================
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
-
-" This is a bit slow so disable it
-let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
+let g:syntastic_python_python_exec = '/usr/bin/python3.7'
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_c_checkers = ['gcc', 'clang_check', 'clang_tidy']
 

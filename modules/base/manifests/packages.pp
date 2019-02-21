@@ -23,7 +23,9 @@ class base::packages {
         'htop',
         'powertop',
         'rename',
-        'man-db']:
+        'man-db',
+        'python3.7',
+        'python3.7-venv']:
         ensure => installed
     }
 }
