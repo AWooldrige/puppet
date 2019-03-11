@@ -175,5 +175,11 @@ nnoremap <leader>7 7gt<CR>
 nnoremap <leader>8 8gt<CR>
 nnoremap <leader>9 9gt<CR>
 
+" Copy and paste in GVim is terrible. https://superuser.com/a/189198 sorts it
+vmap <C-c> "+yi
+vmap <C-x> "+c
+vmap <C-v> c<ESC>"+p
+imap <C-v> <C-r><C-o>+
+
 " NERDTree
 noremap <leader>n :NERDTreeToggle<CR>
