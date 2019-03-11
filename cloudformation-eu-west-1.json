@@ -181,6 +181,28 @@
                 "HostedZoneName": "kempstonnurseries.co.uk.",
                 "RecordSets": [
                     {
+                        "Name": "kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "KempstonnurseriesCoUkCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
+                        "Name": "www.kempstonnurseries.co.uk.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "WwwKempstonnurseriesCoUkCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
                         "Name": "ZQJYDD6YQE2G.kempstonnurseries.co.uk.",
                         "Type": "CNAME",
                         "TTL": "1209600",
@@ -386,11 +408,50 @@
                 }
             }
         },
+        "KempstonnurseriesCoUkCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Enabled": "true",
+                    "Aliases": [ "kempstonnurseries.co.uk" ],
+                    "Origins": [
+                        {
+                            "DomainName": "kempstonnurseries.co.uk.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "kempstonnurseries.co.uk",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "Compress": true,
+                        "TargetOriginId": "kempstonnurseries.co.uk",
+                        "ForwardedValues": {
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/99b344c9-6ed5-4c51-8443-1361b8def44a",
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            },
+            "DependsOn": [
+                "KempstonnurseriesCoUkRedirectBucket"
+            ]
+        },
         "WwwKempstonnurseriesCoUkCloudFrontCDN": {
             "Type": "AWS::CloudFront::Distribution",
             "Properties": {
                 "DistributionConfig": {
+                    "Enabled": "true",
                     "Aliases": [ "www.kempstonnurseries.co.uk" ],
+                    "DefaultRootObject": "index.html",
                     "Origins": [
                         {
                             "DomainName": "www.kempstonnurseries.co.uk.s3-website-eu-west-1.amazonaws.com",
@@ -401,15 +462,26 @@
                         }
                     ],
                     "DefaultCacheBehavior": {
+                        "Compress": true,
                         "TargetOriginId": "www.kempstonnurseries.co.uk",
                         "ForwardedValues": {
-                            "QueryString": false
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
                         },
-                        "ViewerProtocolPolicy": "allow-all"
+                        "ViewerProtocolPolicy": "redirect-to-https"
                     },
-                    "Enabled": "true"
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/99b344c9-6ed5-4c51-8443-1361b8def44a",
+                        "SslSupportMethod": "sni-only"
+                    }
                 }
-            }
+            },
+            "DependsOn": [
+                "WwwKempstonnurseriesCoUkWebsiteBucket"
+            ]
         },
         "WwwBrignellbookbindersComCloudFrontCDN": {
             "Type": "AWS::CloudFront::Distribution",
@@ -435,6 +507,17 @@
                     "Enabled": "true"
                 }
             }
+        },
+       "StagingWebsiteBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "PublicRead",
+                "BucketName" : "wooliestaging",
+                "WebsiteConfiguration" : {
+                    "IndexDocument" : "index.html"
+                }
+            },
+            "DeletionPolicy" : "Retain"
         },
        "WwwWoolieCoUkWebsiteBucket" : {
             "Type" : "AWS::S3::Bucket",
@@ -464,10 +547,11 @@
                 "AccessControl" : "PublicRead",
                 "BucketName" : "www.kempstonnurseries.co.uk",
                 "WebsiteConfiguration" : {
-                    "IndexDocument" : "index.html"
+                    "IndexDocument" : "index.html",
+                    "ErrorDocument" : "error.html"
                 }
             },
-            "DeletionPolicy" : "Retain"
+            "DeletionPolicy" : "Delete"
         },
        "WwwBrignellbookbindersComWebsiteBucket" : {
             "Type" : "AWS::S3::Bucket",
@@ -601,9 +685,14 @@
             "Type" : "AWS::S3::Bucket",
             "Properties" : {
                 "AccessControl" : "PublicRead",
-                "BucketName" : "kempstonnurseries.co.uk"
+                "BucketName" : "kempstonnurseries.co.uk",
+                "WebsiteConfiguration" : {
+                    "RedirectAllRequestsTo": {
+                        "HostName": "www.kempstonnurseries.co.uk"
+                    }
+                }
             },
-            "DeletionPolicy" : "Retain"
+            "DeletionPolicy" : "Delete"
         },
        "BrignellbookbindersComRedirectBucket" : {
             "Type" : "AWS::S3::Bucket",
