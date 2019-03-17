@@ -548,7 +548,7 @@
                 "BucketName" : "www.kempstonnurseries.co.uk",
                 "WebsiteConfiguration" : {
                     "IndexDocument" : "index.html",
-                    "ErrorDocument" : "error.html"
+                    "ErrorDocument" : "404/index.html"
                 }
             },
             "DeletionPolicy" : "Delete"
