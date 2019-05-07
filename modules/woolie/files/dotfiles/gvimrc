@@ -1,0 +1,15 @@
+"#########################################################################
+"##   This file is controlled by Puppet - changes will be overwritten   ##
+"#########################################################################
+
+" Nice dark colour scheme
+colorscheme gruvbox
+set background=dark
+
+" Default font size is usually a bit too large, bring down to 9.
+set guifont=Monospace 9
+
+
+set guioptions-=m  "Hide menu bar
+set guioptions-=T  "Hide toolbar
+set guioptions-=r  "Hide scrollbar

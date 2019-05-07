@@ -85,6 +85,12 @@ class woolie::ubuntuprefs {
         mode    => '0644',
         notify  => Exec['vundle-install-plugins']
     }
+    file { "${homedir}/.gvimrc":
+        source  => 'puppet:///modules/woolie/dotfiles/gvimrc',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0644'
+    }
 
     # Sometimes the git command will fail, but will still create the vundle
     # directory. This is why the directory is removed as part of the command,
