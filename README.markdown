@@ -65,6 +65,11 @@ Logging
 All scripts should log to syslog and to stdout/stderr. This should be managed
 within the scripts themselves.
 
+To see log output for the main crons:
+
+ * `sudo journalctl -t 'gdpup'`
+ * `sudo journalctl -t 'ddns'`
+
 
 Documentation
 ==============================

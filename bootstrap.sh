@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -eu
 
-GPATH="/etc/gdpup-bootstrap"
-
 # Script principle:
 # 1) Idempotent. It should be possible to run this script multiple times.
+
 function log {
     echo "[$(date --rfc-3339=ns)] ${1}"
 }
@@ -45,18 +44,18 @@ else
     /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /etc/gdpup
 fi
 
-echo "Removing $GPATH"
-rm -rf "$GPATH"
+log "Running puppet"
+puppet apply -v "--modulepath=/etc/gdpup/modules" "/etc/gdpup/manifests"
 
 # https://unix.stackexchange.com/a/465438
 case $(passwd --status woolie | awk '{print $2}') in
-    NP)  echo "No password set for 'woolie', set one:"
+    NP)  echo "No password set for 'woolie', set one uing 'passwd woolie':"
         passwd woolie
         ;;
-    L)  echo "Account 'woolie' is locked, set password"
+    L)  echo "Account 'woolie' is locked, set password using 'passwd woolie'"
         passwd woolie
         ;;
     P)  log "Password already set for 'woolie', no need to change." ;;
 esac
 
-log 'Finished. Remember to delete temporary user. E.g. userdel -r pi'
+log 'Finished. Remember to delete temporary user manually. E.g. userdel -r pi'

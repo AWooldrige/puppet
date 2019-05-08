@@ -28,13 +28,13 @@ class ddns {
     } ->
     cron { 'Check Dynamic DNS entry at regular intervals':
         ensure  => present,
-        command => '/usr/local/bin/ddns',
+        command => '/usr/bin/systemd-cat -t "ddns" /usr/local/bin/ddns',
         minute  => [0, 10, 20, 30, 40, 50],
         user    => 'woolie'
     } ->
     cron { 'Check Dynamic DNS entry at boot':
         ensure  => present,
-        command => '/usr/local/bin/ddns',
+        command => '/usr/bin/systemd-cat -t "ddns" /usr/local/bin/ddns',
         special => 'reboot',
         user    => 'woolie'
     }
