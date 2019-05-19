@@ -24,8 +24,10 @@ class base::packages {
         'powertop',
         'rename',
         'man-db',
-        'python3.7',
-        'python3.7-venv']:
+        'inotify-tools',  # Includes inotifywait
+        # 'python3.7', Not available on raspbian
+        # 'python3.7-venv',
+        ]:
         ensure => installed
     }
 }

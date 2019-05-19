@@ -1,12 +1,5 @@
 apply:
 	sudo puppet apply --modulepath=modules/ manifests/ -vvv
 
-vagrant:
-	vagrant up
-	ssh vagrant -t 'bash -l -c "populate-workspace"'
-
-path = ~/puppet_makefile_deploy
-.PHONY: copy_to_pi
-copy_to_pi:
-	ssh pi-1 'rm -rf $(path) && mkdir $(path)'
-	scp -C -r ./* pi-1:$(path)
+bundle.tar.gz: $(shell find modules manifests)
+	tar -czf bundle.tar.gz --transform 's,^,puppet/,' .

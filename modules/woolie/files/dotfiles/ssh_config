@@ -21,3 +21,19 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.
 #########################################################################
 # Host specific entries
 #########################################################################
+Host pi3
+    Hostname h.wooldrige.co.uk
+    Port 3222
+    User woolie
+
+Host pi3.local
+    Port 3222
+    User woolie
+
+Host laptopdell1.local
+    Port 3222
+    User woolie
+
+Host pi2.local
+    Port 3222
+    User woolie

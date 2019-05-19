@@ -30,9 +30,10 @@ class laptop inherits basenode::workstation {
 class pi inherits basenode {
     include raspi
     include raspi::autologin
+}
+class livingroomtvpi inherits pi {
     include ddns
-
-    #include raspi::piface
-    #include raspi::dynamic-dns
-    #include raspi::home-automation
+}
+class kitchentvpi inherits pi {
+    include raspi::inforad
 }

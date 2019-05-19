@@ -4,7 +4,7 @@ class ddns {
             'python3-click',
             'python3-dnspython',
             'python3-requests',
-            'python3-miniupnpc'
+            # 'python3-miniupnpc'  # Not available in Debian yet
         ]:
         ensure => installed
     } ->
@@ -16,9 +16,10 @@ class ddns {
         require => User['woolie']
     } ->
     exec { 'Create AWS credentials file':
-        command => "/bin/echo -e '# For /usr/bin/ddns\n[ddns]aws_access_key_id=\naws_secret_access_key=' >> /home/woolie/.aws/credentials",
-        unless => "/bin/grep -q '\[ddns\]' /home/woolie/.aws/credentials",
-        provider => "shell"
+        command     => "/bin/echo -e '# For /usr/bin/ddns\n[ddns]\naws_access_key_id=\naws_secret_access_key=' >> /home/woolie/.aws/credentials",
+        unless      => "/bin/grep -q '[ddns]' /home/woolie/.aws/credentials",
+        provider    => "shell",
+        user        => 'woolie'
     } ->
     file { '/usr/local/bin/ddns':
         source  => 'puppet:///modules/ddns/ddns',

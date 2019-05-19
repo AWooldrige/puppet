@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+if ps waux | grep '[ssh] -D 8123'; then
+    echo "SOCKS proxy already running..."
+    ss -l | grep '8123'
+else
+    echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
+    ssh -D 8123 -f -C -q -N pi3 || echo 'Non-zero exist code when starting.'
+    echo "Started"
+fi
+
+# This is mainly because of the start-socks.desktop entry
+echo "Exciting script in 5 seconds"
+sleep 5

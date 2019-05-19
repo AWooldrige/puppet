@@ -154,4 +154,17 @@ class woolie::ubuntuprefs {
         mode    => '0644',
         require => [ User[$uname], Package['tmux'] ]
     }
+
+
+    ###########################################################################
+    # Application shortcut entries
+    ###########################################################################
+    file { "${homedir}/.local/share/applications/start-socks.desktop":
+        source  => 'puppet:///modules/woolie/start-socks.desktop',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0644',
+        require => [ User[$uname] ]
+    }
+
 }

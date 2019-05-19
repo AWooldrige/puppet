@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+DISPLAY=:0 chromium-browser --start-fullscreen "http://iris2.rail.co.uk/tiger/rendercissod.asp?file=308646.xml&width=full" "https://www.bbc.co.uk/weather/2639018" &

@@ -8,6 +8,9 @@ node /^desktop\d+$/ {
     include desktop
 }
 
-node /^pi\d{1,3}$/ {
-    include pi
+node /^pi2$/ {
+    include kitchentvpi
+}
+node /^pi3$/ {
+    include livingroomtvpi
 }

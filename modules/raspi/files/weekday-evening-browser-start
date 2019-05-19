@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+DISPLAY=:0 chromium-browser --start-fullscreen "https://calendar.google.com/calendar/r/custom/4/w" "https://docs.google.com/a/woolie.co.uk/document/d/e/2PACX-1vRXob8VtBLiuo4In-TmCky4gBE58uNvcJ7L8kYMCj2u_Oyb0qIT6n786sLtGWADjSI2ZqQ1KHdBpzTb/pub" "https://goodbudget.com/home" &
