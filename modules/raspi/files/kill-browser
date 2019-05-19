@@ -3,4 +3,4 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 set -eu
-killall chromium-browser
+killall -g -r chromium-browser

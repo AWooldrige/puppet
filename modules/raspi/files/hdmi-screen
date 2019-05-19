@@ -96,11 +96,15 @@ assign_positional_args
 
 case "$_arg_action" in
 "off")
+    echo 'Turning TV off'
 	echo 'standby 0' | cec-client -s -d 1
     ;;
 "on")
+    echo 'Turning TV on'
     echo 'on 0' | cec-client -s -d 1
+    echo 'Waiting 20 seconds to let TV power on'
     sleep 20
+    echo 'Setting TV to select Raspberry PI HDMI'
     echo 'as' | cec-client -s -d 1
     #tvservice --explicit="DMT 35 HDMI"
     ;;

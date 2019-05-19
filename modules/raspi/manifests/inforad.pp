@@ -42,14 +42,14 @@ class raspi::inforad {
     }
     cron { 'Browser start: Weekday mornings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/weekday-morning-browser-start',
-        user    => root,
+        user    => 'woolie',
         hour     => 6,
         minute   => 32,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Browser stop: Weekday mornings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/kill-browser',
-        user    => root,
+        user    => 'woolie',
         hour     => 7,
         minute   => 40,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
@@ -67,28 +67,28 @@ class raspi::inforad {
     ###########################################################################
     cron { 'Screen on: Weekday evenings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen on',
-        user    => root,
+        user    => 'root',
         hour     => 17,
         minute   => 30,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Browser start: Weekday evenings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/weekday-evening-browser-start',
-        user    => root,
+        user    => 'woolie',
         hour     => 17,
         minute   => 32,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Browser stop: Weekday evenings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/kill-browser',
-        user    => root,
+        user    => 'woolie',
         hour     => 22,
         minute   => 15,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Screen off: Weekday evenings':
         command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen on',
-        user    => root,
+        user    => 'root',
         hour     => 22,
         minute   => 17,
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
