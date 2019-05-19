@@ -55,7 +55,7 @@ class raspi::inforad {
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Screen off: Weekday mornings':
-        command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen on',
+        command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen off',
         user    => root,
         hour     => 7,
         minute   => 42,
@@ -87,7 +87,7 @@ class raspi::inforad {
         weekday  => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     }
     cron { 'Screen off: Weekday evenings':
-        command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen on',
+        command => '/usr/bin/systemd-cat -t "inforad" /usr/local/bin/hdmi-screen off',
         user    => 'root',
         hour     => 22,
         minute   => 17,
