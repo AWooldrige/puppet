@@ -9,7 +9,7 @@ if ps waux | grep '[ssh] -D 8123'; then
     ss -l | grep '8123'
 else
     echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
-    ssh -D 8123 -f -C -q -N pi3 || echo 'Non-zero exist code when starting.'
+    ssh -D 8123 -f -C -N -y pi3 || echo 'Non-zero exist code when starting.'
     echo "Started"
 fi
 

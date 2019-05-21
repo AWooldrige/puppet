@@ -2,6 +2,30 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 
+#########################################################################
+# Host specific entries
+#########################################################################
+Host pi3
+    Hostname h.wooldrige.co.uk
+
+Host pi2
+    Hostname pi2.local
+    ProxyJump pi3
+
+# General settings must be placed _after_ more specific ones
+Host pi3 pi3.local pi2 pi2.local
+    Port 3222
+    User woolie
+
+
+#########################################################################
+# General options
+#########################################################################
+# SSH sessions will terminate after 20 (5*4) seconds of network inactivity
+ServerAliveInterval 5
+ServerAliveCountMax 4
+
+
 # A lot of the below is clobbered from:
 # https://infosec.mozilla.org/guidelines/openssh
 
@@ -18,19 +42,3 @@ MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@op
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 
 
-#########################################################################
-# Host specific entries
-#########################################################################
-
-
-Host pi3
-    Hostname h.wooldrige.co.uk
-
-Host pi2
-    Hostname pi2.local
-    ProxyJump pi3
-
-# General settings must be placed _after_ more specific ones
-Host pi3 pi3.local pi2 pi2.local
-    Port 3222
-    User woolie
