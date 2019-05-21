@@ -22,9 +22,6 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.
 # Host specific entries
 #########################################################################
 
-Host pi3, pi3.local, pi2, pi2.local
-    Port 3222
-    User woolie
 
 Host pi3
     Hostname h.wooldrige.co.uk
@@ -32,3 +29,8 @@ Host pi3
 Host pi2
     Hostname pi2.local
     ProxyJump pi3
+
+# General settings must be placed _after_ more specific ones
+Host pi3 pi3.local pi2 pi2.local
+    Port 3222
+    User woolie
