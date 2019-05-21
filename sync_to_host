@@ -102,9 +102,11 @@ function log {
 
 log "To apply changes, manually SSH onto ${_arg_hostname} and run 'cd ~/puppet_rsync_copy && sudo make apply'"
 
+log "Running initial rsync"
 # TODO: Remove this duplication
 rsync -az --delete . "${_arg_hostname}:~/puppet_rsync_copy"
 
+log "Initial rsync complete, setting up inotifywait"
 while inotifywait -e create,modify,delete -r ./*; do
     rsync -az --delete . "${_arg_hostname}:~/puppet_rsync_copy"
 done

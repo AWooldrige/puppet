@@ -1,4 +1,4 @@
-class raspi::prevent-screen-blanking {
+class raspi::noscreenblanking {
 
     $asfile = '/etc/xdg/lxsession/LXDE-pi/autostart'
 

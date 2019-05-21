@@ -14,6 +14,7 @@ class basenode::workstation inherits basenode {
     include ubutils::sysctl
     include ubutils::epsonscanner
     include workstation::packages
+    include woolie::workstationprefs
 
     # dconf not used by lightdm
     include dconf
@@ -30,7 +31,7 @@ class laptop inherits basenode::workstation {
 class pi inherits basenode {
     include raspi
     include raspi::autologin
-    include raspi::prevent-screen-blanking
+    include raspi::noscreenblanking
 }
 class livingroomtvpi inherits pi {
     include ddns
