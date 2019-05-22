@@ -131,14 +131,9 @@ class woolie::ubuntuprefs {
         require => User[$uname]
     }
 
-    # Ubuntu's default ~/.profile adds ~/bin to the PATH
+    # Remove old location of user scripts before systemdification
     file { "${homedir}/bin":
-        source  => 'puppet:///modules/woolie/bin',
-        owner   => $uname,
-        group   => $uname,
-        mode    => '0744',
-        recurse => true,
-        purge   => true,
+        ensure => absent,
         force   => true,
         require => User[$uname]
     }
