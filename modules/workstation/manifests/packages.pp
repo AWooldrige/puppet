@@ -17,4 +17,8 @@ class workstation::packages {
         ]:
         ensure => installed
     }
+    package { 's3sup':
+        ensure => installed,
+        provider => 'pip3'
+    }
 }

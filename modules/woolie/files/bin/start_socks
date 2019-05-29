@@ -9,8 +9,12 @@ if ps waux | grep '[ssh] -D 8123'; then
     ss -l | grep '8123'
 else
     echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
-    ssh -D 8123 -f -C -N -y pi3 || echo 'Non-zero exist code when starting.'
-    echo "Started"
+    if ssh -D 8123 -f -C -N -y pi3; then
+        echo "Proxy started"
+    else
+        echo 'ERROR: non-zero exit code from ssh(1)'
+        sleep 10
+    fi
 fi
 
 # This is mainly because of the start-socks.desktop entry

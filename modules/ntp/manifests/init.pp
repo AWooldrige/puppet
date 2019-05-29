@@ -15,11 +15,6 @@ class ntp {
         command  => "timedatectl set-timezone Europe/London",
         unless => "timedatectl status | grep 'Time zone: Europe/London'",
         provider => "shell"
-    } ->
-    exec { 'Make sure NTP running':
-        command  => "timedatectl set-timezone Europe/London",
-        unless => "timedatectl status | grep 'Network time on: yes'",
-        provider => "shell"
     }
 
 }
