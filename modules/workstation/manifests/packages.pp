@@ -1,8 +1,9 @@
 class workstation::packages {
 
-    # Editors
     package { [
-        'vim-gtk3'
+        'vim-gtk3',
+        'exiftool',
+        'sqlitebrowser'
         ]:
         ensure => installed
     }
