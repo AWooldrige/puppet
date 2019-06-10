@@ -7,7 +7,8 @@ colorscheme gruvbox
 set background=dark
 
 " Default font size is usually a bit too large, bring down to 9.
-set guifont=Monospace 9
+" Quotes don't work, must escape the space.
+set guifont=Monospace\ 8
 
 
 set guioptions-=m  "Hide menu bar
