@@ -4,19 +4,19 @@
 #########################################################################
 set -eu
 
-if ps waux | grep '[ssh] -D 8123'; then
-    echo "SOCKS proxy already running..."
-    ss -l | grep '8123'
+if pkill -u woolie -f 'ssh -D 8123'; then
+    echo "SOCKS proxy was already running, have killed for a restart..."
+    sleep 2
+fi
+
+echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
+if ssh -D 8123 -f -C -v -N -y pi3; then
+    echo "Proxy started"
 else
-    echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
-    if ssh -D 8123 -f -C -N -y pi3; then
-        echo "Proxy started"
-    else
-        echo 'ERROR: non-zero exit code from ssh(1)'
-        sleep 10
-    fi
+    echo 'ERROR: non-zero exit code from ssh(1)'
+    sleep 10
 fi
 
 # This is mainly because of the start-socks.desktop entry
-echo "Exciting script in 5 seconds"
-sleep 5
+echo "Exiting script in 3 seconds"
+sleep 3

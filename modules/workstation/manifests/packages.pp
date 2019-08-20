@@ -18,7 +18,7 @@ class workstation::packages {
         ]:
         ensure => installed
     }
-    package { 's3sup':
+    package { ['pysocks', 's3sup']:
         ensure => installed,
         provider => 'pip3'
     }
