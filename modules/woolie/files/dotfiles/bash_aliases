@@ -4,7 +4,8 @@
 set -o vi
 export EDITOR=vim
 
-alias ls='ls --color=auto -lash'
+# Not on Debian by deafult
+alias ll='ls --color=auto -lash'
 
 # Auto launch tmux session for interactive shells
 if [[ $- == *i* ]]; then
