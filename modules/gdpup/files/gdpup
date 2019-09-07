@@ -50,4 +50,4 @@ if [ "$FORCE" == "no" ] && [ "$GIT_REMOTE_CHANGES" == "no" ]; then
 fi
 
 log "Running puppet apply"
-puppet apply -v "--modulepath=${GDIR}/modules" "${GDIR}/manifests"
+puppet apply -v "--modulepath=/etc/puppet/code/modules/:${GDIR}/modules" "${GDIR}/manifests"

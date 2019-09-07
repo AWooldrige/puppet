@@ -36,6 +36,7 @@ else
 
     log 'Installing puppet modules'
     puppet module install puppetlabs-stdlib
+    puppet module install puppetlabs-apt
 
     log 'Removing any current puppet code from /etc/gdpup'
     rm -rf /etc/gdpup
@@ -45,7 +46,7 @@ else
 fi
 
 log "Running puppet"
-puppet apply -v "--modulepath=/etc/gdpup/modules" "/etc/gdpup/manifests"
+puppet apply -v "--modulepath=/etc/puppet/code/modules/:/etc/gdpup/modules" "/etc/gdpup/manifests"
 
 # https://unix.stackexchange.com/a/465438
 case $(passwd --status woolie | awk '{print $2}') in
