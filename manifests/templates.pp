@@ -32,9 +32,11 @@ class pi inherits basenode {
     include raspi
     include raspi::autologin
     include raspi::noscreenblanking
+    include influx::telegraf
 }
 class livingroomtvpi inherits pi {
     include ddns
+    include influx::influxdb
 }
 class kitchentvpi inherits pi {
     include raspi::inforad
