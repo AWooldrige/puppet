@@ -1,4 +1,5 @@
 class influx::telegraf {
+    include influx::repos
 
     package { 'telegraf':
         ensure => installed,
