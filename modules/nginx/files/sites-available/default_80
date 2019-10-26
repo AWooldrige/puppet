@@ -1,0 +1,37 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+##############################################################################
+# This should be the only virtual server in sites-enabled that is listening on
+# port 80.
+#
+# All others should be TLS only and allow this virtual server to deal with the
+# redirects and ACME challenges for them
+##############################################################################
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    access_log /var/log/nginx/default_80.access.log tsv_full;
+    error_log /var/log/nginx/default_80.error.log warn;
+
+    autoindex off;
+
+    # This will 403 otherwise
+    location = /.well-known/acme-challenge/ {
+        return 404;
+    }
+
+    # No need to have a seperate webroot per domain, one for them all is fine
+    location /.well-known/acme-challenge/ {
+        default_type "text/plain";
+        root /var/www/letsencrypt;
+    }
+
+    # Default is to redirect the request over TLS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}

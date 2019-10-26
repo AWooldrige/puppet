@@ -1,0 +1,16 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    access_log /var/log/nginx/default_443.access.log tsv_full;
+    error_log /var/log/nginx/default_443.error.log warn;
+
+    ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+    ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+    include /etc/nginx/snippets/tlsparams.conf;
+
+    return 404;
+}
