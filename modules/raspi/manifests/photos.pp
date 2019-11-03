@@ -26,6 +26,23 @@ class raspi::photos {
         path => '/etc/fstab',
         line => 'UUID=2b103ac7-c7a6-4225-ac3b-47b42145f2ef /media/bulkstorage-fstab ext4 defaults,nofail,noatime 0 0'
     }->
+    file { "/var/www/photos.wooldrige.co.uk/noauth":
+        ensure => 'directory',
+        owner   => 'root',
+        group   => 'www-data'
+    }->
+    file { "/var/www/photos.wooldrige.co.uk/noauth/facebook_message.html":
+        source  => 'puppet:///modules/raspi/facebook_message.html',
+        owner  => 'root',
+        group  => 'www-data',
+        mode   => '0644'
+    }->
+    file { "/var/www/photos.wooldrige.co.uk/noauth/auth_required.html":
+        source  => 'puppet:///modules/raspi/auth_required.html',
+        owner  => 'root',
+        group  => 'www-data',
+        mode   => '0644'
+    }->
     file { "/etc/nginx/sites-available/photos.wooldrige.co.uk":
         source  => 'puppet:///modules/raspi/sites-available/photos.wooldrige.co.uk',
         owner  => 'root',

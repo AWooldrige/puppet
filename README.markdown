@@ -39,6 +39,8 @@ Add the following as applicable:
  1. Transfer SSH keys from another machine if a workstation.
  2. Set `[ddns]` in `/home/woolie/.aws/credentials` if the machine uses
     raspi::ddns
+ 3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store if
+    machine uses `raspi::photos`.
 
 
 Development

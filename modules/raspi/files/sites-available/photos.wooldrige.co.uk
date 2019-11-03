@@ -31,10 +31,23 @@ server {
 
     root /media/bulkstorage-fstab/jalbums-published/photos;
     index index.html index.htm;
+    error_page 401 /noauth/auth_required.html;
+
 
     location / {
+        if ($http_user_agent ~* ".*FBAN.*") {
+           return 302 https://photos.wooldrige.co.uk/noauth/facebook_message.html;
+        }
+
         # First attempt to serve request as file, then
         # as directory, then fall back to displaying a 404.
+        try_files $uri $uri/ =404;
+    }
+
+    location /noauth/ {
+        auth_basic off;
+        root /var/www/photos.wooldrige.co.uk/;
+        index index.html index.htm;
         try_files $uri $uri/ =404;
     }
 
