@@ -74,4 +74,13 @@ class woolie::workstationprefs {
         mode => '0755',
         require => File[$bindir]
     }
+
+    file { "${bindir}/photos_dir_gen":
+        ensure => file,
+        source  => 'puppet:///modules/woolie/bin/photos_dir_gen',
+        owner => $woolie::uname,
+        group => $woolie::uname,
+        mode => '0755',
+        require => File[$bindir]
+    }
 }

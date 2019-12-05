@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+DBR="${DROPBOX_ROOT:-UNKNOWN}"
+if [ "$DBR" == "UNKNOWN" ]; then
+    echo 'ERROR: Expected $DROPBOX_ROOT env var to be set'
+    exit 1
+fi
+
+PHOTOS_ROOT="${DBR}/Photos"
+if [ ! -d "$PHOTOS_ROOT" ]; then
+    echo "ERROR: Expected photos folder at '${PHOTOS_ROOT}'"
+    exit 1
+fi
+
+function confirm {
+    # Gloriously adapted from https://stackoverflow.com/questions/226703/
+    echo -n "Continue (y/n)? "
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ]; then
+        echo "Continuing"
+    else
+        echo "Exiting"
+        echo 1
+    fi
+}
+
+read -r -p 'Enter year for new photo dir, e.g. "2020" (filename suitable): ' year
+
+read -r -p 'Enter event title, e.g. "2019-10-12 Jon''s new pony" (filename suitable): ' title
+
+EVENT_DIR="${PHOTOS_ROOT}/${year}/${title}"
+echo "New directories will be created under: ${EVENT_DIR}"
+confirm
+
+for d in "RAW originals" "JPEG originals" "Video originals" "Image derivatives" "Video derivatives"; do
+    new_dir="${EVENT_DIR}/${d}"
+    echo "Creating: $new_dir"
+    mkdir -p "$new_dir"
+done
+
+echo "Done. To seperate RAW images from JPEGs and videos, place all files into 'RAW originals'."
+confirm
+
+originals="${EVENT_DIR}/RAW originals"
+
+echo "Checking for and moving JPEGs:"
+mv -i -v "$originals"/*.{jpg,JPG,jpeg,JPEG} "${EVENT_DIR}/JPEG originals" || true
+
+echo "Checking for and moving Videos:"
+mv -i -v "$originals"/*.{mp4,MP4} "${EVENT_DIR}/Video originals" || true
+
+echo "Complete!"

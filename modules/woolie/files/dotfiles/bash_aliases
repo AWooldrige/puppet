@@ -4,6 +4,15 @@
 set -o vi
 export EDITOR=vim
 
+# Used by scripts such as photos_dir_gen
+if [ -f "${HOME}/Dropbox/.well_known.txt" ]; then
+    export DROPBOX_ROOT="${HOME}/Dropbox"
+elif [ -f "/media/hdd/Dropbox/.well_known.txt" ]; then
+    export DROPBOX_ROOT="/media/hdd/Dropbox"
+else
+    unset DROPBOX_ROOT
+fi
+
 # Not on Debian by deafult
 alias ll='ls --color=auto -lash'
 
