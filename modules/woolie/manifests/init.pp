@@ -12,7 +12,8 @@ class woolie {
         expiry          => absent,
         uid             => 18001,  # Best to sync UIDs across machines
         gid             => $uname,
-        groups          => ['sshallowedlogin', 'passwordsudo'],
+        # Need to be in the video group to be able to use omxplayer on RPIs
+        groups          => ['sshallowedlogin', 'passwordsudo', 'video'],
         shell           => '/bin/bash',
         home            => $homedir,
         managehome      => true,
