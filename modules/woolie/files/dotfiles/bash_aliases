@@ -5,10 +5,10 @@ set -o vi
 export EDITOR=vim
 
 # Used by scripts such as photos_dir_gen
-if [ -f "${HOME}/Dropbox/.well_known.txt" ]; then
+if [ -f "${HOME}/Dropbox/do_not_remove.txt" ]; then
     export DROPBOX_ROOT="${HOME}/Dropbox"
-elif [ -f "/media/hdd/Dropbox/.well_known.txt" ]; then
-    export DROPBOX_ROOT="/media/hdd/Dropbox"
+elif [ -f "/media/woolie/hdd/Dropbox/do_not_remove.txt" ]; then
+    export DROPBOX_ROOT="/media/woolie/hdd/Dropbox"
 else
     unset DROPBOX_ROOT
 fi
