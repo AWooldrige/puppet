@@ -177,6 +177,12 @@
                         }
                     },
                     {
+                        "Name": "photos.wooldrige.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "3600",
+                        "ResourceRecords": [ "cg.wooldrige.co.uk" ]
+                    },
+                    {
                         "Name": "google._domainkey.wooldrige.co.uk.",
                         "Type": "TXT",
                         "TTL": "86400",
