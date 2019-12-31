@@ -25,6 +25,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'scrooloose/nerdtree'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'scrooloose/syntastic'
+Plugin 'pandysong/ghost-text.vim'
 
 call vundle#end()            " required
 filetype plugin indent on    " required

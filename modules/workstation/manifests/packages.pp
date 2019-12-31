@@ -18,7 +18,11 @@ class workstation::packages {
         ]:
         ensure => installed
     }
-    package { ['pysocks', 's3sup']:
+    package { [
+        'pysocks',
+        's3sup',
+        'websockets'  # Required by vim ghost-text plugin
+        ]:
         ensure => installed,
         provider => 'pip3'
     }
