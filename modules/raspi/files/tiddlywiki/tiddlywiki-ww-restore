@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+# Use GPG symmetric encryption instead of public key.
+export PASSPHRASE="$(head -n 1 /home/woolie/.backup_key)"
+
+# TODO: minor sanity checking on encryption key length
+
+# Duplicity can't use boto named credentials profiles yet.  Grab these from the
+# credentials profile manually.  This is fairly fragile, but effective.
+export AWS_ACCESS_KEY_ID="$(grep -A 20 '\[ddns\]' /home/woolie/.aws/credentials | grep 'aws_access_key_id=' | head -n 1 | cut -d'=' -f2)"
+if [ ${#AWS_ACCESS_KEY_ID} -le 10 ]; then
+    echo "Error: AWS_ACCESS_KEY_ID shorter than expected."
+fi;
+export AWS_SECRET_ACCESS_KEY="$(grep -A 20 '\[ddns\]' /home/woolie/.aws/credentials | grep 'aws_secret_access_key=' | head -n 1 | cut -d'=' -f2)"
+if [ ${#AWS_SECRET_ACCESS_KEY} -le 10 ]; then
+    echo "Error: AWS_SECRET_ACCESS_KEY shorter than expected."
+fi;
+
+/usr/bin/duplicity \
+    --name tiddlywiki-ww \
+    --allow-source-mismatch \
+    --s3-use-new-style \
+    --full-if-older-than 1M  \
+    "s3+http://wooliebackupbucket/tiddlywiki-ww" \
+    "/var/www/tw/ww" \
+
+# Not really needed but makes me feel better!
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+unset PASSPHRASE

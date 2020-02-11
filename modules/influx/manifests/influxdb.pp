@@ -3,7 +3,10 @@ class influx::influxdb {
 
     package { 'influxdb':
         ensure => installed,
-        require => Apt::Source['influxdb']
+        require => [
+            Apt::Source['influxdb'],
+            Class['apt::update']
+        ]
     } ->
     file { '/etc/influxdb/influxdb.conf':
         source  => 'puppet:///modules/influx/influxdb.conf',

@@ -1,0 +1,13 @@
+[Unit]
+Description=TiddlyWiki-ww
+After=syslog.target
+
+[Service]
+# Modified from: https://askubuntu.com/a/921183
+SyslogIdentifier=tiddlywiki-ww
+Restart=always
+StandardOutput=syslog
+ExecStart=/usr/local/bin/tiddlywiki /var/www/tw/ww --listen host=127.0.0.1 port=8115 root-tiddler=$:/core/save/lazy-images gzip=yes path-prefix=/tw/ww
+
+[Install]
+WantedBy=multi-user.target

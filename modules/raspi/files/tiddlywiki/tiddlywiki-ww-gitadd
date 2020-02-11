@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+# This stages new, modified and removed files
+/usr/bin/git -C /var/www/tw/ww add --all
+/usr/bin/git -C /var/www/tw/ww commit -m"Auto commited changes: $(date --iso-8601='seconds')" || echo "git commit return code: $?"

@@ -41,6 +41,9 @@ Add the following as applicable:
     raspi::ddns
  3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store if
     machine uses `raspi::photos`.
+ 3. Set `/etc/nginx/secrets/cg.htpasswd` contents from password store if
+    machine uses `raspi::cg`.
+ 3. Restore backup to  `/var/ww/tw/ww` if machine uses `raspi::tiddlywiki`.
 
 
 Development

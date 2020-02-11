@@ -19,5 +19,21 @@ class influx::repos {
         },
         notify => Exec['apt_update']
     }
-
+    apt::source { 'grafana':
+        ensure => 'present',
+        comment => 'Grafana from Grafana Labs',
+        location => 'https://packages.grafana.com/oss/deb',
+        release => 'stable',
+        repos => 'main',
+        key => {
+            id => '4E40DDF6D76E284A4A6780E48C8C34C524098CB6',
+            source => 'https://packages.grafana.com/gpg.key'
+        },
+        include => {
+            'src' => false,
+            'deb' => true
+        },
+        before => Package['grafana'],
+        notify => Exec['apt_update']
+    }
 }

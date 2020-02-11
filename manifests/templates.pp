@@ -37,8 +37,11 @@ class pi inherits basenode {
 class livingroomtvpi inherits pi {
     include ddns
     include influx::influxdb
+    include influx::grafana
     include nginx
     include raspi::photos
+    include raspi::tiddlywiki
+    include raspi::cg
 }
 class kitchentvpi inherits pi {
     include raspi::inforad

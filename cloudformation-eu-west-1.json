@@ -323,7 +323,8 @@
             "Type": "AWS::IAM::User",
             "Properties": {
                 "Groups": [
-                    { "Ref": "IAMGroupDynamicDNS" }
+                    { "Ref": "IAMGroupDynamicDNS" },
+                    { "Ref": "IAMGroupBackupBucket" }
                 ]
             }
         },
@@ -348,6 +349,51 @@
                                 "Effect":"Allow",
                                 "Action":[ "route53:GetChange" ],
                                 "Resource":"arn:aws:route53:::change/*"
+                            }
+                        ]
+                    }
+                } ]
+            }
+        },
+        "BackupBucket" : {
+            "Type" : "AWS::S3::Bucket",
+            "Properties" : {
+                "AccessControl" : "Private",
+                "BucketName" : "wooliebackupbucket"
+            },
+            "DeletionPolicy" : "Retain"
+        },
+        "IAMGroupBackupBucket": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "Policies": [ {
+                    "PolicyName" : "writeonlyaccesstobackupbucket",
+                    "PolicyDocument": {
+                        "Statement" : [
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:HeadBucket",
+                                    "s3:ListBucket"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "BackupBucket" } ]
+                                ]
+                                }
+                            },
+                            {
+                                "Effect":"Allow",
+                                "Action":[
+                                    "s3:GetBucketLocation",
+                                    "s3:GetObject",
+                                    "s3:GetObjectAcl",
+                                    "s3:PutObject",
+                                    "s3:PutObjectAcl"
+                                ],
+                                "Resource" : { "Fn::Join" : [
+                                    "", [ "arn:aws:s3:::", { "Ref" : "BackupBucket" } , "/*" ]
+                                ]
+                                }
                             }
                         ]
                     }
