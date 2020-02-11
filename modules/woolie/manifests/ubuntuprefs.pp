@@ -36,7 +36,7 @@ class woolie::ubuntuprefs {
         ensure  => directory,
         owner   => $uname,
         group   => $uname,
-        mode    => '0755',
+        mode    => '0700',
         require => [ User[$uname], Package['gnupg'] ]
     } ->
     file { "${homedir}/.gnupg/gpg.conf":
