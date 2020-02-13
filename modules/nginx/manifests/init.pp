@@ -72,6 +72,28 @@ class nginx {
     }
 
 
+    file { "/etc/nginx/sites-available/status":
+        source  => 'puppet:///modules/nginx/sites-available/status',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
+        notify  => Service['nginx']
+    } ->
+    file { "/etc/nginx/sites-enabled/status":
+        ensure => 'link',
+        target => '/etc/nginx/sites-available/status',
+        notify  => Service['nginx']
+    } ->
+    file { '/etc/telegraf/telegraf.d/nginx.conf':
+        source  => 'puppet:///modules/nginx/telegraf/nginx.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['telegraf'],
+        notify  => Service['telegraf']
+    }
+
+
     # Default virtual host for port 80 + serving of .well-known dir
     file { "/var/www/letsencrypt":
         ensure => 'directory',
@@ -132,7 +154,8 @@ class nginx {
         require => [
             File["/etc/nginx/sites-enabled/default_80"],
             File["/etc/nginx/sites-enabled/default_443"],
-            File["/etc/nginx/sites-enabled/ping"]
+            File["/etc/nginx/sites-enabled/ping"],
+            File["/etc/nginx/sites-enabled/status"]
         ]
     }
 

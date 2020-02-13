@@ -1,0 +1,9 @@
+# Used by telegraf nginx plugin
+server {
+    listen 127.0.0.1:5270;
+    location = /status {
+        stub_status;
+    }
+    access_log /var/log/nginx/status.access.log tsv_full;
+    error_log /var/log/nginx/status.error.log warn;
+}
