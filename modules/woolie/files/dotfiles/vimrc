@@ -26,6 +26,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'scrooloose/syntastic'
 Plugin 'pandysong/ghost-text.vim'
+Plugin 'ledger/vim-ledger'
 
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -188,3 +189,6 @@ imap <C-v> <C-r><C-o>+
 
 " NERDTree
 noremap <leader>n :NERDTreeToggle<CR>
+
+" vim-edger
+noremap <leader>a :LedgerAlign<CR>
