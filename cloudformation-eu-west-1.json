@@ -257,6 +257,28 @@
                 "HostedZoneName": "brignellbookbinders.com.",
                 "RecordSets": [
                     {
+                        "Name": "brignellbookbinders.com.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "BrignellbookbindersComCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
+                        "Name": "www.brignellbookbinders.com.",
+                        "Type": "A",
+                        "AliasTarget": {
+                            "DNSName": { "Fn::GetAtt": [
+                                "WwwBrignellbookbindersComCloudFrontCDN",
+                                "DomainName"
+                            ]},
+                            "HostedZoneId": "Z2FDTNDATAQYW2"
+                        }
+                    },
+                    {
                         "Name": "mail.brignellbookbinders.com.",
                         "Type": "CNAME",
                         "TTL": "86400",
@@ -607,11 +629,50 @@
                 "WwwKempstonnurseriesCoUkWebsiteBucket"
             ]
         },
+        "BrignellbookbindersComCloudFrontCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "Enabled": "true",
+                    "Aliases": [ "brignellbookbinders.com" ],
+                    "Origins": [
+                        {
+                            "DomainName": "brignellbookbinders.com.s3-website-eu-west-1.amazonaws.com",
+                            "Id": "brignellbookbinders.com",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "Compress": true,
+                        "TargetOriginId": "brignellbookbinders.com",
+                        "ForwardedValues": {
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https"
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/91280dba-2f0b-4f6e-85fa-2bcfbf6598e4",
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            },
+            "DependsOn": [
+                "BrignellbookbindersComRedirectBucket"
+            ]
+        },
         "WwwBrignellbookbindersComCloudFrontCDN": {
             "Type": "AWS::CloudFront::Distribution",
             "Properties": {
                 "DistributionConfig": {
+                    "Enabled": "true",
                     "Aliases": [ "www.brignellbookbinders.com" ],
+                    "DefaultRootObject": "index.html",
                     "Origins": [
                         {
                             "DomainName": "www.brignellbookbinders.com.s3-website-eu-west-1.amazonaws.com",
@@ -622,15 +683,26 @@
                         }
                     ],
                     "DefaultCacheBehavior": {
+                        "Compress": true,
                         "TargetOriginId": "www.brignellbookbinders.com",
                         "ForwardedValues": {
-                            "QueryString": false
+                            "QueryString": "false",
+                            "Cookies": {
+                                "Forward": "none"
+                            }
                         },
-                        "ViewerProtocolPolicy": "allow-all"
+                        "ViewerProtocolPolicy": "redirect-to-https"
                     },
-                    "Enabled": "true"
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": "arn:aws:acm:us-east-1:607705815226:certificate/91280dba-2f0b-4f6e-85fa-2bcfbf6598e4",
+                        "SslSupportMethod": "sni-only"
+                    }
                 }
-            }
+            },
+            "DependsOn": [
+                "WwwBrignellbookbindersComWebsiteBucket"
+            ]
         },
        "StagingWebsiteBucket" : {
             "Type" : "AWS::S3::Bucket",
@@ -684,12 +756,12 @@
                 "AccessControl" : "PublicRead",
                 "BucketName" : "www.brignellbookbinders.com",
                 "WebsiteConfiguration" : {
-                    "IndexDocument" : "index.html"
+                    "IndexDocument" : "index.html",
+                    "ErrorDocument" : "404/index.html"
                 }
             },
             "DeletionPolicy" : "Retain"
         },
-
         "WwwWooldrigeCoUkWebsiteBucket" : {
             "Type" : "AWS::S3::Bucket",
             "Properties" : {
@@ -828,9 +900,14 @@
             "Type" : "AWS::S3::Bucket",
             "Properties" : {
                 "AccessControl" : "PublicRead",
-                "BucketName" : "brignellbookbinders.com"
+                "BucketName" : "brignellbookbinders.com",
+                "WebsiteConfiguration" : {
+                    "RedirectAllRequestsTo": {
+                        "HostName": "www.brignellbookbinders.com"
+                    }
+                }
             },
-            "DeletionPolicy" : "Retain"
+            "DeletionPolicy" : "Delete"
         },
         "WwwWoolieCoUkBucketReadWriteGroup": {
             "Type": "AWS::IAM::Group",
