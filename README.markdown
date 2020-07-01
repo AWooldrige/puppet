@@ -45,6 +45,17 @@ Add the following as applicable:
     machine uses `raspi::cg`.
  3. Restore backup to  `/var/ww/tw/ww` if machine uses `raspi::tiddlywiki`.
 
+5) Install pihole manually
+--------------------------
+This is not automated with puppet yet, so install pihole if the machine type
+requires it.
+
+Then make sure `/etc/lighttpd/lighttpd.conf` fudged with:
+
+    server.bind                 = "127.0.0.1"
+    server.port                 = 6090
+
+
 
 Development
 ================================

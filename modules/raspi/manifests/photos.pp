@@ -26,6 +26,10 @@ class raspi::photos {
         path => '/etc/fstab',
         line => 'UUID=2b103ac7-c7a6-4225-ac3b-47b42145f2ef /media/bulkstorage-fstab ext4 defaults,nofail,noatime 0 0'
     }->
+    exec { 'Reload portable hard drive mount if not mounted':
+       command => 'mount -a',
+       unless  => '/usr/bin/test -f /media/bulkstorage-fstab/jalbums-published/photos/index.html',
+    } ->
     file { "/var/www/photos.wooldrige.co.uk/noauth":
         ensure => 'directory',
         owner   => 'root',

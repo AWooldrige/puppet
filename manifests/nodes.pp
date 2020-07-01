@@ -12,5 +12,8 @@ node /^pi2$/ {
     include kitchentvpi
 }
 node /^pi3$/ {
-    include livingroomtvpi
+    include webpi
+}
+node /^webpi$/ {
+    include webpi
 }

@@ -34,10 +34,11 @@ class pi inherits basenode {
     include raspi::noscreenblanking
     include influx::telegraf
 }
-class livingroomtvpi inherits pi {
+class webpi inherits pi {
     include ddns
     include influx::influxdb
     include influx::grafana
+    include pihole
     include nginx
     include raspi::photos
     include raspi::tiddlywiki
