@@ -7,17 +7,28 @@ class pihole {
 
     package { 'lighttpd':
         ensure => installed,
-    }
-
+    } ->
     file { "/etc/lighttpd/external.conf":
         source => 'puppet:///modules/pihole/lighttpd-external.conf',
         owner => 'root',
         group => 'root',
         mode => '0644',
-        require => Package['lighttpd'],
         notify => Service['lighttpd']
-    }
-
+    } ->
+    file_line { 'Set lighttpd bind IP to localhost only':
+        ensure => present,
+        path   => '/etc/lighttpd/lighttpd.conf',
+        line   => 'server.bind = "127.0.0.1"',
+        match  => '^server.bind',
+        notify => Service['lighttpd']
+    } ->
+    file_line { 'Set lighttpd port to 6090':
+        ensure => present,
+        path   => '/etc/lighttpd/lighttpd.conf',
+        line   => 'server.port = 6090',
+        match  => '^server.port',
+        notify => Service['lighttpd']
+    } ->
     service { 'lighttpd':
         ensure     => running,
         enable     => true,

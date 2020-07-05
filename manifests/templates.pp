@@ -30,8 +30,6 @@ class laptop inherits basenode::workstation {
 
 class pi inherits basenode {
     include raspi
-    include raspi::autologin
-    include raspi::noscreenblanking
     include influx::telegraf
 }
 class webpi inherits pi {
@@ -45,5 +43,7 @@ class webpi inherits pi {
     include raspi::cg
 }
 class kitchentvpi inherits pi {
+    include raspi::autologin
+    include raspi::noscreenblanking
     include raspi::inforad
 }

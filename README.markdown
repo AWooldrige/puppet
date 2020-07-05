@@ -37,23 +37,19 @@ Run the bootstrap script:
 Add the following as applicable:
 
  1. Transfer SSH keys from another machine if a workstation.
- 2. Set `[ddns]` in `/home/woolie/.aws/credentials` if the machine uses
-    raspi::ddns
- 3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store if
-    machine uses `raspi::photos`.
- 3. Set `/etc/nginx/secrets/cg.htpasswd` contents from password store if
-    machine uses `raspi::cg`.
- 3. Restore backup to  `/var/ww/tw/ww` if machine uses `raspi::tiddlywiki`.
+
+If webpi:
+
+ 2. Set `[ddns]` in `/home/woolie/.aws/credentials`
+ 3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store
+ 3. Set `/etc/nginx/secrets/cg.htpasswd` contents from password store
+ 3. Restore tiddlywiki backup using `/var/ww/tw/ww`
+ 3. Install pihole using instructions from [https://pi-hole.net/]
 
 5) Install pihole manually
 --------------------------
 This is not automated with puppet yet, so install pihole if the machine type
 requires it.
-
-Then make sure `/etc/lighttpd/lighttpd.conf` fudged with:
-
-    server.bind                 = "127.0.0.1"
-    server.port                 = 6090
 
 
 

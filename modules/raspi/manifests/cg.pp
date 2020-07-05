@@ -1,7 +1,7 @@
 class raspi::cg {
 
     exec { 'Check manually added credentials file is present for cg (from LastPass)':
-       command => '/bin/echo "WARNING: YOU MUST MANUALLY ADD .htpasswd FILE FOR CG"',
+       command => "/usr/bin/bash -c 'echo \"WARNING: YOU MUST MANUALLY ADD .htpasswd FILE FOR CG\"; false'",
        unless  => '/usr/bin/test -f /etc/nginx/secrets/cg.htpasswd',
     }
 
@@ -44,13 +44,15 @@ class raspi::cg {
         group  => 'root',
         mode   => '0644',
         require => [
-            Package['nginx']
+            Package['nginx'],
+            Exec['Check manually added credentials file is present for cg (from LastPass)'],
+            Exec['Certificate for cg.wooldrige.co.uk']
         ],
-        notify  => Service['nginx']
+        notify => Exec['reload-nginx']
     } ->
     file { "/etc/nginx/sites-enabled/cg.wooldrige.co.uk":
         ensure => 'link',
         target => '/etc/nginx/sites-available/cg.wooldrige.co.uk',
-        notify  => Service['nginx']
+        notify => Exec['reload-nginx']
     }
 }

@@ -24,9 +24,11 @@ fi;
     --name tiddlywiki-ww \
     --allow-source-mismatch \
     --s3-use-new-style \
-    --full-if-older-than 1M  \
     "s3+http://wooliebackupbucket/tiddlywiki-ww" \
     "/var/www/tw/ww" \
+
+/usr/bin/chown -R woolie:www-data /var/www/tw/ww
+/usr/bin/systemctl restart tiddlywiki-ww
 
 # Not really needed but makes me feel better!
 unset AWS_ACCESS_KEY_ID

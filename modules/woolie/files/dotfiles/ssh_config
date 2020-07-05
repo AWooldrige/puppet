@@ -5,15 +5,18 @@
 #########################################################################
 # Host specific entries
 #########################################################################
-Host pi3
-    Hostname h.wooldrige.co.uk
+Host webpi
+    Hostname cg.wooldrige.co.uk
+
+Host webpi.local
+    Hostname 192.168.0.201
 
 Host pi2
     Hostname pi2.local
     ProxyJump pi3
 
 # General settings must be placed _after_ more specific ones
-Host pi3 pi3.local pi2 pi2.local
+Host webpi webpi.local
     Port 3222
     User woolie
 

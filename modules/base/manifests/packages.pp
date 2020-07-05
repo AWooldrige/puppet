@@ -3,7 +3,6 @@ class base::packages {
     # Essential
     package { [
         'duplicity',
-        'python-boto',  # Sadly still required by Duplicity
         'python3-boto',  # Should be required by Duplicity in the future
         'awscli',
         'git',
@@ -11,9 +10,9 @@ class base::packages {
         'unzip',
         'make',
         'nodejs',
+        'npm',
         'vim',
         'vim-common',
-        'gnupg',
         'tmux',
         'curl']:
         ensure => installed

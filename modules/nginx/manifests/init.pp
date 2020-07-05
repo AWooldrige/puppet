@@ -101,6 +101,12 @@ class nginx {
         group   => 'www-data',
         mode    => '0750'
     }->
+    file { "/var/www/letsencrypt/.well-known":
+        ensure => 'directory',
+        owner   => 'root',
+        group   => 'www-data',
+        mode    => '0750'
+    }->
     file { "/var/www/letsencrypt/.well-known/acme-challenge":
         ensure => 'directory',
         owner   => 'root',

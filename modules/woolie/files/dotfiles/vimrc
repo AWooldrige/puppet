@@ -25,7 +25,6 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'scrooloose/nerdtree'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'scrooloose/syntastic'
-Plugin 'pandysong/ghost-text.vim'
 Plugin 'ledger/vim-ledger'
 
 call vundle#end()            " required

@@ -1,7 +1,7 @@
 class raspi::photos {
 
     exec { 'Check manually added credentials file is present (from LastPass)':
-       command => '/bin/echo "WARNING: YOU MUST MANUALLY ADD .htpasswd FILE FOR PHOTOS"',
+       command => "/usr/bin/bash -c 'echo \"WARNING: YOU MUST MANUALLY ADD .htpasswd FILE FOR PHOTOS\"; false'",
        unless  => '/usr/bin/test -f /etc/nginx/secrets/photos.htpasswd',
     }
 
@@ -30,6 +30,11 @@ class raspi::photos {
        command => '/bin/mount -a',
        unless  => '/usr/bin/test -f /media/bulkstorage-fstab/jalbums-published/photos/index.html',
     } ->
+    file { "/var/www/photos.wooldrige.co.uk":
+        ensure => 'directory',
+        owner   => 'root',
+        group   => 'www-data'
+    }->
     file { "/var/www/photos.wooldrige.co.uk/noauth":
         ensure => 'directory',
         owner   => 'root',
@@ -52,12 +57,16 @@ class raspi::photos {
         owner  => 'root',
         group  => 'root',
         mode   => '0644',
-        require => Package['nginx'],
-        notify  => Service['nginx']
+        require => [
+            Package['nginx'],
+            Exec['Check manually added credentials file is present (from LastPass)'],
+            Exec['Certificate for photos.wooldrige.co.uk']
+        ],
+        notify => Exec['reload-nginx']
     } ->
     file { "/etc/nginx/sites-enabled/photos.wooldrige.co.uk":
         ensure => 'link',
         target => '/etc/nginx/sites-available/photos.wooldrige.co.uk',
-        notify  => Service['nginx']
+        notify => Exec['reload-nginx']
     }
 }

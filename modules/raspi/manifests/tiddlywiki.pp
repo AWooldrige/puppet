@@ -1,21 +1,19 @@
 class raspi::tiddlywiki {
 
     exec { 'Check manually added backup symmetric key is present':
-       command => '/bin/echo "WARNING: YOU MUST MANUALLY ADD /home/woolie/.backup_key"',
+       command => "/usr/bin/bash -c 'echo \"WARNING: YOU MUST MANUALLY ADD /home/woolie/.backup_key\"; false'",
        unless  => '/usr/bin/test -f /home/woolie/.backup_key',
     }
-
 
     exec { 'daemon-reload':
         command => '/usr/bin/systemctl daemon-reload',
         refreshonly => true
     }
 
-
     exec { 'Install tiddlywiki npm package':
        command => '/usr/bin/npm install -g tiddlywiki',
-       unless => '/usr/local/bin/tiddlywiki --version',
-       require => Package['nodejs']
+       creates => '/usr/local/bin/tiddywiki',
+       require => Package['npm']
     } ->
     file { "/var/www/tw":
         ensure => 'directory',
@@ -49,11 +47,11 @@ class raspi::tiddlywiki {
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
-        require => Package[[
-            'duplicity',
-            'python3-boto',
-            'python-boto'
-        ]]
+        require => [
+            Exec['Check manually added backup symmetric key is present'],
+            Package['duplicity'],
+            Package['python3-boto']
+        ]
     } ->
     file { '/usr/local/bin/tiddlywiki-ww-restore':
         source => 'puppet:///modules/raspi/tiddlywiki/tiddlywiki-ww-restore',
