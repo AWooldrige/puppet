@@ -1,5 +1,5 @@
 Bootstrapping a system from scratch
-============================================
+===================================
 
 1) Install OS
 -------------
@@ -15,6 +15,10 @@ Bootstrapping a system from scratch
 
 2) Run puppet
 -------------
+If bootstrapping a host that needs a static IP, ensure the router configuration
+is set as in this README. If changing a hardware used for the same host,
+update the MAC address in the README/router.
+
 Run the bootstrap script:
 
     wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
@@ -35,18 +39,25 @@ For webpi:
  3. Install pihole using instructions from [https://pi-hole.net/]
 
 
+Router configuration
+====================
+
+DHCP reservations
+-----------------
+| Description | MAC | Reserved IP |
+| webpi Raspberry Pi 4 | dc:a6:32:8b:96:48 | 192.168.0.201 |
+| epaperpi Raspberry Pi 3 | b8:27:eb:3c:0c:11 | 192.168.0.202 |
+
+Port forwarding
+---------------
+| Description | Protocol | External port | Local port | Local IP |
+| SSH (slightly obsfucated) to webpi | TCP + UDP | 3222 | 3222 | 192.168.0.201 |
+| HTTP to webpi | TCP + UDP | 80 | 80 | 192.168.0.201 |
+| HTTPS to webpi | TCP + UDP | 443 | 443 | 192.168.0.201 |
 
 
-Development
-================================
-This is a masterless puppet configuration and works solely on puppet apply:
-
-    ./apply.sh
-
-
-
-Conventions
-==============================
+Puppet config conventions
+=========================
 
 Files
 ------------------------------
