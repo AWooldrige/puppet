@@ -1,5 +1,6 @@
+.PHONY: apply
 apply:
-	sudo puppet apply --modulepath=/etc/puppet/code/modules/:./modules/ ./manifests/ -vvv
+	./apply.sh
 
 bundle.tar.gz: $(shell find modules manifests)
 	tar -czf bundle.tar.gz --transform 's,^,puppet/,' .

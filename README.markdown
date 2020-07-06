@@ -7,38 +7,26 @@ Bootstrapping a system from scratch
     encryption. This reduces risk from hardware theft. There's no point
     encrypting a VM drive, the host has full access anyway.
  2. Do not create a user named `woolie` as part of setup, instead create a
-    temporary user which will only be used to run puppet and will be removed
+    temporary user named 'tmpbootstrap' if a temporary user doesn't already
+    exist. This will only be used to run puppet initially and should be removed
     after. Puppet needs to create the `woolie` user to keep UIDs/GIDs in sync.
  3. Set hostname if asked, following scheme of {model}{increment}.
 
 
 2) Run puppet
 -------------
-Set the hostname for the machine if not set during OS install, following the
-scheme of {model}{increment}:
-
-    $ sudo hostnamectl set-hostname hplaptop1
-
-Make sure hostname is captured by one of the matchers in `manifests/nodes.pp`
-
 Run the bootstrap script:
 
     wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
 
 
-3) Remove temporary user
-------------------------
- 1. Log in as woolie, check that sudo works correctly.
- 2. Remove the temporary user that was only for puppet install.
-
-
-4) Add credentials not managed by Puppet
+3) Add credentials not managed by Puppet
 ----------------------------------------
-Add the following as applicable:
+For workstations:
 
- 1. Transfer SSH keys from another machine if a workstation.
+ 1. Transfer SSH keys from another machine.
 
-If webpi:
+For webpi:
 
  2. Set `[ddns]` in `/home/woolie/.aws/credentials`
  3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store
@@ -46,10 +34,6 @@ If webpi:
  3. Restore tiddlywiki backup using `/var/ww/tw/ww`
  3. Install pihole using instructions from [https://pi-hole.net/]
 
-5) Install pihole manually
---------------------------
-This is not automated with puppet yet, so install pihole if the machine type
-requires it.
 
 
 
@@ -57,7 +41,7 @@ Development
 ================================
 This is a masterless puppet configuration and works solely on puppet apply:
 
-    make apply
+    ./apply.sh
 
 
 

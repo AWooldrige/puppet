@@ -19,14 +19,6 @@ class woolie::workstationprefs {
         require => File[$sharedir]
     }
 
-#    package { [
-#        'python3.7',  # Not available on raspbian
-#        'python3.7-venv',
-#        'python3-pip'
-#        ]:
-#        ensure => installed
-#    }
-
 
     ###########################################################################
     # Application shortcut entries

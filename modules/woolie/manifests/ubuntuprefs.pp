@@ -101,6 +101,7 @@ class woolie::ubuntuprefs {
         provider    => 'shell',
         logoutput   => 'true',
         user        => $uname,
+        timeout     => 15,
         tries       => 3,
         creates     => "${vndldir}/README.md",
         require     => [Package['git'], File["${homedir}/.vimrc"]],
@@ -114,6 +115,7 @@ class woolie::ubuntuprefs {
     exec { 'vundle-install-plugins':
         command     => "/bin/su -l -c 'vim -c VundleInstall -c quitall' $uname",
         logoutput   => 'true',
+        timeout     => 20,
         tries       => 3,
         refreshonly => true,
         require     => [Exec["install-vundle"]]

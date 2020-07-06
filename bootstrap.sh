@@ -21,8 +21,8 @@ function install {
     done
 }
 
-if [ -f "/etc/gdpup/.git/HEAD" ]; then
-    log "/etc/gdpup/ already exists, not re-cloning"
+if [ -f "/root/puppet/.git/HEAD" ]; then
+    log "/root/puppet/ already exists, not re-cloning"
 else
     log 'Updating apt repos'
     apt update -y
@@ -38,25 +38,8 @@ else
     puppet module install puppetlabs-stdlib
     puppet module install puppetlabs-apt
 
-    log 'Removing any current puppet code from /etc/gdpup'
-    rm -rf /etc/gdpup
-
-    log 'Shallow cloning puppet git repo from master'
-    /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /etc/gdpup
+    log 'Cloning puppet confs repo to /root/puppet'
+    /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /root/puppet
 fi
 
-log "Running puppet"
-puppet apply -v "--modulepath=/etc/puppet/code/modules/:/etc/gdpup/modules" "/etc/gdpup/manifests"
-
-# https://unix.stackexchange.com/a/465438
-case $(passwd --status woolie | awk '{print $2}') in
-    NP)  echo "No password set for 'woolie', set one uing 'passwd woolie':"
-        passwd woolie
-        ;;
-    L)  echo "Account 'woolie' is locked, set password using 'passwd woolie'"
-        passwd woolie
-        ;;
-    P)  log "Password already set for 'woolie', no need to change." ;;
-esac
-
-log 'Finished. Remember to delete temporary user manually. E.g. userdel -r pi'
+log 'Complete. Enter /root/puppet, make changes if needed, then run ./apply.sh.'

@@ -22,4 +22,25 @@ class woolie {
                              Group['passwordsudo'] ]
     }
 
+    exec { "Verify manual password set for user 'woolie'":
+        command     => "echo 'Password not set for \'woolie\' user. Set manually with \'passwd woolie\''; false",
+        unless      => "passwd --status woolie | grep '^woolie P'",
+        provider    => "shell",
+        timeout     => 5,
+        require     => User['woolie']
+    }
+
+    exec { "Verify temporary user 'tmpbootstrap' not present":
+        command     => "echo '\'tmpbootstrap\' user still present, verify sudo access for \'woolie\' user then delete manually with \'userdel -r tmpbootstrap\''; false",
+        onlyif      => "id -u tmpbootstrap",
+        provider    => "shell",
+        timeout     => 5
+    }
+
+    exec { "Verify temporary user 'ubuntu' not present":
+        command     => "echo '\'ubuntu\' user still present, verify sudo access for \'woolie\' user then delete manually with \'userdel -r ubuntu\''; false",
+        onlyif      => "id -u ubuntu",
+        provider    => "shell",
+        timeout     => 5
+    }
 }

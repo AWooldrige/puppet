@@ -18,6 +18,10 @@ class base::packages {
         ensure => installed
     }
 
+    # Need to use this as it's defined in modules/apt/manifests/init.pp for
+    # newer versions
+    ensure_packages(['gnupg'])
+
     # Nice to have
     package { [
         'tree',
