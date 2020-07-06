@@ -11,9 +11,9 @@ node /^desktop\d+$/ {
 node /^pi2$/ {
     include kitchentvpi
 }
-node /^pi3$/ {
-    include webpi
-}
 node /^webpi$/ {
     include webpi
+}
+node /^epaperpi$/ {
+    include epaperpi
 }

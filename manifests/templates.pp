@@ -47,3 +47,5 @@ class kitchentvpi inherits pi {
     include raspi::noscreenblanking
     include raspi::inforad
 }
+class epaperpi inherits pi {
+}
