@@ -12,7 +12,7 @@ class raspi::tiddlywiki {
 
     exec { 'Install tiddlywiki npm package':
        command => '/usr/bin/npm install -g tiddlywiki',
-       creates => '/usr/local/bin/tiddywiki',
+       creates => '/usr/local/bin/tiddlywiki',
        require => Package['npm']
     } ->
     file { "/var/www/tw":
