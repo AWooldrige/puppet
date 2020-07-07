@@ -1,0 +1,16 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+network:
+    version: 2
+    ethernets:
+        eth0:
+            optional: true
+            dhcp4: true
+    wifis:
+        wlan0:
+            optional: true
+            dhcp4: true
+            access-points:
+                "<%= $wifi_ssid %>":
+                    password: "<%= $wifi_password %>"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu
+
+TMP_DIR=$(mktemp -d)
+cd $TMP_DIR
+
+# Yes, this is dodge
+wget -O bcm2835-1.64.tar.gz https://www.airspayce.com/mikem/bcm2835/bcm2835-1.64.tar.gz
+tar zxvf bcm2835-1.64.tar.gz
+cd bcm2835-1.64
+./configure
+make
+sudo make check
+sudo make install
+rm -rf $TMP_DIR
