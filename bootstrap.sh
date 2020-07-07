@@ -21,6 +21,11 @@ function install {
     done
 }
 
+if [ ! -d "/etc/securepuppet" ]; then
+    log "Copy in secure puppet module to /etc/securepuppet before continuing."
+    exit 1
+fi
+
 if [ -f "/root/puppet/.git/HEAD" ]; then
     log "/root/puppet/ already exists, not re-cloning"
 else

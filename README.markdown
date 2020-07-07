@@ -3,23 +3,33 @@ Bootstrapping a system from scratch
 
 1) Install OS
 -------------
- 1. If boostrapping a physical machine (not a VM), enable full drive
-    encryption. This reduces risk from hardware theft. There's no point
-    encrypting a VM drive, the host has full access anyway.
+For Raspberry Pi:
+
+ 1. Connect with ethernet and SSH to local IP with `ssh -o IdentitiesOnly=yes
+    ubuntu@<IP>`
+
+For Ubuntu Desktops:
+
+ 1. Enable full drive encryption during install. This reduces risk from
+    hardware theft.
  2. Do not create a user named `woolie` as part of setup, instead create a
-    temporary user named 'tmpbootstrap' if a temporary user doesn't already
-    exist. This will only be used to run puppet initially and should be removed
-    after. Puppet needs to create the `woolie` user to keep UIDs/GIDs in sync.
+    temporary user named 'tmpbootstrap'. This will only be used to run puppet
+    initially and should be removed after. Puppet needs to create the `woolie`
+    user to keep UIDs/GIDs in sync.
  3. Set hostname if asked, following scheme of {model}{increment}.
 
 
 2) Run puppet
 -------------
-If bootstrapping a host that needs a static IP, ensure the router configuration
-is set as in this README. If changing a hardware used for the same host,
-update the MAC address in the README/router.
 
-Run the bootstrap script:
+ 1. If bootstrapping a host that needs a static IP, ensure the router
+    configuration is set as in this README. If changing a hardware used for the
+    same host, update the MAC address in the README/router.
+ 2. Set hostname with `sudo hostnamectl set-hostname "{model}{increment}`
+ 3. Copy secure puppet module from password manager to
+    `/etc/securepuppet/modules/secure/manifests/init.pp` then `chmod -R 600
+    /etc/securepuppet`
+ 4. Run the bootstrap script:
 
     wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
 

@@ -48,4 +48,6 @@ class kitchentvpi inherits pi {
     include raspi::inforad
 }
 class epaperpi inherits pi {
+    include raspi::wifi
+    include raspi::spi
 }
