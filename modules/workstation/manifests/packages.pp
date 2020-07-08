@@ -24,6 +24,7 @@ class workstation::packages {
         'websockets'  # Required by vim ghost-text plugin
         ]:
         ensure => installed,
-        provider => 'pip3'
+        provider => 'pip3',
+        require => Package['python3-pip']
     }
 }

@@ -11,12 +11,17 @@ Host webpi
 Host webpi.local
     Hostname 192.168.0.201
 
-Host pi2
-    Hostname pi2.local
-    ProxyJump pi3
+
+Host epaperpi
+    Hostname epaperpi.local
+    ProxyJump webpi
+
+Host epaperpi.local
+    Hostname 192.168.0.203
+
 
 # General settings must be placed _after_ more specific ones
-Host webpi webpi.local
+Host webpi webpi.local epaperpi epaperpi.local
     Port 3222
     User woolie
 

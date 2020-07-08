@@ -51,4 +51,5 @@ class kitchentvpi inherits pi {
 class epaperpi inherits pi {
     include raspi::wifi
     include raspi::spi
+    include raspi::epaperdisplay
 }

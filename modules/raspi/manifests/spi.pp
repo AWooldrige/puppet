@@ -18,11 +18,12 @@ class raspi::spi {
         provider => 'shell'
     }
 
-    package { 'wiringpi':
+    package { ['wiringpi', 'python3-rpi.gpio']:
         ensure => installed
     }
     package { 'spidev':
         ensure => installed,
-        provider => 'pip3'
+        provider => 'pip3',
+        require => Package['python3-pip']
     }
 }
