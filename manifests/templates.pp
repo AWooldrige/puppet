@@ -8,6 +8,7 @@ class basenode {
     include sudo
     include woolie
     include woolie::ubuntuprefs
+    include secure
 }
 
 class basenode::workstation inherits basenode {

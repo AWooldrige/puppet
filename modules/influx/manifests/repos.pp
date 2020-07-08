@@ -33,7 +33,6 @@ class influx::repos {
             'src' => false,
             'deb' => true
         },
-        before => Package['grafana'],
         notify => Exec['apt_update']
     }
 }
