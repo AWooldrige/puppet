@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import time
+import os
+import sys
+import hashlib
+import pathlib
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+from PIL import Image, ImageDraw, ImageFont
+
+# Puppet will clone the repo here. Yes, this is fragile.
+sys.path.append('/opt/epaperlibs/RaspberryPi&JetsonNano/python/lib')
+from waveshare_epd import epd7in5_V2
+
+FILE_TO_WATCH = '/var/epaper/todisplay.bmp'
+
+
+def file_hash(path):
+    # Bad use of memory and hashing algo... But it's also one line
+    return hashlib.md5(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+class EpaperDisplayHandler(FileSystemEventHandler):
+
+    def __init__(self, file_path):
+        super(FileSystemEventHandler, self).__init__()
+        self.file_path = file_path
+        self.hash_currently_displayed = None
+
+
+    def on_modified(self, event):
+        print(f'event type: {event.event_type}  path : {event.src_path}')
+
+        new_hash = file_hash(self.file_path)
+        if new_hash == self.hash_currently_displayed:
+            print("Same image already displayed")
+            return
+
+        # TODO: Error handling needed?
+        epd = epd7in5_V2.EPD()
+        epd.init()
+        Himage = Image.open(self.file_path)
+        epd.display(epd.getbuffer(Himage))
+
+        self.hash_currently_displayed = new_hash
+
+
+if __name__ == "__main__":
+    event_handler = EpaperDisplayHandler(FILE_TO_WATCH)
+    observer = Observer()
+    observer.schedule(
+        event_handler, path=os.path.dirname(FILE_TO_WATCH), recursive=False)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

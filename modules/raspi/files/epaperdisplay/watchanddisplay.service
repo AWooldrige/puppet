@@ -1,0 +1,12 @@
+[Unit]
+Description=watchanddisplay
+After=syslog.target
+
+[Service]
+SyslogIdentifier=watchanddisplay
+Restart=always
+StandardOutput=syslog
+ExecStart=/usr/local/bin/watchanddisplay
+
+[Install]
+WantedBy=multi-user.target
