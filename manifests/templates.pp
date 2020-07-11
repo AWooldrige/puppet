@@ -31,6 +31,7 @@ class laptop inherits basenode::workstation {
 
 class pi inherits basenode {
     include raspi
+    include avahi
     include influx::telegraf
 }
 class webpi inherits pi {
