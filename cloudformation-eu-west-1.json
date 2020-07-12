@@ -31,12 +31,6 @@
                         }
                     },
                     {
-                        "Name": "cg.woolie.co.uk.",
-                        "Type": "CNAME",
-                        "TTL": "3600",
-                        "ResourceRecords": [ "cg.wooldrige.co.uk" ]
-                    },
-                    {
                         "Name": "woolie.co.uk.",
                         "Type": "MX",
                         "TTL": "86400",
@@ -179,8 +173,14 @@
                     {
                         "Name": "photos.wooldrige.co.uk.",
                         "Type": "CNAME",
-                        "TTL": "3600",
-                        "ResourceRecords": [ "cg.wooldrige.co.uk" ]
+                        "TTL": "300",
+                        "ResourceRecords": [ "h.wooldrige.co.uk" ]
+                    },
+                    {
+                        "Name": "cg.wooldrige.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "h.wooldrige.co.uk" ]
                     },
                     {
                         "Name": "google._domainkey.wooldrige.co.uk.",

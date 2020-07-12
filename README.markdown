@@ -54,17 +54,21 @@ Router configuration
 
 DHCP reservations
 -----------------
+
 | Description | MAC | Reserved IP |
-| webpi Raspberry Pi 4 eth0 | dc:a6:32:8b:96:48 | 192.168.0.201 |
-| epaperpi Raspberry Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.0.202 |
-| epaperpi Raspberry Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.0.203 |
+| ----------- | --- | ----------- |
+| webpi Pi 4 eth0 | dc:a6:32:8b:96:48 | 192.168.50.2 |
+| epaperpi Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.50.3 |
+| epaperpi Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
 
 Port forwarding
 ---------------
+
 | Description | Protocol | External port | Local port | Local IP |
-| SSH (slightly obsfucated) to webpi | TCP + UDP | 3222 | 3222 | 192.168.0.201 |
-| HTTP to webpi | TCP + UDP | 80 | 80 | 192.168.0.201 |
-| HTTPS to webpi | TCP + UDP | 443 | 443 | 192.168.0.201 |
+| ----------- | -------- | ------------- | ---------- | -------- |
+| SSH (slightly obsfucated) to webpi | TCP + UDP | 3222 | 3222 | 192.168.50.2 |
+| HTTP to webpi | TCP + UDP | 80 | 80 | 192.168.50.2 |
+| HTTPS to webpi | TCP + UDP | 443 | 443 | 192.168.50.2 |
 
 
 Puppet config conventions

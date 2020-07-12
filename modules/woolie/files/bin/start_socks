@@ -9,8 +9,8 @@ if pkill -u woolie -f 'ssh -D 8123'; then
     sleep 2
 fi
 
-echo "Starting SOCKS proxy to pi3 on 127.0.0.1:8123"
-if ssh -D 8123 -f -C -v -N -y pi3; then
+echo "Starting SOCKS proxy to webpi on 127.0.0.1:8123"
+if ssh -D 8123 -f -C -v -N -y webpi; then
     echo "Proxy started"
 else
     echo 'ERROR: non-zero exit code from ssh(1)'

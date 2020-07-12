@@ -7,6 +7,6 @@ Version=0.1.0
 Type=Application
 Terminal=true
 Exec=/home/woolie/.local/bin/start_socks
-Name=Start SOCKS to pi3
+Name=Start SOCKS to webpi
 Comment=Start SSH connection for SOCKS proxy
 #Icon=TODO

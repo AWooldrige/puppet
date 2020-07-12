@@ -8,9 +8,6 @@ node /^desktop\d+$/ {
     include desktop
 }
 
-node /^pi2$/ {
-    include kitchentvpi
-}
 node /^webpi$/ {
     include webpi
 }
