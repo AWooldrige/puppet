@@ -1,0 +1,8 @@
+[Unit]
+Description=Runs EPIM to refresh ePaper display image regularly
+
+[Timer]
+OnCalendar=*:0,15,30,45
+
+[Install]
+WantedBy=timers.target

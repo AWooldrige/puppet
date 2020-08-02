@@ -30,4 +30,20 @@ class raspi::epaperdisplay {
         ensure => running,
         enable => true
     }
+
+
+    file { "/etc/systemd/system/epim.service":
+        source => 'puppet:///modules/raspi/epaperdisplay/epim.service',
+        owner => 'root',
+        group => 'root',
+        mode => '0644',
+        notify => Exec['daemon-reload']
+    } ->
+    file { "/etc/systemd/system/epim.timer":
+        source => 'puppet:///modules/raspi/epaperdisplay/epim.timer',
+        owner => 'root',
+        group => 'root',
+        mode => '0644',
+        notify => Exec['daemon-reload']
+    }
 }

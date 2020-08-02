@@ -1,0 +1,8 @@
+[Unit]
+Description=EPIM: EPaper Image Maker
+
+[Service]
+Type=oneshot
+ExecStart=/home/woolie/epim/draw
+User=woolie
+Group=woolie
