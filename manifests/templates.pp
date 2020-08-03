@@ -53,4 +53,5 @@ class epaperpi inherits pi {
     include raspi::wifi
     include raspi::spi
     include raspi::epaperdisplay
+    include raspi::epim
 }

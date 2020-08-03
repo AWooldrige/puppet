@@ -1,0 +1,10 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+[DEFAULT]
+write_bmp_path = /var/epaper/todisplay.bmp
+
+[tiddlywiki]
+url = https://cg.wooldrige.co.uk/tw/ww
+username = <%= $cg_einkdisp_username %>
+password = <%= $cg_einkdisp_password %>
