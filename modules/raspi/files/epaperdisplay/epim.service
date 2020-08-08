@@ -6,3 +6,4 @@ Type=oneshot
 ExecStart=/home/woolie/epim/draw
 User=woolie
 Group=woolie
+TimeoutStartSec=60s
