@@ -12,8 +12,12 @@ Host epaperpi
     Hostname epaperpi.local
     ProxyJump webpi
 
+Host fridgepi
+    Hostname fridgepi.local
+    ProxyJump webpi
+
 # General settings must be placed _after_ more specific ones
-Host webpi webpi.local epaperpi epaperpi.local
+Host webpi webpi.local epaperpi epaperpi.locale fridgepi fridgepi.local
     Port 3222
     User woolie
 

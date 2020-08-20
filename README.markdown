@@ -5,8 +5,10 @@ Bootstrapping a system from scratch
 -------------
 For Raspberry Pi:
 
- 1. Connect with ethernet and SSH to local IP with `ssh -o IdentitiesOnly=yes
-    ubuntu@<IP>`
+ 1. Connect with ethernet and SSH to local IP with `ssh -o
+    PasswordAuthentication=yes -o
+    PreferredAuthentications=keyboard-interactive,password -o
+    PubkeyAuthentication=no ubuntu@<IP>`
 
 For Ubuntu Desktops:
 
@@ -60,6 +62,9 @@ DHCP reservations
 | webpi Pi 4 eth0 | dc:a6:32:8b:96:48 | 192.168.50.2 |
 | epaperpi Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.50.3 |
 | epaperpi Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
+| fridgepi Pi 2 eth0 | B8:27:EB:6F:AF:69 | 192.168.50.5 |
+| fridgepi Pi 2 wlan0 | 80:1f:02:af:5a:81 | 192.168.50.6 |
+
 
 Port forwarding
 ---------------

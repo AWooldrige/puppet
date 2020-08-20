@@ -14,3 +14,6 @@ node /^webpi$/ {
 node /^epaperpi$/ {
     include epaperpi
 }
+node /^fridgepi$/ {
+    include fridgepi
+}
