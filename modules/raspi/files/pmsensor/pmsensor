@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+from sds011 import SDS011
+
+
+if __name__ == '__main__':
+    """
+    This whole thing really needs sorting out. BUT, it does work for now.
+
+    Make a blocking call to read measurement from the PM sensor. Returns when
+    the sensor next wakes up every 5 minutes. Dumps output in Influx format.
+    """
+
+    port = "/dev/ttyUSB0"
+    sds = SDS011(port=port)
+    sds.set_working_period(rate=5)
+
+    sd = sds.get_sensor_data()
+    print(f"pmsensor,devid={sd['devid']} sleepworkstate=\"{sd['sleepworkstate']}\",datareportingmore=\"{sd['datareportingmode']}\",rate={sd['rate']}", flush=True)
+
+    m = sds.read_measurement()
+    print(f"particulatematter,devid={m['devid']} pm2.5={m['pm2.5']},pm10={m['pm10']}", flush=True)

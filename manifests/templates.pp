@@ -54,6 +54,7 @@ class epaperpi inherits pi {
     include raspi::spi
     include raspi::epaperdisplay
     include raspi::epim
+    include raspi::pmsensor
 }
 class fridgepi inherits pi {
     include raspi::wifi
