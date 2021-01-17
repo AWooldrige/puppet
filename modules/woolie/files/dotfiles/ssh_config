@@ -20,6 +20,7 @@ Host fridgepi
 Host webpi webpi.local epaperpi epaperpi.locale fridgepi fridgepi.local
     Port 3222
     User woolie
+    IdentityFile ~/.ssh/id_puppet_woolie_2018_12_04_ec
 
 
 #########################################################################

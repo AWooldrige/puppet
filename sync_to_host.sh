@@ -100,7 +100,7 @@ function log {
 }
 
 
-log "To apply changes, manually SSH onto ${_arg_hostname} and run 'cd ~/puppet_rsync_copy && sudo make apply'"
+log "To apply changes, SSH onto ${_arg_hostname} and run 'cd ~/puppet_rsync_copy && ./apply.sh'"
 
 log "Running initial rsync"
 # TODO: Remove this duplication
