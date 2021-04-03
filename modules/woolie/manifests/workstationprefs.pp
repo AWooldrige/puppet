@@ -1,6 +1,14 @@
 class woolie::workstationprefs {
     include woolie
 
+    $localdir = "${woolie::homedir}/.local"
+    file { "$localdir":
+        ensure => directory,
+        owner => $woolie::uname,
+        group => $woolie::uname,
+        require => User[$woolie::uname]
+    }
+
     ###########################################################################
     # Application shortcut entries
     ###########################################################################
@@ -9,7 +17,10 @@ class woolie::workstationprefs {
         ensure => directory,
         owner => $woolie::uname,
         group => $woolie::uname,
-        require => User[$woolie::uname]
+        require => [
+            User[$woolie::uname],
+            File[$localdir]
+        ]
     }
     file { "${sharedir}/applications/start-socks.desktop":
         source  => 'puppet:///modules/woolie/start-socks.desktop',
@@ -32,7 +43,10 @@ class woolie::workstationprefs {
         ensure => directory,
         owner => $woolie::uname,
         group => $woolie::uname,
-        require => User[$woolie::uname]
+        require => [
+            User[$woolie::uname],
+            File[$localdir]
+        ]
     }
 
     # TODO: Puppet's checksum_value is only used for change detection.  It does
