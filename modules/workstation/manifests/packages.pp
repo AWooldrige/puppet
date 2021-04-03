@@ -3,7 +3,8 @@ class workstation::packages {
     package { [
         'vim-gtk3',
         'exiftool',
-        'sqlitebrowser'
+        'sqlitebrowser',
+        'podman'
         ]:
         ensure => installed
     }
