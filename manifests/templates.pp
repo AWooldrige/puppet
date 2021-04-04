@@ -60,3 +60,9 @@ class fridgepi inherits pi {
     include raspi::wifi
     include raspi::spi
 }
+
+class webprimary inherits basenode {
+    include influx::telegraf
+    include ot
+    include postgres
+}

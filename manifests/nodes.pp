@@ -17,3 +17,6 @@ node /^epaperpi$/ {
 node /^fridgepi$/ {
     include fridgepi
 }
+node /^webprimary$/ {
+    include webprimary
+}

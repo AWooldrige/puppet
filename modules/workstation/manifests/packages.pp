@@ -4,7 +4,9 @@ class workstation::packages {
         'vim-gtk3',
         'exiftool',
         'sqlitebrowser',
-        'podman'
+        'podman',
+        'ledger',
+        'pulseeffects'
         ]:
         ensure => installed
     }
