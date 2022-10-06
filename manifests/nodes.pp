@@ -14,8 +14,8 @@ node /^webpi$/ {
 node /^epaperpi$/ {
     include epaperpi
 }
-node /^fridgepi$/ {
-    include fridgepi
+node /^boilerpi$/ {
+    include boilerpi
 }
 node /^webprimary$/ {
     include webprimary

@@ -56,9 +56,7 @@ class epaperpi inherits pi {
     include raspi::epim
     include raspi::pmsensor
 }
-class fridgepi inherits pi {
-    include raspi::wifi
-    include raspi::spi
+class boilerpi inherits pi {
 }
 
 class webprimary inherits basenode {

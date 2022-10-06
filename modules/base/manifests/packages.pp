@@ -15,7 +15,8 @@ class base::packages {
         'vim',
         'vim-common',
         'tmux',
-        'curl']:
+        'curl',
+        'ncal']:
         ensure => installed
     }
 
