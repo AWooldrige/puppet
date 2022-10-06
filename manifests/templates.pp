@@ -57,6 +57,7 @@ class epaperpi inherits pi {
     include raspi::pmsensor
 }
 class boilerpi inherits pi {
+    include raspi::autowifirestart
 }
 
 class webprimary inherits basenode {
