@@ -58,6 +58,7 @@ class epaperpi inherits pi {
 }
 class boilerpi inherits pi {
     include raspi::autowifirestart
+    include raspi::boiler
 }
 
 class webprimary inherits basenode {

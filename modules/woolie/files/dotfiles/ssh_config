@@ -12,12 +12,12 @@ Host epaperpi
     Hostname epaperpi.local
     ProxyJump webpi
 
-Host fridgepi
-    Hostname fridgepi.local
+Host boilerpi
+    Hostname boilerpi.local
     ProxyJump webpi
 
 # General settings must be placed _after_ more specific ones
-Host webpi webpi.local epaperpi epaperpi.locale fridgepi fridgepi.local
+Host webpi webpi.local epaperpi epaperpi.local boilerpi boilerpi.local
     Port 3222
     User woolie
     IdentityFile ~/.ssh/id_puppet_woolie_2018_12_04_ec
