@@ -64,22 +64,22 @@ def in_low_temp_period_now():
 
     high_temp_periods = [
         ("03:30", "04:30"),
-        ("08:00", "08:59"),
+        ("11:00", "11:59"),
         ("14:00", "15:00")
     ]
+    click.echo(f"Evaluating if current time of {now.time()} falls within high or low temp period")
     for start, end in high_temp_periods:
         start_h, start_m = start.split(':')
-        end_h, end_m = start.split(':')
+        end_h, end_m = end.split(':')
 
         start_t = datetime.time(int(start_h), int(start_m), tzinfo=tz_lon)
         end_t = datetime.time(int(end_h), int(end_m), tzinfo=tz_lon)
 
-        click.echo(f"Evaluating if current time of {now.time()} falls within high or low temp period")
         if start_t <= now.time() <= end_t:
-            click.echo(f" -> {start} - {end}: matches this high temp period")
+            click.echo(f" -> {start} ({start_t}) - {end} ({end_t}): matches this high temp period")
             return False
         else:
-            click.echo(f" -> {start} - {end}: no match")
+            click.echo(f" -> {start} ({start_t}) - {end} ({end_t}): no match")
     click.echo(f"-> choosing low temp period by default")
     return True
 
