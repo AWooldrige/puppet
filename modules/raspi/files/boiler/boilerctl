@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import math
+import socket
 import datetime
 import time
 import unittest
@@ -10,26 +11,33 @@ from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 
-pigpio_f = PiGPIOFactory()
 
-"""
-Spec sheet[1] for the SF180M says:
-    - full min: 0.5ms
-    - middle  : 1.5ms
-    - full max: 2.5ms
-
-[1] https://m.media-amazon.com/images/I/81+CuFyNFcL.pdf
-"""
-servo = Servo(
-    12,  # GPIO 12 (header pin 32, hardware PWM 0)
-    initial_value=None,  # Otherwise this blasts the servo to 'mid' as it defaults to 0
-    min_pulse_width=0.5/1000,
-    max_pulse_width=2.5/1000,
-    pin_factory=pigpio_f  # Using pigpio to allow hardware PWM, removing jitter
-)
+def send_metric(name, value):
+    msg = f"boilerctl {name}={value} {int(datetime.datetime.utcnow().timestamp())}"
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.sendto(bytes(msg, "utf-8"), ("127.0.0.1", 8094))
 
 
 def move(pos):
+    pigpio_f = PiGPIOFactory()
+
+    """
+    Spec sheet[1] for the SF180M says:
+        - full min: 0.5ms
+        - middle  : 1.5ms
+        - full max: 2.5ms
+
+    [1] https://m.media-amazon.com/images/I/81+CuFyNFcL.pdf
+    """
+    servo = Servo(
+        12,  # GPIO 12 (header pin 32, hardware PWM 0)
+        initial_value=None,  # Otherwise this blasts the servo to 'mid' as it defaults to 0
+        min_pulse_width=0.5/1000,
+        max_pulse_width=2.5/1000,
+        pin_factory=pigpio_f  # Using pigpio to allow hardware PWM, removing jitter
+    )
+
+    send_metric('desired_servo_position', pos)
     servo.value = pos
     time.sleep(5)
     servo.detach()
@@ -45,6 +53,7 @@ def temp_to_servo_position(desired_temp_c, in_min=35, in_max=82, out_min=-1, out
 
 
 def move_dial_to_temp(desired_temp_c):
+    send_metric('desired_temp_celcius', desired_temp_c)
     click.echo(f"Moving boiler dial to {desired_temp_c}C")
     move(temp_to_servo_position(desired_temp_c))
 
@@ -55,6 +64,7 @@ def in_low_temp_period_now():
 
     high_temp_periods = [
         ("03:30", "04:30"),
+        ("08:00", "08:59"),
         ("14:00", "15:00")
     ]
     for start, end in high_temp_periods:
@@ -94,8 +104,10 @@ def demo():
 @cli.command()
 def autoset():
     if in_low_temp_period_now():
+        send_metric('in_low_temp_period', 1)
         move_dial_to_temp(35)
     else:
+        send_metric('in_low_temp_period', 0)
         move_dial_to_temp(65)
 
 
