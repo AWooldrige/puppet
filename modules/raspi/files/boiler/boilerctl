@@ -17,7 +17,6 @@ def send_metric(name, value):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.sendto(bytes(msg, "utf-8"), ("127.0.0.1", 8094))
 
-
 def move(pos):
     pigpio_f = PiGPIOFactory()
 
@@ -64,7 +63,6 @@ def in_low_temp_period_now():
 
     high_temp_periods = [
         ("03:30", "04:30"),
-        ("11:00", "11:59"),
         ("14:00", "15:00")
     ]
     click.echo(f"Evaluating if current time of {now.time()} falls within high or low temp period")
@@ -111,7 +109,7 @@ def autoset():
         move_dial_to_temp(35)
     else:
         send_metric('in_low_temp_period', 0)
-        move_dial_to_temp(65)
+        move_dial_to_temp(70)
 
 
 if __name__ == "__main__":
