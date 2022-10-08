@@ -20,7 +20,7 @@ class raspi::boiler {
     } ->
     cron { 'Run boilerctl autoset every minute':
         ensure => 'present',
-        command => '/usr/bin/systemd-cat -t "boilerctl" /usr/bin/boilerctl',
+        command => '/usr/bin/systemd-cat -t "boilerctl" /usr/bin/boilerctl autoset',
         user    => root
     }
 
