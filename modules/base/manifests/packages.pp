@@ -36,6 +36,7 @@ class base::packages {
         'man-db',
         'inotify-tools',  # Includes inotifywait
         'python3-tabulate',
+        'python3-tenacity',
         # 'python3.7', Not available on raspbian
         # 'python3.7-venv',
         ]:

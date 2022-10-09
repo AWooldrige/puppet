@@ -58,6 +58,7 @@ class epaperpi inherits pi {
 }
 class boilerpi inherits pi {
     include raspi::autowifirestart
+    include raspi::ds18b20
     include raspi::boiler
 }
 

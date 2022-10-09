@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+import configparser
+import datetime
+import time
+import os
+import json
+import socket
+
+import tenacity
+import RPi.GPIO as GPIO
+
+
+DS18B20_POWER_GPIO_PIN = 17
+
+
+def send_metric(name, value):
+    msg = f"ds18b20 {name}={value}"
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.sendto(bytes(msg, "utf-8"), ("127.0.0.1", 8094))
+
+
+def reset_bus():
+    """
+    https://forums.raspberrypi.com/viewtopic.php?t=164059
+    """
+    send_metric('bus_reset', 1)
+    print("Resetting bus")
+    pin = DS18B20_POWER_GPIO_PIN
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.LOW)
+    time.sleep(3)
+    GPIO.output(pin, GPIO.HIGH)
+    time.sleep(5)
+    print("Done resetting bus")
+
+
+def read_temps(config):
+    """
+    Typical outpput of w1_slave:
+        aa 01 55 05 7f a5 81 66 1e : crc=1e YES
+        aa 01 55 05 7f a5 81 66 1e t=26625
+    """
+    data = {}
+    for key in config['probes']:
+        path = f"/sys/bus/w1/devices/{key}/w1_slave"
+        with open(path, "r") as f:
+            first_line = f.readline()
+            if not first_line.strip().endswith("YES"):
+                raise Exception(f"CRC check failed in {path} ({config['probes'][key]}): {first_line}")
+            second_line = f.readline()
+            temp = float(second_line.split('=')[1]) / 1000.0
+            if temp < -30 or temp > 100:
+                raise Exception(f"Invalid temperature '{temp}' in {path} ({config['probes'][key]}): {second_line}")
+            send_metric(config['probes'][key], temp)
+            data[config['probes'][key]] = {
+                'probe_id': key,
+                'temp_celcius': temp,
+                'read_time': datetime.datetime.utcnow().isoformat()
+            }
+    with open("/var/ds18b20_output.json", "w") as outf:
+        json.dump(data, outf)
+
+
+@tenacity.retry(stop=(tenacity.stop_after_delay(20) | tenacity.stop_after_attempt(5)))
+def attempt_to_read(config):
+    try:
+        read_temps(config)
+    except:
+        reset_bus()
+        raise
+
+
+if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    config.read('/etc/ds18b20_manager.conf')
+    attempt_to_read(config)
