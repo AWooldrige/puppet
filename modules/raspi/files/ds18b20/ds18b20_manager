@@ -5,12 +5,23 @@ import time
 import os
 import json
 import socket
+import sqlite3
 
 import tenacity
-import RPi.GPIO as GPIO
-
 
 DS18B20_POWER_GPIO_PIN = 17
+
+"""
+As of 2022-10-13, I could install lgpio using pip3, but it's pointless because
+the actual linux binary isn't included. This has to be manually installed. I
+could puppet the installation, but this is the lazy approach.
+"""
+lgpio_available = False
+try:
+    import lgpio
+    lgpio_available = True
+except ModuleNotFoundError:
+    import RPi.GPIO as GPIO
 
 
 def send_metric(name, value):
@@ -19,28 +30,75 @@ def send_metric(name, value):
     s.sendto(bytes(msg, "utf-8"), ("127.0.0.1", 8094))
 
 
-def reset_bus():
+def reset_w1_power_rail():
     """
     https://forums.raspberrypi.com/viewtopic.php?t=164059
     """
     send_metric('bus_reset', 1)
-    print("Resetting bus")
+    print("Powering off w1 power rail")
     pin = DS18B20_POWER_GPIO_PIN
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
-    time.sleep(3)
-    GPIO.output(pin, GPIO.HIGH)
+
+    if lgpio_available:
+        print(" -> using lgpio library")
+        h = lgpio.gpiochip_open(0)
+        lgpio.gpio_claim_output(h, pin)
+        lgpio.gpio_write(h, pin, 0)
+        time.sleep(3)
+        lgpio.gpio_write(h, pin, 1)
+    else:
+        print(" -> using RPi.GPIO as lgpio library not available")
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, GPIO.LOW)
+        time.sleep(3)
+        GPIO.output(pin, GPIO.HIGH)
+    print("Power returned to w1 power rail")
     time.sleep(5)
-    print("Done resetting bus")
+
+
+def get_db_connection(config):
+    con = sqlite3.connect('/var/ds18b20_readings.db')
+
+    cur = con.cursor()
+    res = cur.execute("PRAGMA user_version")
+    current_user_version = res.fetchone()[0]
+
+    if current_user_version == 0:
+        print("Creating new sqlite database")
+        cur.execute("PRAGMA user_version = 1")
+
+        # This is not normalised, I don't care :)
+        cur.execute("""
+        CREATE TABLE readings (
+            time_utc_iso8601 TEXT,
+            probe_name TEXT,
+            probe_id TEXT,
+            temperature_celcius REAL,
+            PRIMARY KEY(time_utc_iso8601, probe_name)
+        )
+        """)
+        con.commit()
+
+    return con
+
+
+def delete_old_metrics(db_con):
+    cur = db_con.cursor()
+    cur.execute(
+        "DELETE FROM readings WHERE time_utc_iso8601 < datetime('now', '-30 days');"
+    )
+    db_con.commit()
+    return db_con
 
 
 def read_temps(config):
     """
-    Typical outpput of w1_slave:
+    Typical output of w1_slave:
         aa 01 55 05 7f a5 81 66 1e : crc=1e YES
         aa 01 55 05 7f a5 81 66 1e t=26625
     """
+    con = get_db_connection(config)
+    cur = con.cursor()
     data = {}
     for key in config['probes']:
         path = f"/sys/bus/w1/devices/{key}/w1_slave"
@@ -53,21 +111,35 @@ def read_temps(config):
             if temp < -30 or temp > 100:
                 raise Exception(f"Invalid temperature '{temp}' in {path} ({config['probes'][key]}): {second_line}")
             send_metric(config['probes'][key], temp)
+            cur.execute(
+                "INSERT INTO readings VALUES(?, ?, ?, ?)",
+                (
+                    datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
+                    config['probes'][key],
+                    key,
+                    temp
+                )
+            )
+            con.commit()
+
             data[config['probes'][key]] = {
                 'probe_id': key,
                 'temp_celcius': temp,
                 'read_time': datetime.datetime.utcnow().isoformat()
             }
+
+    # TODO: WARNING, this isn't an atomic write.
     with open("/var/ds18b20_output.json", "w") as outf:
         json.dump(data, outf)
+    delete_old_metrics(con)
 
 
-@tenacity.retry(stop=(tenacity.stop_after_delay(20) | tenacity.stop_after_attempt(5)))
+@tenacity.retry(stop=(tenacity.stop_after_delay(20) | tenacity.stop_after_attempt(1)))
 def attempt_to_read(config):
     try:
         read_temps(config)
     except:
-        reset_bus()
+        reset_w1_power_rail()
         raise
 
 

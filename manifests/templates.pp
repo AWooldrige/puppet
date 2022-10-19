@@ -31,6 +31,7 @@ class laptop inherits basenode::workstation {
 
 class pi inherits basenode {
     include raspi
+    include raspi::bootconfig
     include avahi
     include influx::telegraf
 }
@@ -43,6 +44,12 @@ class webpi inherits pi {
     include raspi::photos
     include raspi::tiddlywiki
     include raspi::cg
+
+    # Raspbian version not up-to-date enough yet.
+    # python3-lgpio only available on Ubuntu Server.
+    # ds18b20_manager autodetects, with fallback to RPi.GPIO
+    package { 'python3-lgpio': ensure => installed }
+    include raspi::ds18b20
 }
 class kitchentvpi inherits pi {
     include raspi::autologin

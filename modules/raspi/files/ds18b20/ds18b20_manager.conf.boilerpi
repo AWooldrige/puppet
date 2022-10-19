@@ -1,0 +1,12 @@
+;####################################################################
+;##   This file is controlled by Puppet - changes will be overwritten
+;####################################################################
+
+[sqlite]
+retention_days = 30
+
+[probes]
+28-3c01d075305a = boiler_return
+28-3c01d0756a23 = boiler_flow
+28-3c01d075e1f8 = kitchen_cupboard_ambient
+28-000004ef4b90 = kitchen_ambient

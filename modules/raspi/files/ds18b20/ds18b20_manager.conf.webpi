@@ -1,0 +1,10 @@
+;####################################################################
+;##   This file is controlled by Puppet - changes will be overwritten
+;####################################################################
+
+[sqlite]
+retention_days = 30
+
+[probes]
+28-000004eea45e = outside_southwest_ambient
+28-3c01d0752238 = livingroom_ambient

@@ -1,0 +1,19 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+[pi4]
+# Run as fast as firmware / board allows
+arm_boost=1
+
+
+[all]
+display_auto_detect=1
+camera_auto_detect=1
+
+# Enable the 1-wire protocol on GPIO pin 4 (header pin 7)
+# for the DS18B20s temp sensors.
+dtoverlay=w1-gpio,gpiopin=4,pullup=0
+
+# dtparam=i2c_arm=on
+# dtparam=spi=on
