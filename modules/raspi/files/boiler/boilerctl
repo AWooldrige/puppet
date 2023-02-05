@@ -4,11 +4,25 @@ import socket
 import datetime
 import time
 import unittest
+import logging
 
+import influxdb_client
 import pytz
 import click
 from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
+
+INFLUX_URL="http://192.168.50.2:8086"
+INFLUX_OUTSIDE_PROBE_NAME = "outside_southwest_ambient"
+
+# Warmest temp that CWC should start tail off at
+COLD_WEATHER_COMPENSATION_START_TEMP = 8
+
+# Coldest temp that CWC should apply full additional compensation by
+COLD_WEATHER_COMPENSATION_FULL_TEMP = -2
+
+COLD_WEATHER_COMPENSATION_START_TIME = "05:00"
+COLD_WEATHER_COMPENSATION_END_TIME = "21:00"
 
 
 
@@ -43,16 +57,73 @@ def move(pos):
     servo.detach()
 
 
+def get_recent_lowest_outside_temp_from_influx():
+    client = influxdb_client.InfluxDBClient(url=INFLUX_URL)
+
+    query_api = client.query_api()
+
+    flux_q = f"""from(bucket:"telegraf/autogen")
+      |> range(start: -1h)
+      |> filter(fn: (r) =>
+        r._measurement == "ds18b20" and
+        r._field == "{INFLUX_OUTSIDE_PROBE_NAME}"
+      )
+      |> min()
+      |> yield()
+    """
+    result = query_api.query(query=flux_q)
+
+    results = []
+    for table in result:
+      for record in table.records:
+        results.append((record.get_field(), record.get_value()))
+
+    if len(results) != 1:
+        raise Exception(f"Expected 1 result row to be returned from InfluxDB query for outside temp, returned {len(results)}.")
+
+    r_probe_name, r_temp = results[0]
+
+    if r_probe_name != INFLUX_OUTSIDE_PROBE_NAME:
+        raise Exception(f"Expected {INFLUX_OUTSIDE_PROBE_NAME}, not {_r_probe_name}")
+
+    if r_temp < -30 or r_temp > 60:
+        raise Exception(f"Outside reporting temperature outside of expected UK range: {r_temp}")
+
+    return r_temp
+
+
+
 def scale_to_new_range(v, range_min, range_max, target_min, target_max):
     """
     Normalise/scale number to within different range:
     https://stats.stackexchange.com/a/281164
     """
     if range_max <= range_min:
-        raise Exception("Invalid ranges: {range_min} -> {range_max}")
+        raise Exception(f"Invalid range: {range_min} -> {range_max}")
     if target_max <= target_min:
-        raise Exception("Invalid ranges: {target_min} -> {target_max}")
+        raise Exception(f"Invalid range: {target_min} -> {target_max}")
     return ((v - range_min) / (range_max - range_min)) * (target_max - target_min) + target_min
+
+
+def clamp(v, min_v, max_v):
+    return max(min_v, min(v, max_v))
+
+
+def cold_weather_compensation_percentage(outside_temp, cwc_start_temp, cwc_full_compensation_temp):
+    """
+    Cold weather compensation amount will give a 0-1 percentage compensation
+    amount based on cwc_start and cwc_full (full compensation) temperatures.
+
+                         cwc_full              cwc_start
+                         |-----------------------------|
+    -10C   -8C   -6C   -4C   -2C    0C    2C    4C    6C    8C   10C   12C
+    100%  100%  100%  100%  100%   80%   60%   40%   20%    0%    0%    0%
+    """
+    position_inverse = scale_to_new_range(
+        outside_temp,
+        cwc_full_compensation_temp, cwc_start_temp,
+        0, 1)
+    return 1 - clamp(position_inverse, 0, 1)
 
 
 def temp_to_servo_position(desired_temp_c, in_min=40, in_max=75, out_min=-1, out_max=1):
@@ -148,14 +219,49 @@ def demo():
     move(1)
 
 
+def cold_weather_compensation_percentage_needed():
+    tz_lon = pytz.timezone('Europe/London')
+    now = datetime.datetime.now(tz_lon)
+
+    start_h, start_m = COLD_WEATHER_COMPENSATION_START_TIME.split(':')
+    end_h, end_m = COLD_WEATHER_COMPENSATION_END_TIME.split(':')
+
+    start_t = datetime.time(int(start_h), int(start_m), tzinfo=tz_lon)
+    end_t = datetime.time(int(end_h), int(end_m), tzinfo=tz_lon)
+
+    if start_t <= now.time() <= end_t:
+        click.echo(f" -> {start_t} - {end_t}: matches cold weather compensation active window")
+
+        try:
+            outside_temp = get_recent_lowest_outside_temp_from_influx()
+        except Exception as Argument:
+            logging.exception("Unable to get outside temperature. Setting default of 10 C.")
+            # TODO: keep last known value for 48 hours (to allow for PI maintenance)
+            outside_temp = 10
+
+        cwc_pct = cold_weather_compensation_percentage(
+            outside_temp,
+            COLD_WEATHER_COMPENSATION_START_TEMP,
+            COLD_WEATHER_COMPENSATION_FULL_TEMP)
+        return cwc_pct
+
+    return 0
+
+
+
 @cli.command()
 def autoset():
     if in_low_temp_period_now():
         send_metric('in_low_temp_period', 1)
-        move_dial_to_temp(40)
+
+        cwc_pct = cold_weather_compensation_percentage_needed()
+        send_metric('cold_weather_compensation_percentage', cwc_pct)
+
+        move_dial_to_temp(40 + scale_to_new_range(cwc_pct, 0, 1, 0, 15))
     else:
         send_metric('in_low_temp_period', 0)
         move_dial_to_temp(70)
+
 
 @cli.command()
 def evaluate():

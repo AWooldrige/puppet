@@ -3,7 +3,7 @@ class raspi::boiler {
     package { ['python3-gpiozero', 'python3-click', 'pigpio', 'python3-pigpio']:
         ensure => installed
     } ->
-    package { 'pytz':
+    package { ['pytz', 'influxdb-client':
         ensure => installed,
         provider => 'pip3',
         require => Package['python3-pip']
