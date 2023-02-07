@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import os
 import math
 import socket
 import datetime
 import time
 import unittest
 import logging
+import sqlite3
 
 import influxdb_client
 import pytz
@@ -12,7 +14,9 @@ import click
 from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 
-INFLUX_URL="http://192.168.50.2:8086"
+DB_PATH = '/var/lib/boilerctl.sqlite3'
+
+INFLUX_URL = "http://192.168.50.2:8086"
 INFLUX_OUTSIDE_PROBE_NAME = "outside_southwest_ambient"
 
 # Warmest temp that CWC should start tail off at
@@ -22,7 +26,7 @@ COLD_WEATHER_COMPENSATION_START_TEMP = 8
 COLD_WEATHER_COMPENSATION_FULL_TEMP = -2
 
 COLD_WEATHER_COMPENSATION_START_TIME = "05:00"
-COLD_WEATHER_COMPENSATION_END_TIME = "21:00"
+COLD_WEATHER_COMPENSATION_END_TIME = "22:00"
 
 
 
@@ -30,6 +34,76 @@ def send_metric(name, value):
     msg = f"boilerctl {name}={value}"
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.sendto(bytes(msg, "utf-8"), ("127.0.0.1", 8094))
+
+
+def initialise_sqlite_db_if_needed():
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    user_version = cur.execute("PRAGMA user_version").fetchone()[0]
+    if user_version != 1:
+        cur.execute("""
+            CREATE TABLE time_series(
+                name TEXT NOT NULL,
+                time_utc_iso8601 TEXT NOT NULL,
+                source TEXT NOT NULL,
+                value NUMERIC
+            )""")
+        # For normal queries that need the most recent value for a measurement
+        cur.execute("""
+            CREATE INDEX time_series_name_time_idx
+            ON time_series(name, time_utc_iso8601)
+            """)
+        # For speedy logrotate style deletions
+        cur.execute("""
+            CREATE INDEX time_series_time_idx
+            ON time_series(time_utc_iso8601)
+            """)
+        cur.execute("PRAGMA user_version=1")
+    con.commit()
+    con.close()
+
+
+def write_time_series_value_to_local_db(name, value):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute(
+        "INSERT INTO time_series VALUES (?, ?, ?, ?)",
+        (
+            name,
+            datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
+            f"PID: {os.getpid()}",
+            value
+        ))
+    cur.execute(
+        "DELETE FROM time_series WHERE time_utc_iso8601 < datetime('now', '-30 days');"
+    )
+    con.commit()
+    con.close()
+
+
+def read_most_recent_time_series_value_from_local_db(name):
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    res = cur.execute("""
+        SELECT * FROM time_series
+        WHERE name = ?
+        ORDER BY time_utc_iso8601 DESC
+        LIMIT 1""",
+        (name, )).fetchone()
+    con.close()
+    if res:
+        now = datetime.datetime.now(datetime.timezone.utc)
+        parsed = datetime.datetime.fromisoformat(res['time_utc_iso8601'])
+        return {
+            'name': res['name'],
+            'time_string': res['time_utc_iso8601'],
+            'time_parsed': parsed,
+            'time_delta_from_now': now - parsed,
+            'source': res['source'],
+            'value': res['value']
+        }
+    return None
 
 
 def move(pos):
@@ -170,8 +244,13 @@ def return_temp_to_efficiency(return_temp):
 
 def move_dial_to_temp(desired_temp_c):
     send_metric('desired_temp_celcius', desired_temp_c)
-    click.echo(f"Moving boiler dial to {desired_temp_c}C")
-    move(temp_to_servo_position(desired_temp_c))
+    last_record = read_most_recent_time_series_value_from_local_db('desired_temp')
+    if last_record and last_record['time_delta_from_now'].total_seconds() < (60*2) and last_record['value'] > (desired_temp_c - 0.5) and last_record['value'] < (desired_temp_c + 0.5):
+        click.echo(f"Boiler dial already set to {desired_temp_c}C +/- 0.5C ({last_record['value']}), not moving again.")
+    else:
+        click.echo(f"Moving boiler dial to {desired_temp_c}C")
+        move(temp_to_servo_position(desired_temp_c))
+        write_time_series_value_to_local_db('desired_temp', desired_temp_c)
 
 
 def in_low_temp_period_now():
@@ -234,10 +313,16 @@ def cold_weather_compensation_percentage_needed():
 
         try:
             outside_temp = get_recent_lowest_outside_temp_from_influx()
+            write_time_series_value_to_local_db('outside_temp_from_influx', outside_temp)
         except Exception as Argument:
-            logging.exception("Unable to get outside temperature. Setting default of 10 C.")
+            logging.exception("Unable to get outside temperature.")
             # TODO: keep last known value for 48 hours (to allow for PI maintenance)
-            outside_temp = 10
+            last_record = read_most_recent_time_series_value_from_local_db('outside_temp_from_influx')
+            if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*48):
+                logging.warning("Using last recorded value from Influx (using this for 48 hours")
+                outside_temp = last_record['value']
+            else:
+                outside_temp = 10
 
         cwc_pct = cold_weather_compensation_percentage(
             outside_temp,
@@ -276,6 +361,8 @@ if __name__ == "__main__":
     assert temp_to_servo_position(40) == -1
     assert temp_to_servo_position(75) == 1
     assert temp_to_servo_position(57.5) == 0
+
+    initialise_sqlite_db_if_needed()
 
     cli.add_command(calibrate)
     cli.add_command(autoset)
