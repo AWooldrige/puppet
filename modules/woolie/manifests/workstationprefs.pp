@@ -89,4 +89,13 @@ class woolie::workstationprefs {
         mode => '0755',
         require => File[$bindir]
     }
+
+    file { "${bindir}/remove_raw_files_without_jpeg_equivalent":
+        ensure => file,
+        source  => 'puppet:///modules/woolie/bin/remove_raw_files_without_jpeg_equivalent',
+        owner => $woolie::uname,
+        group => $woolie::uname,
+        mode => '0755',
+        require => File[$bindir]
+    }
 }
