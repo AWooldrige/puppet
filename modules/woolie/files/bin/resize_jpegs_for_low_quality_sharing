@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -eu
+
+mkdir -p resized
+
+echo "Resizing images into ./resized"
+for i in *.{JPG,jpg,JPEG,jpeg}; do
+    [ -f "$i" ] || continue
+    echo " -> $i"
+    convert "$i" -resize 2500x2500 -quality 80 "resized/$i";
+done
+echo "Complete"
