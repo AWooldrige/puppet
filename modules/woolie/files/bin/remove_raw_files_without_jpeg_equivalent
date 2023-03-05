@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+import sys
+from pathlib import Path
+import click
+
+
+@click.command()
+@click.option('-d', '--dry-run', is_flag=True,
+              help='Do not make changes, only describe what would have been done.')
+@click.option('-v', '--verbose', is_flag=True,
+              help='Noisy about progress.')
+def run(dry_run, verbose):
+    """Run in directories with a mix of CR3 and JPEG files. Remove CR3s without matching JPEG."""
+    p = Path('.')
+    jpeg_file_stems = [jp.stem for jp in p.glob('*.JPG')]
+    raw_files_matched = [rp for rp in p.glob('*.CR3') if rp.stem in jpeg_file_stems]
+    raw_files_to_delete = [rp for rp in p.glob('*.CR3') if rp.stem not in jpeg_file_stems]
+
+    if verbose or dry_run:
+        click.echo((f"JPEG file stems:\n{jpeg_file_stems}\n\n"))
+        click.echo(f"CR3 files matched with JPEG:\n{raw_files_matched}\n\n")
+        click.echo(f"CR3 files to delete (no matching JPEG):\n{raw_files_to_delete}\n\n")
+
+    if set(raw_files_matched) & set(raw_files_to_delete):
+        raise Exception("CR3s must not appear in both matched and deletion sets")
+        click.confirm('After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
+
+    if not raw_files_to_delete:
+        click.echo(f"No unmatched CR3 files to delete.")
+        sys.exit(0)
+
+    if len(raw_files_matched) != len(jpeg_file_stems):
+        click.confirm('After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
+
+    click.echo(f"{len(raw_files_to_delete)} unmatched CR3 files to delete ({len(raw_files_matched)} matched CR3 files will remain).")
+
+    if click.confirm('Continue?'):
+        for f in raw_files_to_delete:
+            if verbose or dry_run:
+                click.echo((f"Deleting {f}"))
+            if not dry_run:
+                f.unlink()
+
+
+if __name__ == '__main__':
+    run()

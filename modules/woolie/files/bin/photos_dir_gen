@@ -4,11 +4,15 @@
 #########################################################################
 set -eu
 
-DBR="${DROPBOX_ROOT:-UNKNOWN}"
-if [ "$DBR" == "UNKNOWN" ]; then
-    echo 'ERROR: Expected $DROPBOX_ROOT env var to be set'
+
+DBR="$(find /mnt/ -maxdepth 3 -name 'do_not_remove.txt' -printf "%h\n" -quit)"
+if test -n "$DBR"; then
+    echo "Dropbox directory found: $DBR"
+else
+    echo "Cannot find Dropbox directory"
     exit 1
 fi
+
 
 PHOTOS_ROOT="${DBR}/Photos"
 if [ ! -d "$PHOTOS_ROOT" ]; then
@@ -19,7 +23,7 @@ fi
 function confirm {
     # Gloriously adapted from https://stackoverflow.com/questions/226703/
     echo -n "Continue (y/n)? "
-    read answer
+    read -r answer
     if [ "$answer" != "${answer#[Yy]}" ]; then
         echo "Continuing"
     else
@@ -28,9 +32,9 @@ function confirm {
     fi
 }
 
-read -r -p 'Enter year for new photo dir, e.g. "2020" (filename suitable): ' year
+read -r -p "Enter year for new photo dir, e.g. $(date +%Y): " year
 
-read -r -p 'Enter event title, e.g. "2019-10-12 Jon''s new pony" (filename suitable): ' title
+read -r -p "Enter event title (directory name suitable) , e.g. $(date +%Y)-10-12 Jon's new pony: " title
 
 EVENT_DIR="${PHOTOS_ROOT}/${year}/${title}"
 echo "New directories will be created under: ${EVENT_DIR}"
