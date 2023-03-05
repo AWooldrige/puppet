@@ -25,10 +25,6 @@ COLD_WEATHER_COMPENSATION_START_TEMP = 8
 # Coldest temp that CWC should apply full additional compensation by
 COLD_WEATHER_COMPENSATION_FULL_TEMP = -2
 
-COLD_WEATHER_COMPENSATION_START_TIME = "05:00"
-COLD_WEATHER_COMPENSATION_END_TIME = "22:00"
-
-
 
 def send_metric(name, value):
     msg = f"boilerctl {name}={value}"
@@ -302,35 +298,24 @@ def cold_weather_compensation_percentage_needed():
     tz_lon = pytz.timezone('Europe/London')
     now = datetime.datetime.now(tz_lon)
 
-    start_h, start_m = COLD_WEATHER_COMPENSATION_START_TIME.split(':')
-    end_h, end_m = COLD_WEATHER_COMPENSATION_END_TIME.split(':')
+    try:
+        outside_temp = get_recent_lowest_outside_temp_from_influx()
+        write_time_series_value_to_local_db('outside_temp_from_influx', outside_temp)
+    except Exception as Argument:
+        logging.exception("Unable to get outside temperature.")
+        # TODO: keep last known value for 48 hours (to allow for PI maintenance)
+        last_record = read_most_recent_time_series_value_from_local_db('outside_temp_from_influx')
+        if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*48):
+            logging.warning("Using last recorded value from Influx (using this for 48 hours")
+            outside_temp = last_record['value']
+        else:
+            outside_temp = 10
 
-    start_t = datetime.time(int(start_h), int(start_m), tzinfo=tz_lon)
-    end_t = datetime.time(int(end_h), int(end_m), tzinfo=tz_lon)
-
-    if start_t <= now.time() <= end_t:
-        click.echo(f" -> {start_t} - {end_t}: matches cold weather compensation active window")
-
-        try:
-            outside_temp = get_recent_lowest_outside_temp_from_influx()
-            write_time_series_value_to_local_db('outside_temp_from_influx', outside_temp)
-        except Exception as Argument:
-            logging.exception("Unable to get outside temperature.")
-            # TODO: keep last known value for 48 hours (to allow for PI maintenance)
-            last_record = read_most_recent_time_series_value_from_local_db('outside_temp_from_influx')
-            if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*48):
-                logging.warning("Using last recorded value from Influx (using this for 48 hours")
-                outside_temp = last_record['value']
-            else:
-                outside_temp = 10
-
-        cwc_pct = cold_weather_compensation_percentage(
-            outside_temp,
-            COLD_WEATHER_COMPENSATION_START_TEMP,
-            COLD_WEATHER_COMPENSATION_FULL_TEMP)
-        return cwc_pct
-
-    return 0
+    cwc_pct = cold_weather_compensation_percentage(
+        outside_temp,
+        COLD_WEATHER_COMPENSATION_START_TEMP,
+        COLD_WEATHER_COMPENSATION_FULL_TEMP)
+    return cwc_pct
 
 
 
