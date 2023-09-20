@@ -26,14 +26,14 @@ def run(dry_run, verbose):
 
     if set(raw_files_matched) & set(raw_files_to_delete):
         raise Exception("CR3s must not appear in both matched and deletion sets")
-        click.confirm('After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
+        click.confirm(f'After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
 
     if not raw_files_to_delete:
         click.echo(f"No unmatched CR3 files to delete.")
         sys.exit(0)
 
     if len(raw_files_matched) != len(jpeg_file_stems):
-        click.confirm('After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
+        click.confirm(f'After deletion, there will be {len(raw_files_matched)}, which does not match the {len(jpeg_file_stems)} JPEGs, continue?', abort=True)
 
     click.echo(f"{len(raw_files_to_delete)} unmatched CR3 files to delete ({len(raw_files_matched)} matched CR3 files will remain).")
 
