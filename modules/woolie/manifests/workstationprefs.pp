@@ -22,14 +22,6 @@ class woolie::workstationprefs {
             File[$localdir]
         ]
     }
-    file { "${sharedir}/applications/start-socks.desktop":
-        source  => 'puppet:///modules/woolie/start-socks.desktop',
-        owner   => $woolie::uname,
-        group   => $woolie::uname,
-        mode    => '0644',
-        require => File[$sharedir]
-    }
-
 
     ###########################################################################
     # Application shortcut entries
@@ -47,29 +39,6 @@ class woolie::workstationprefs {
             User[$woolie::uname],
             File[$localdir]
         ]
-    }
-
-    # TODO: Puppet's checksum_value is only used for change detection.  It does
-    # NOT validate the checksum of the downloaded file, so this should be done
-    # using an exec.
-    file { "${bindir}/google-font-downloader":
-        ensure => file,
-        source => 'https://github.com/neverpanic/google-font-download/raw/b0844341d1508ec1f8382f335c10354d1560d8ca/google-font-download',
-        checksum => md5,
-        checksum_value => 'ece5cda61be427fbc26426ee54f5b1c5',
-        owner => $woolie::uname,
-        group => $woolie::uname,
-        mode => '0755',
-        require => File[$bindir]
-    }
-
-    file { "${bindir}/start_socks":
-        ensure => file,
-        source  => 'puppet:///modules/woolie/bin/start_socks',
-        owner => $woolie::uname,
-        group => $woolie::uname,
-        mode => '0755',
-        require => File[$bindir]
     }
 
     file { "${bindir}/ssh_key_gen":

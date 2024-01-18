@@ -40,6 +40,8 @@ else
     install puppet
 
     log 'Installing puppet modules'
+    puppet module install puppetlabs-cron_core
+    puppet module install puppetlabs-sshkeys_core
     puppet module install puppetlabs-stdlib
     puppet module install puppetlabs-apt
 

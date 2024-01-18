@@ -2,11 +2,13 @@ class workstation::packages {
 
     package { [
         'vim-gtk3',
-        'exiftool',
+        'libimage-exiftool-perl',
         'sqlitebrowser',
         'podman',
+        'python3-websockets',  # Needed for vim ghost-text plugin
+        'python3-pandas',
         'ledger',
-        'pulseeffects'
+        'easyeffects'
         ]:
         ensure => installed
     }
@@ -22,13 +24,11 @@ class workstation::packages {
         ensure => installed
     }
     package { [
-        'pysocks',
-        's3sup',
-        'websockets',  # Required by vim ghost-text plugin
-        'pandas'
+        's3sup'
         ]:
         ensure => installed,
         provider => 'pip3',
-        require => Package['python3-pip']
+        require => Package['python3-pip'],
+        install_options => ['--break-system-packages']
     }
 }

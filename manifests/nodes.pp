@@ -1,22 +1,22 @@
-node /^hplaptop\d+$/ {
+node /^hplaptop\d+/ {
     include laptop
 }
-node /^laptop.+$/ {
+node /^laptop.+/ {
     include laptop
 }
-node /^desktop\d+$/ {
+node /^desktop\d+/ {
     include desktop
 }
 
-node /^webpi$/ {
+node /^webpi/ {
     include webpi
 }
-node /^epaperpi$/ {
+node /^epaperpi/ {
     include epaperpi
 }
-node /^boilerpi$/ {
+node /^boilerpi/ {
     include boilerpi
 }
-node /^webprimary$/ {
+node /^webprimary/ {
     include webprimary
 }

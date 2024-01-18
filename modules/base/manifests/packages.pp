@@ -22,7 +22,7 @@ class base::packages {
 
     # Need to use this as it's defined in modules/apt/manifests/init.pp for
     # newer versions
-    ensure_packages(['gnupg'])
+    stdlib::ensure_packages(['gnupg'])
 
     # Nice to have
     package { [
