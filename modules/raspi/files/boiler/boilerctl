@@ -8,7 +8,7 @@ import unittest
 import logging
 import sqlite3
 
-import influxdb_client
+import requests
 import pytz
 import click
 from gpiozero import Servo
@@ -16,14 +16,11 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 
 DB_PATH = '/var/lib/boilerctl.sqlite3'
 
-INFLUX_URL = "http://192.168.50.2:8086"
-INFLUX_OUTSIDE_PROBE_NAME = "outside_southwest_ambient"
-
 # Warmest temp that CWC should start tail off at
-COLD_WEATHER_COMPENSATION_START_TEMP = 8
+COLD_WEATHER_COMPENSATION_START_TEMP = 6
 
 # Coldest temp that CWC should apply full additional compensation by
-COLD_WEATHER_COMPENSATION_FULL_TEMP = -2
+COLD_WEATHER_COMPENSATION_FULL_TEMP = -4
 
 
 def send_metric(name, value):
@@ -127,40 +124,17 @@ def move(pos):
     servo.detach()
 
 
-def get_recent_lowest_outside_temp_from_influx():
-    client = influxdb_client.InfluxDBClient(url=INFLUX_URL)
+def get_outside_temp_from_open_meteo():
+    r = requests.get('https://api.open-meteo.com/v1/forecast?latitude=52.2&longitude=0.1167&current=temperature_2m&timezone=Europe%2FLondon&forecast_days=1')
+    r.raise_for_status()
+    data = r.json()
+    temp = r.json()['current']['temperature_2m']
 
-    query_api = client.query_api()
+    if temp < -30 or temp > 60:
+        raise Exception(f"Outside reporting temperature outside of expected UK range: {temp}")
 
-    flux_q = f"""from(bucket:"telegraf/autogen")
-      |> range(start: -1h)
-      |> filter(fn: (r) =>
-        r._measurement == "ds18b20" and
-        r._field == "{INFLUX_OUTSIDE_PROBE_NAME}"
-      )
-      |> min()
-      |> yield()
-    """
-    result = query_api.query(query=flux_q)
-
-    results = []
-    for table in result:
-      for record in table.records:
-        results.append((record.get_field(), record.get_value()))
-
-    if len(results) != 1:
-        raise Exception(f"Expected 1 result row to be returned from InfluxDB query for outside temp, returned {len(results)}.")
-
-    r_probe_name, r_temp = results[0]
-
-    if r_probe_name != INFLUX_OUTSIDE_PROBE_NAME:
-        raise Exception(f"Expected {INFLUX_OUTSIDE_PROBE_NAME}, not {_r_probe_name}")
-
-    if r_temp < -30 or r_temp > 60:
-        raise Exception(f"Outside reporting temperature outside of expected UK range: {r_temp}")
-
-    return r_temp
-
+    send_metric('outside_temp_open_meteo', temp)
+    return temp
 
 
 def scale_to_new_range(v, range_min, range_max, target_min, target_max):
@@ -298,18 +272,25 @@ def cold_weather_compensation_percentage_needed():
     tz_lon = pytz.timezone('Europe/London')
     now = datetime.datetime.now(tz_lon)
 
-    try:
-        outside_temp = get_recent_lowest_outside_temp_from_influx()
-        write_time_series_value_to_local_db('outside_temp_from_influx', outside_temp)
-    except Exception as Argument:
-        logging.exception("Unable to get outside temperature.")
-        # TODO: keep last known value for 48 hours (to allow for PI maintenance)
-        last_record = read_most_recent_time_series_value_from_local_db('outside_temp_from_influx')
-        if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*48):
-            logging.warning("Using last recorded value from Influx (using this for 48 hours")
-            outside_temp = last_record['value']
-        else:
-            outside_temp = 10
+    last_record = read_most_recent_time_series_value_from_local_db('outside_temp')
+
+    # Don't poll the Open-Meteo API more than once per hour
+    if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*1):
+        logging.info("Outside temperature data less than hour old, reusing.")
+        outside_temp = last_record['value']
+    else:
+        try:
+            outside_temp = get_outside_temp_from_open_meteo()
+            write_time_series_value_to_local_db('outside_temp', outside_temp)
+        except Exception as Argument:
+            logging.exception("Unable to get outside temperature.")
+            # TODO: keep last known value for 5 days (to allow for problems)
+            if last_record and last_record['time_delta_from_now'].total_seconds() < (60*60*24*5):
+                logging.warning("Using last recorded value as latest data unavailable")
+                outside_temp = last_record['value']
+            else:
+                # Better to assume that we need more compensation than less
+                outside_temp = 3
 
     cwc_pct = cold_weather_compensation_percentage(
         outside_temp,
