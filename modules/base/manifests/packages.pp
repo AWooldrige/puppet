@@ -20,9 +20,13 @@ class base::packages {
         ensure => installed
     }
 
-    # Need to use this as it's defined in modules/apt/manifests/init.pp for
-    # newer versions
-    stdlib::ensure_packages(['gnupg'])
+    if $::puppetversion and versioncmp($::puppetversion, '6.0.0') >= 0 {
+        # Need to use this as it's defined in modules/apt/manifests/init.pp for
+        # newer versions
+        stdlib::ensure_packages(['gnupg'])
+    } else {
+        ensure_packages(['gnupg'])
+    }
 
     # Nice to have
     package { [
