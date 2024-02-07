@@ -21,10 +21,20 @@ function install {
     done
 }
 
-if [ ! -d "/etc/securepuppet" ]; then
-    log "Copy in secure puppet module to /etc/securepuppet before continuing."
-    exit 1
-fi
+function initialise_securepuppet {
+    SP_DIR="/etc/securepuppet/modules/secure/manifests"
+    if [ ! -d "$SP_DIR" ]; then
+        log "Creating secure puppet module directory at: $SP_DIR"
+        mkdir -p "$SP_DIR"
+    fi
+
+    SP_MFST="${SP_DIR}/init.pp"
+    if ! grep 'class secure' "$SP_MFST" 1> /dev/null 2> /dev/null; then
+        log "Creating secure puppet manifest file: $SP_MFST"
+        echo 'class secure {}' > "$SP_MFST"
+    fi
+    chmod -R 600 /etc/securepuppet
+}
 
 if [ -f "/root/puppet/.git/HEAD" ]; then
     log "/root/puppet/ already exists, not re-cloning"
@@ -47,6 +57,11 @@ else
 
     log 'Cloning puppet confs repo to /root/puppet'
     /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /root/puppet
+
+    log 'Installing puppet modules'
 fi
 
-log 'Complete. Enter /root/puppet, make changes if needed, then run ./apply.sh.'
+log 'Complete, now:'
+log '  1) Optional: populate /etc/securepuppet'
+log '  2) Optional: modify local /root/puppet'
+log '  3) cd /root/puppet && ./apply.sh'

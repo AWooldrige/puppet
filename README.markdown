@@ -46,10 +46,7 @@ For desktop1 to auto decrypt and mount the internal SATA HDD:
     configuration is set as in this README. If changing a hardware used for the
     same host, update the MAC address in the README/router.
  2. Set hostname with `sudo hostnamectl set-hostname "{model}{increment}`
- 3. Copy secure puppet module from password manager to
-    `/etc/securepuppet/modules/secure/manifests/init.pp` then `chmod -R 600
-    /etc/securepuppet`
- 4. Run the bootstrap script:
+ 3. Run the bootstrap script:
 
     wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
 
