@@ -7,6 +7,9 @@ node /^laptop.+/ {
 node /^desktop\d+/ {
     include desktop
 }
+node /^lenovoaio\d+/ {
+    include desktop
+}
 
 node /^webpi/ {
     include webpi

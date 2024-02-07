@@ -9,8 +9,11 @@ class workstation::packages {
         'podman',
         'python3-websockets',  # Needed for vim ghost-text plugin
         'python3-pandas',
+        'python3-fuzzywuzzy',  # Accounts
+        'python3-structlog',
         'ledger',
-        'easyeffects'
+        'easyeffects',
+        'gnome-boxes'
         ]:
         ensure => installed
     }
@@ -55,8 +58,8 @@ class workstation::packages {
     } ->
     exec { 'allow_flatpak_cryptomator_access_to_filesystem':
         # https://community.cryptomator.org/t/cryptomator-flatpak-doesnt-find-safes/9613/2
-        command => "flatpak override org.cryptomator.Cryptomator --filesystem '/mnt/bulkstorage/Dropbox/c_vaults'",
-        unless => "flatpak override org.cryptomator.Cryptomator --show | grep '/mnt/bulkstorage/Dropbox/c_vaults'",
+        command => "flatpak override org.cryptomator.Cryptomator --filesystem '/media/woolie/bulkstorage/Dropbox/c_vaults'",
+        unless => "flatpak override org.cryptomator.Cryptomator --show | grep '/media/woolie/bulkstorage/Dropbox/c_vaults'",
         provider => "shell"
     }
 

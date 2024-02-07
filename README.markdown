@@ -21,6 +21,24 @@ For Ubuntu Desktops:
  3. Set hostname if asked, following scheme of {model}{increment}.
 
 
+For desktop1 to auto decrypt and mount the internal SATA HDD:
+
+ 1. Configure auto unlocking of partition:
+     1. Retrieve password from password manager for drive starting UUID=cd5e45c0
+     2. Open GNOME disks.
+     3. Select LUKS partition on drive (not the filesystem).
+     4. Additional partition options > Edit Encryption Options.
+     5. Uncheck "User Session Defaults".
+     6. Check "Unlock at system startup".
+     7. Enter passphrase from manager.
+ 2. Configure auto mounting of filesystem:
+     1. Select the filesystem (not the partition) in GNOME disks.
+     2. Additional partition options -> Edit Mount Options.
+     3. Uncheck "User Session Defaults".
+     4. Check "Mount at system startup"
+     5. Set mount point: `/media/woolie/bulkstorage`.
+
+
 2) Run puppet
 -------------
 
