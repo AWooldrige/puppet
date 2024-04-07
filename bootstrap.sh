@@ -59,6 +59,7 @@ else
     /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /root/puppet
 
     log 'Installing puppet modules'
+    initialise_securepuppet
 fi
 
 log 'Complete, now:'

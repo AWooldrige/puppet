@@ -11,6 +11,8 @@ class workstation::packages {
         'python3-pandas',
         'python3-fuzzywuzzy',  # Accounts
         'python3-structlog',
+        # https://github.com/rbenv/ruby-build/discussions/2012#discussioncomment-4619519
+        'libyaml-dev',  # Needed for installing nanoc gem (one of the deps)
         'ledger',
         'easyeffects',
         'gnome-boxes'

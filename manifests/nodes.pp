@@ -23,3 +23,8 @@ node /^boilerpi/ {
 node /^webprimary/ {
     include webprimary
 }
+
+
+node /^k\d+/ {
+    include basenode
+}
