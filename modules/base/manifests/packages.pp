@@ -5,7 +5,6 @@ class base::packages {
         'duplicity',
         'python3-boto',  # Should be required by Duplicity in the future
         'python3-pip',
-        'awscli',
         'git',
         'zip',
         'unzip',
