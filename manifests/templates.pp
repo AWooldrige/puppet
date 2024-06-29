@@ -69,6 +69,13 @@ class boilerpi inherits pi {
     include raspi::boiler
 }
 
+
+class websh1 inherits basenode {
+    include raspi
+    include avahi
+}
+
+
 class webprimary inherits basenode {
     include influx::telegraf
     include ot
