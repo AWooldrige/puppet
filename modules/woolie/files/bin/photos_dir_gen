@@ -5,7 +5,7 @@
 set -eu
 
 
-DBR="$(find /mnt/ -maxdepth 3 -name 'do_not_remove.txt' -printf "%h\n" -quit)"
+DBR="$(find /media/woolie/ /mnt/ -maxdepth 3 -name 'do_not_remove.txt' -printf "%h\n" -quit)"
 if test -n "$DBR"; then
     echo "Dropbox directory found: $DBR"
 else
