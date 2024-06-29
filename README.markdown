@@ -5,7 +5,8 @@ Bootstrapping a system from scratch
 -------------
 For Raspberry Pi:
 
- 1. Connect with ethernet and SSH to local IP with `ssh -o
+ 1. Install latest Ubuntu server LTS.
+ 2. Connect with ethernet and SSH to local IP with `ssh -o
     PasswordAuthentication=yes -o
     PreferredAuthentications=keyboard-interactive,password -o
     PubkeyAuthentication=no ubuntu@<IP>`
@@ -66,6 +67,25 @@ For webpi:
  3. Install pihole using instructions from [https://pi-hole.net/]
 
 
+Naming convention
+=================
+
+All lowercase
+
+| Char | Field | Options |
+| ---- | ----- | ------- |
+| 1-3  | Purpose | (free choice) |
+| 4    | Type | d:desktop, s:server |
+| 5    | Location | h:home |
+| 6+   | Unique num | 1 onwards |
+
+
+Allocated hostnames:
+
+ * websh1
+
+
+
 Router configuration
 ====================
 
@@ -79,6 +99,9 @@ DHCP reservations
 | epaperpi Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
 | boilerpi Pi 2 eth0 | B8:27:EB:6F:AF:69 | 192.168.50.5 |
 | boilerpi Pi 2 wlan0 | 80:1f:02:af:5a:81 | 192.168.50.6 |
+| websh1 Pi 5 eth0 | 2C:CF:67:27:0C:D7 | 192.168.50.7 |
+| websh1 Pi 5 wlan0 | TODO | 192.168.50.8 |
+
 
 
 Port forwarding
