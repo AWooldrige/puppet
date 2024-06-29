@@ -43,7 +43,8 @@ else
     apt update -y
 
     log 'Upgrading apt packages'
-    apt upgrade -y
+    # https://askubuntu.com/a/1431746
+    NEEDRESTART_MODE=a apt upgrade -y
 
     log 'Installing git and puppet'
     install git
