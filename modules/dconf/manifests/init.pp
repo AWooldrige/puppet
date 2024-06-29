@@ -1,5 +1,10 @@
 class dconf {
 
+    # Not needed, but handy.
+    package { 'dconf-editor':
+        ensure => installed
+    }
+
     # The specific dirname of 'local.d' is important. dconf update will treat
     # this as the keyfiles source, then create the binary 'local' database that
     # is referenced in /etc/dconf/profile/user

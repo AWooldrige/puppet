@@ -1,3 +1,8 @@
+# Use dconf-editor to find settings available.
+#
+# Or view:
+# /usr/share/glib-2.0/schemas/*
+
 [org/gnome/desktop/input-sources]
 sources=[('xkb', 'gb')]
 xkb-options=['caps:ctrl_modifier', 'numpad:mac', 'altwin:menu']
