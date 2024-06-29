@@ -24,8 +24,8 @@ class sudo {
                      Group['nopasswordsudo'] ]
     }
 
-    file { '/etc/polkit-1/localauthority.conf.d/61-woolie-admin.conf':
-        source  => 'puppet:///modules/sudo/61-woolie-admin.conf.pollkit',
+    file { '/etc/polkit-1/rules.d/61-woolie-admin.rules':
+        source  => 'puppet:///modules/sudo/61-woolie-admin.rules',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',

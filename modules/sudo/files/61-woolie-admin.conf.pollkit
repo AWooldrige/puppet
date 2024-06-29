@@ -1,2 +1,0 @@
-[Configuration]
-AdminIdentities=unix-group:sudo;unix-group:admin;unix-group:passwordsudo;unix-group:nopasswordsudo
