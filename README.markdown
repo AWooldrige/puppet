@@ -109,7 +109,7 @@ Port forwarding
 
 | Description | Protocol | External port | Local port | Local IP |
 | ----------- | -------- | ------------- | ---------- | -------- |
-| SSH (slightly obsfucated) to webpi | TCP + UDP | 3222 | 3222 | 192.168.50.2 |
+| SSH (slightly obsfucated) to websh1 | TCP + UDP | 3222 | 3222 | 192.168.50.7 |
 | HTTP to webpi | TCP + UDP | 80 | 80 | 192.168.50.2 |
 | HTTPS to webpi | TCP + UDP | 443 | 443 | 192.168.50.2 |
 
