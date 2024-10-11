@@ -22,7 +22,7 @@ For Ubuntu Desktops:
  3. Set hostname if asked, following scheme of {model}{increment}.
 
 
-For desktop1 to auto decrypt and mount the internal SATA HDD:
+For main desktop to auto decrypt and mount the internal SATA HDD:
 
  1. Configure auto unlocking of partition:
      1. Retrieve password from password manager for drive starting UUID=cd5e45c0
@@ -39,6 +39,17 @@ For desktop1 to auto decrypt and mount the internal SATA HDD:
      4. Check "Mount at system startup"
      5. Set mount point: `/media/woolie/bulkstorage`.
 
+For main desktop to get Dropbox client running again:
+
+ 1. `mv /media/woolie/bulkstorage/Dropbox /media/woolie/bulkstorage/Dropbox_old`
+ 2. Install Dropbox and sign in.
+ 3. Change Dropbox storage location to `/media/woolie/bulkstorage` (it will create a `/Dropbox` dir within).
+ 4. Quit/stop the Dropbox application (very important).
+ 5. `rm -rf /media/woolie/bulkstorage/Dropbox/*`
+ 6. `mv /media/woolie/bulkstorage/Dropbox_tmpold/* /media/woolie/bulkstorage/Dropbox/`
+ 7. Start Dropbox again and wait a long time for it to index.
+
+
 
 2) Run puppet
 -------------
@@ -47,9 +58,7 @@ For desktop1 to auto decrypt and mount the internal SATA HDD:
     configuration is set as in this README. If changing a hardware used for the
     same host, update the MAC address in the README/router.
  2. Set hostname with `sudo hostnamectl set-hostname "{model}{increment}`
- 3. Run the bootstrap script:
-
-    wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash
+ 3. Run the bootstrap script: `wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash`
 
 
 3) Add credentials not managed by Puppet

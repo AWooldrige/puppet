@@ -4,10 +4,7 @@ node /^hplaptop\d+/ {
 node /^laptop.+/ {
     include laptop
 }
-node /^desktop\d+/ {
-    include desktop
-}
-node /^lenovoaio\d+/ {
+node /^lendh1/ {
     include desktop
 }
 

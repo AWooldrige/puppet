@@ -70,7 +70,7 @@ class boilerpi inherits pi {
 }
 
 
-class websh1 inherits basenode {
+class websh1 inherits pi {
     include raspi
     include avahi
     include docker::docker

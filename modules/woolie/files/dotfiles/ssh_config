@@ -5,7 +5,7 @@
 #########################################################################
 # Host specific entries
 #########################################################################
-Host webpi
+Host websh1
     Hostname h.wooldrige.co.uk
 
 Host epaperpi
@@ -17,7 +17,7 @@ Host boilerpi
     ProxyJump webpi
 
 # General settings must be placed _after_ more specific ones
-Host webpi webpi.local epaperpi epaperpi.local boilerpi boilerpi.local
+Host webpi webpi.local epaperpi epaperpi.local boilerpi boilerpi.local websh1 websh1.local
     Port 3222
     User woolie
     IdentityFile ~/.ssh/id_puppet_woolie_2018_12_04_ec
