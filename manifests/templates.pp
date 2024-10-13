@@ -75,6 +75,8 @@ class websh1 inherits pi {
     include raspi
     include avahi
     include docker::docker
+
+    include nginx
 }
 
 
