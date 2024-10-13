@@ -95,11 +95,11 @@ def resolve_dns_name(name):
     resolver = dns.resolver.Resolver()
     resolver.nameservers = CONF['dns_resolvers']
     try:
-        answer = resolver.query(name)
+        answer = resolver.resolve(name, 'A')
+        return answer[0]
     except Exception as e:
         click.echo("Could not resolve {0}".format(name), err=True)
         raise
-    return answer.response.answer[0].items[0].address
 
 
 def get_current_r53_ip(r53_client):

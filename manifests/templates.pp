@@ -36,7 +36,7 @@ class pi inherits basenode {
     include influx::telegraf
 }
 class webpi inherits pi {
-    include ddns
+    include ddns::remove
     include influx::influxdb
     include influx::grafana
     include pihole
@@ -71,6 +71,7 @@ class boilerpi inherits pi {
 
 
 class websh1 inherits pi {
+    include ddns
     include raspi
     include avahi
     include docker::docker
