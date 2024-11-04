@@ -24,11 +24,23 @@ class sudo {
                      Group['nopasswordsudo'] ]
     }
 
-    file { '/etc/polkit-1/rules.d/61-woolie-admin.rules':
-        source  => 'puppet:///modules/sudo/61-woolie-admin.rules',
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => [Group['passwordsudo'], Group['nopasswordsudo']]
+
+    if $facts['os']['release']['major'] == '11' {
+        file { '/etc/polkit-1/localauthority.conf.d/61-woolie-admin.conf':
+            source  => 'puppet:///modules/sudo/61-woolie-admin.conf.pollkit',
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0644',
+            require => [Group['passwordsudo'], Group['nopasswordsudo']]
+        }
+    }
+    else {
+        file { '/etc/polkit-1/rules.d/61-woolie-admin.rules':
+            source  => 'puppet:///modules/sudo/61-woolie-admin.rules',
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0644',
+            require => [Group['passwordsudo'], Group['nopasswordsudo']]
+        }
     }
 }

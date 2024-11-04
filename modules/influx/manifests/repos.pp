@@ -2,7 +2,8 @@ class influx::repos {
 
     include apt
 
-    if $facts['os']['release']['major'] == '22.04' {
+    # Older Ubuntu or Raspbian 11
+    if $facts['os']['release']['major'] in ['22.04', '11'] {
         apt::source { 'influxdb':
             ensure => 'present',
             comment => 'InfluxDB packages for TICK stack',
