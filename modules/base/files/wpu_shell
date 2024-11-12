@@ -1,0 +1,41 @@
+# vim: filetype=sh
+#
+# This is a file of utility functions designed to be sourced by other scripts
+
+function log {
+    echo "[$(date --rfc-3339=ns)] ${1}"
+}
+
+function error {
+    local text="$1"
+    log "Error: $text"
+    exit 1
+}
+
+function is_toggle_on {
+    local name="$1"
+    if grep "${name} = true" /etc/toggles.toml > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function escalate_if_anything_fails {
+    # Usage: add the following at the start of script
+    #   set -Eeuo pipefail
+    #   source /usr/share/wpu/wpu_shell
+    #   trap escalate_if_anything_fails ERR
+    local MSG="[$(date --rfc-3339=ns)] Command failed: ${BASH_COMMAND}. At line $(caller)."
+    escalate "$MSG"
+}
+
+function send_influx_line_protocol {
+    local ilp="$1"
+    echo -n "$ilp" >/dev/udp/127.0.0.1/8094
+}
+
+function send_statsd {
+    local statsd="$1"
+    echo -n "$statsd" >/dev/udp/127.0.0.1/8125
+}

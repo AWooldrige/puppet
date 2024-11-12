@@ -2,7 +2,10 @@ class nginx {
     include certbot
     include stdlib
 
-    package { 'nginx':
+    package { [
+            'nginx',
+            'apache2-utils' # has htpasswd in
+        ]:
         ensure => installed
     }
 

@@ -40,6 +40,8 @@ class base::packages {
         'inotify-tools',  # Includes inotifywait
         'python3-tabulate',
         'python3-tenacity',
+        'python3-click',
+        'python3-requests',
         # 'python3.7', Not available on raspbian
         # 'python3.7-venv',
         ]:

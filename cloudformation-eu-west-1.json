@@ -183,6 +183,24 @@
                         "ResourceRecords": [ "h.wooldrige.co.uk" ]
                     },
                     {
+                        "Name": "websh1.h.wooldrige.co.uk.",
+                        "Type": "A",
+                        "ResourceRecords": [ "192.168.50.7" ],
+                        "TTL": "300"
+                    },
+                    {
+                        "Name": "boilerpi.h.wooldrige.co.uk.",
+                        "Type": "A",
+                        "ResourceRecords": [ "192.168.50.5" ],
+                        "TTL": "300"
+                    },
+                    {
+                        "Name": "webpi.h.wooldrige.co.uk.",
+                        "Type": "A",
+                        "ResourceRecords": [ "192.168.50.2" ],
+                        "TTL": "300"
+                    },
+                    {
                         "Name": "google._domainkey.wooldrige.co.uk.",
                         "Type": "TXT",
                         "TTL": "86400",
@@ -358,19 +376,23 @@
                     "PolicyDocument": {
                         "Statement" : [
                             {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "route53:ListHostedZones",
+                                    "route53:GetChange"
+                                ],
+                                "Resource": [
+                                    "*"
+                                ]
+                            },
+                            {
                                 "Effect":"Allow",
                                 "Action":[
                                     "route53:ChangeResourceRecordSets",
-                                    "route53:GetChange",
                                     "route53:ListResourceRecordSets",
                                     "route53:GetHostedZone"
                                 ],
                                 "Resource":"arn:aws:route53:::hostedzone/Z1VIBQX07I3Y3K"
-                            },
-                            {
-                                "Effect":"Allow",
-                                "Action":[ "route53:GetChange" ],
-                                "Resource":"arn:aws:route53:::change/*"
                             }
                         ]
                     }

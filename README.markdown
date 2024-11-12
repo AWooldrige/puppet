@@ -111,6 +111,8 @@ DHCP reservations
 | websh1 Pi 5 eth0 | 2C:CF:67:27:0C:D7 | 192.168.50.7 |
 | websh1 Pi 5 wlan0 | TODO | 192.168.50.8 |
 
+These also have convenience DNS entries created under
+`<hostname>.wooldrige.co.uk`.
 
 
 Port forwarding
@@ -119,8 +121,8 @@ Port forwarding
 | Description | Protocol | External port | Local port | Local IP |
 | ----------- | -------- | ------------- | ---------- | -------- |
 | SSH (slightly obsfucated) to websh1 | TCP + UDP | 3222 | 3222 | 192.168.50.7 |
-| HTTP to webpi | TCP + UDP | 80 | 80 | 192.168.50.2 |
-| HTTPS to webpi | TCP + UDP | 443 | 443 | 192.168.50.2 |
+| HTTP to websh1 | TCP + UDP | 80 | 80 | 192.168.50.7 |
+| HTTPS to websh1 | TCP + UDP | 443 | 443 | 192.168.50.7 |
 
 
 Puppet config conventions

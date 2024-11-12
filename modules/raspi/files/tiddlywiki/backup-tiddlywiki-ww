@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -Eeuo pipefail
+source /usr/share/wpu/wpu_shell
+trap escalate_if_anything_fails ERR
+
+systemctl stop tiddlywiki-ww.service || log "Tiddlywiki service already not running"
+backuptool backup tiddlywiki-ww /var/lib/tiddlywiki/ww/
+systemctl start tiddlywiki-ww.service

@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import socket
+
+import click
+import pathlib
+import requests
+
+
+@click.command()
+@click.argument('message', required=True, nargs=1)
+def escalate(message):
+    """
+    Send push notification with MESSAGE
+    """
+    msg = f"{socket.gethostname()}: {message}"
+    url = pathlib.Path('/etc/google_chat_webhook_url').read_text()
+    r = requests.post(url, json={'text': msg})
+    r.raise_for_status()
+
+
+if __name__ == '__main__':
+    escalate()

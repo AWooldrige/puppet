@@ -2,20 +2,23 @@
 FORCE="no"
 [ "$1" == "-f" ] && FORCE="yes"
 
-set -eu
+set -Eeuo pipefail
+source /usr/share/wpu/wpu_shell
+trap escalate_if_anything_fails ERR
+
 
 # Config
 GDIR="/etc/gdpup"
-
-# Functions
-function log {
-    echo "[$(date --rfc-3339=ns)] ${1}"
-}
 
 # Runtime flags
 GIT_REMOTE_CHANGES="no"
 
 # -----------
+#
+if ! is_toggle_on "enabled_gdpup"; then
+    log "gdpup disabled via /etc/toggles.toml"
+    exit 0
+fi
 
 if [ ! -f "$GDIR/manifests/nodes.pp" ]; then
     log "Cloning repo to ${GDIR}."

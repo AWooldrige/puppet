@@ -1,9 +1,5 @@
 class raspi::epim {
 
-    package { ['python3-requests']:
-        ensure => installed
-    }
-
     file { '/etc/epim.ini':
         ensure  => 'present',
         owner  => 'root',
@@ -23,7 +19,8 @@ class raspi::epim {
         owner => 'root',
         group => 'root',
         mode => '0644',
-        notify => Exec['daemon-reload']
+        notify => Exec['daemon-reload'],
+        require => Package['python3-requests']
     } ->
     file { "/etc/systemd/system/epim.timer":
         source => 'puppet:///modules/raspi/epaperdisplay/epim.timer',

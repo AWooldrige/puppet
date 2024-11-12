@@ -17,9 +17,6 @@ node /^epaperpi/ {
 node /^boilerpi/ {
     include boilerpi
 }
-node /^webprimary/ {
-    include webprimary
-}
 node /^websh1/ {
     include websh1
 }

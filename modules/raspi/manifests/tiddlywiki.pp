@@ -1,10 +1,5 @@
 class raspi::tiddlywiki {
 
-    exec { 'Check manually added backup symmetric key is present':
-       command => "/usr/bin/bash -c 'echo \"WARNING: YOU MUST MANUALLY ADD /home/woolie/.backup_key\"; false'",
-       unless  => '/usr/bin/test -f /home/woolie/.backup_key',
-    }
-
     exec { 'daemon-reload':
         command => '/usr/bin/systemctl daemon-reload',
         refreshonly => true
@@ -15,56 +10,43 @@ class raspi::tiddlywiki {
        creates => '/usr/local/bin/tiddlywiki',
        require => Package['npm']
     } ->
-    file { "/var/www/tw":
+    group { 'tiddlywiki':
+        ensure => 'present',
+        gid => 21001
+    } ->
+    user { 'tiddlywiki':
+        ensure => 'present',
+        comment => 'TiddlyWiki local server',
+        uid => 19001,
+        gid => 'tiddlywiki'
+    } ->
+    file { ["/var/lib/tiddlywiki", "/var/lib/tiddlywiki/ww"]:
         ensure => 'directory',
-        owner => 'woolie',
-        group => 'www-data',
+        owner => 'tiddlywiki',
+        group => 'tiddlywiki'
     } ->
     file { "/etc/systemd/system/tiddlywiki-ww.service":
         source => 'puppet:///modules/raspi/tiddlywiki/tiddlywiki-ww.service',
         owner => 'root',
         group => 'root',
         mode => '0644',
-        notify => Exec['daemon-reload']
+        notify => [
+            Exec['daemon-reload'],
+            Service['tiddlywiki-ww']
+        ]
     } ->
     service { 'tiddlywiki-ww':
         ensure => running,
         enable => true
     }
 
-    file { "/etc/nginx/cg.wooldrige.co.uk.d/tiddlywiki-ww.conf":
+    file { "/etc/nginx/h.wooldrige.co.uk.d/tiddlywiki-ww.conf":
         source => 'puppet:///modules/raspi/tiddlywiki/tiddlywiki-ww.conf',
         owner => 'root',
         group => 'root',
         mode => '0644',
-        require => File["/etc/nginx/cg.wooldrige.co.uk.d"],
+        require => File["/etc/nginx/h.wooldrige.co.uk.d"],
         notify => Service['nginx']
-    }
-
-
-    file { '/usr/local/bin/tiddlywiki-ww-backup':
-        source => 'puppet:///modules/raspi/tiddlywiki/tiddlywiki-ww-backup',
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0755',
-        require => [
-            Exec['Check manually added backup symmetric key is present'],
-            Package['duplicity'],
-            Package['python3-boto']
-        ]
-    } ->
-    file { '/usr/local/bin/tiddlywiki-ww-restore':
-        source => 'puppet:///modules/raspi/tiddlywiki/tiddlywiki-ww-restore',
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0755'
-    } ->
-    cron { 'Backup tiddlywiki-ww daliy':
-        ensure  => present,
-        command => '/usr/bin/systemd-cat -t "tiddlywiki-ww-backup" /usr/local/bin/tiddlywiki-ww-backup',
-        hour     => [3, 15],  # Keep offset from tiddlywiki-ww-gitadd to avoid backing up mid commit
-        minute   => 15,
-        user    => 'woolie'
     }
 
 
@@ -81,6 +63,26 @@ class raspi::tiddlywiki {
         ensure  => present,
         command => '/usr/bin/systemd-cat -t "tiddlywiki-ww-gitadd" /usr/local/bin/tiddlywiki-ww-gitadd',
         minute  => [0, 30],
-        user    => 'woolie'
+        user    => 'tiddlywiki',
+        require => User['tiddlywiki']
+    }
+
+    file { '/usr/local/sbin/backup-tiddlywiki-ww':
+        source => 'puppet:///modules/raspi/tiddlywiki/backup-tiddlywiki-ww',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755'
+    }
+    cron { 'Backup tiddlywiki-ww daliy':
+        ensure  => present,
+        command => '/usr/bin/systemd-cat -t "backup-tiddlywiki-ww" /usr/local/sbin/backup-tiddlywiki-ww',
+        # Keep offset from tiddlywiki-ww-gitadd to avoid backing up mid commit
+        # Keep offset from gdpup as it will start the systemd service again mid backup
+        hour => [23],
+        minute => 51,
+        require => [
+            File['/usr/local/sbin/backup-tiddlywiki-ww'],
+            Service['tiddlywiki-ww']
+        ]
     }
 }

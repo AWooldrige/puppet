@@ -1,0 +1,42 @@
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name h.wooldrige.co.uk *.h.wooldrige.co.uk *.local;
+
+    ssl_certificate /etc/letsencrypt/live/h.wooldrige.co.uk/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/h.wooldrige.co.uk/privkey.pem;
+    include /etc/nginx/snippets/tlsparams.conf;
+
+    tcp_nopush on;
+    keepalive_timeout 300s;
+
+    gzip on;
+    charset UTF-8;
+
+    auth_basic "h";
+    auth_basic_user_file /etc/nginx/secrets/h.htpasswd;
+
+    root /var/www/h.wooldrige.co.uk;
+    index index.html;
+
+    location /noauth/ {
+        auth_basic off;
+        root /var/www/h.wooldrige.co.uk/;
+        index index.html index.htm;
+        try_files $uri $uri/ =404;
+    }
+
+    error_page 401 /noauth/auth_required.html;
+
+    proxy_set_header Authorization "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    include /etc/nginx/h.wooldrige.co.uk.d/*.conf;
+
+    access_log /var/log/nginx/h.wooldrige.co.uk.access.log tsv_full;
+    error_log /var/log/nginx/h.wooldrige.co.uk.error.log warn;
+}

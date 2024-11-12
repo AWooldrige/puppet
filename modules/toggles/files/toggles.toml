@@ -1,0 +1,11 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+##                                                                     ##
+##   To edit and disable Puppet, set: feature_enabled_gdpup = false    ##
+#########################################################################
+
+# TOML boolean values: true/false
+
+# Setting enabled to false prevents write behaviour
+enabled_gdpup = true
+enabled_backups = false

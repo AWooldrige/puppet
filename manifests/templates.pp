@@ -1,5 +1,6 @@
 class basenode {
     include base::packages
+    include base::utilitylibs
     include gdpup
     include motd
     include ntp
@@ -34,16 +35,11 @@ class pi inherits basenode {
     include raspi::bootconfig
     include avahi
     include influx::telegraf
+    include toggles
+    include escalate
 }
 class webpi inherits pi {
     include ddns::remove
-    include influx::influxdb
-    include influx::grafana
-    include pihole
-    include nginx
-    include raspi::photos
-    include raspi::tiddlywiki
-    include raspi::cg
 
     # Raspbian version not up-to-date enough yet.
     # python3-lgpio only available on Ubuntu Server.
@@ -72,16 +68,14 @@ class boilerpi inherits pi {
 
 class websh1 inherits pi {
     include ddns
+    include backuptool
     include raspi
     include avahi
     include docker::docker
 
     include nginx
-}
-
-
-class webprimary inherits basenode {
-    include influx::telegraf
-    include ot
-    include postgres
+    include raspi::h
+    include otelcol
+    include grafana
+    include raspi::tiddlywiki
 }

@@ -1,7 +1,7 @@
 class workstation::packages {
 
     package { [
-        'libpango1.0-0',  # Dropbox needs this
+        # 'libpango1.0-0',  # Dropbox needs this
         'python3-gpg',    # Dropbox needs this
         'vim-gtk3',
         'libimage-exiftool-perl',
@@ -14,7 +14,6 @@ class workstation::packages {
         # https://github.com/rbenv/ruby-build/discussions/2012#discussioncomment-4619519
         'libyaml-dev',  # Needed for installing nanoc gem (one of the deps)
         'ledger',
-        'easyeffects',
         'gnome-boxes'
         ]:
         ensure => installed
@@ -52,6 +51,13 @@ class workstation::packages {
     # Flatpak apps
     ###########################################################################
     flatpak::package { 'com.logseq.Logseq':
+        ensure => 'absent'
+    }
+
+    package { 'easyeffects':
+        ensure => absent
+    }
+    flatpak::package { 'com.github.wwmm.easyeffects':
         ensure => 'installed'
     }
 

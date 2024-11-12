@@ -1,6 +1,6 @@
 class raspi::boiler {
 
-    package { ['python3-gpiozero', 'python3-click', 'pigpio', 'python3-pigpio']:
+    package { ['python3-gpiozero', 'pigpio', 'python3-pigpio']:
         ensure => installed
     } ->
     package { ['pytz', 'influxdb-client']:
@@ -16,7 +16,8 @@ class raspi::boiler {
         source => 'puppet:///modules/raspi/boiler/boilerctl',
         owner  => 'root',
         group  => 'root',
-        mode   => '755'
+        mode   => '755',
+        require => Package['python3-click']
     } ->
     cron { 'Run boilerctl autoset every minute':
         ensure => 'present',

@@ -6,8 +6,31 @@ After=syslog.target
 # Modified from: https://askubuntu.com/a/921183
 SyslogIdentifier=tiddlywiki-ww
 Restart=always
-StandardOutput=syslog
-ExecStart=/usr/local/bin/tiddlywiki /var/www/tw/ww --listen host=127.0.0.1 port=8115 root-tiddler=$:/core/save/lazy-images gzip=yes path-prefix=/tw/ww
+ExecStart=/usr/local/bin/tiddlywiki /var/lib/tiddlywiki/ww --listen host=127.0.0.1 port=8115 root-tiddler=$:/core/save/lazy-images gzip=yes path-prefix=/tw/ww
+
+User=tiddlywiki
+Group=tiddlywiki
+
+LockPersonality=yes
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateUsers=yes
+ProtectControlGroups=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+ProtectClock=yes
+ProtectHostname=yes
+
+ProtectSystem=strict
+# Expands to /var/lib/tiddlywiki, don't set an absolute path
+StateDirectory=tiddlywiki
+ProtectHome=yes
+ProtectProc=invisible
+
 
 [Install]
 WantedBy=multi-user.target

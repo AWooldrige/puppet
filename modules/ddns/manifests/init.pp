@@ -1,9 +1,7 @@
 class ddns {
     package { [
             'python3-boto3',
-            'python3-click',
             'python3-dnspython',
-            'python3-requests',
             # 'python3-miniupnpc'  # Not available in Debian yet
         ]:
         ensure => installed
@@ -25,7 +23,11 @@ class ddns {
         source  => 'puppet:///modules/ddns/ddns',
         owner   => 'root',
         group   => 'root',
-        mode    => '0755'
+        mode    => '0755',
+        require => [
+            Package['python3-click'],
+            Package['python3-requests']
+        ]
     } ->
     cron { 'Check Dynamic DNS entry at regular intervals':
         ensure  => present,

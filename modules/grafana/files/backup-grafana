@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -Eeuo pipefail
+source /usr/share/wpu/wpu_shell
+trap escalate_if_anything_fails ERR
+
+systemctl stop grafana-server.service || log "Grafana service already not running"
+backuptool backup grafana /var/lib/grafana/
+systemctl start grafana-server.service

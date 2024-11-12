@@ -14,6 +14,13 @@ define flatpak::package (
             require => [ Exec["${repo}_repo"] ]
         }
     }
+    elsif $ensure == 'absent' {
+        exec { "remove_flatpak_${packagename}":
+            command => "flatpak uninstall '${packagename}' --noninteractive",
+            onlyif => "flatpak info '${packagename}'",
+            provider => "shell"
+        }
+    }
     else {
         warning('Not implemented yet.')
     }

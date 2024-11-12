@@ -6,18 +6,20 @@
 # Host specific entries
 #########################################################################
 Host websh1
+    # Everything else ProxyJumps through this one, so use the public address.
+    # This way it works on + off local network.
     Hostname h.wooldrige.co.uk
 
-Host epaperpi
-    Hostname epaperpi.local
-    ProxyJump webpi
-
 Host boilerpi
-    Hostname boilerpi.local
-    ProxyJump webpi
+    Hostname boilerpi.h.wooldrige.co.uk
+    ProxyJump websh1
+
+Host webpi
+    Hostname webpi.h.wooldrige.co.uk
+    ProxyJump websh1
 
 # General settings must be placed _after_ more specific ones
-Host webpi webpi.local epaperpi epaperpi.local boilerpi boilerpi.local websh1 websh1.local
+Host websh1* boilerpi* webpi*
     Port 3222
     User woolie
     IdentityFile ~/.ssh/id_puppet_woolie_2018_12_04_ec

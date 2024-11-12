@@ -3,7 +3,17 @@
 ##   This file is controlled by Puppet - changes will be overwritten   ##
 #########################################################################
 set -eu
+source /usr/share/wpu/wpu_shell
+
+if [ "$(id -u)" -ne 19001 ]; then
+    error 'Script must run as tiddlywiki user (uid 19001)'
+fi
+
+export GIT_AUTHOR_NAME='Alistair Wooldrige'
+export GIT_COMMITTER_NAME='Alistair Wooldrige'
+export GIT_AUTHOR_EMAIL='alistair@wooldrige.co.uk'
+export GIT_COMMITTER_EMAIL='alistair@wooldrige.co.uk'
 
 # This stages new, modified and removed files
-/usr/bin/git -C /var/www/tw/ww add --all
-/usr/bin/git -C /var/www/tw/ww commit -m"Auto commited changes: $(date --iso-8601='seconds')" || echo "git commit return code: $?"
+/usr/bin/git -C /var/lib/tiddlywiki/ww add --all
+/usr/bin/git -C /var/lib/tiddlywiki/ww commit -m"Auto commited changes: $(date --iso-8601='seconds')" || echo "git commit return code: $?"
