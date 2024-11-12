@@ -6,8 +6,15 @@ class sshd {
     package { 'openssh-server':
         ensure => installed,
     }
+
+    if $facts['os']['release']['major'] == '11' {
+        $sshd_config_source = "puppet:///modules/sshd/sshd_config_old_raspbian11"
+    }
+    else {
+        $sshd_config_source = "puppet:///modules/sshd/sshd_config"
+    }
     file { '/etc/ssh/sshd_config':
-        source  => 'puppet:///modules/sshd/sshd_config',
+        source  => $sshd_config_source,
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
