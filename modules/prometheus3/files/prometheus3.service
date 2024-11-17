@@ -1,0 +1,41 @@
+# This whole unit file has been based on the Ubuntu 24.04 avaialble prometheus
+# package, because there isn't a deb for prometheus 3 yet.
+
+[Unit]
+Description=Monitoring system and time series database
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=time-sync.target
+
+[Service]
+Restart=on-abnormal
+User=prometheus3
+EnvironmentFile=/etc/default/prometheus3
+ExecStart=/usr/local/bin/prometheus3 $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+SendSIGKILL=no
+
+# systemd hardening-options
+AmbientCapabilities=
+CapabilityBoundingSet=
+DeviceAllow=/dev/null rw
+DevicePolicy=strict
+LimitMEMLOCK=0
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=full
+RemoveIPC=true
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

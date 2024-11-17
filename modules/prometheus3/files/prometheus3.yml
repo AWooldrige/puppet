@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+
+scrape_configs:
+  # Get prometheus to scrape stats on itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['127.0.0.1:9393']
+
+
+otlp:
+  # Ingest OTLP data keeping UTF-8 characters in metric/label names.
+  translation_strategy: NoUTF8EscapingWithSuffixes
+
+storage:
+  tsdb:
+    out_of_order_time_window: 30m

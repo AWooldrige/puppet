@@ -1,0 +1,23 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        tls:
+          # Validate clients coming in against
+          client_ca_file: /etc/wooldrigepki/certificates/root.pem
+          # Allow clients to validate this server with
+          cert_file: /etc/wooldrigepki/certificates/server.pem
+          key_file: /etc/wooldrigepki/privatekeys/server.pem
+
+exporters:
+  otlphttp:
+    endpoint: "http://127.0.0.1:9393/api/v1/otlp/"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [otlphttp]

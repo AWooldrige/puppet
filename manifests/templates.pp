@@ -1,6 +1,7 @@
 class basenode {
     include base::packages
     include base::utilitylibs
+    include base::pki
     include gdpup
     include motd
     include ntp
@@ -78,4 +79,5 @@ class websh1 inherits pi {
     include otelcol
     include grafana
     include raspi::tiddlywiki
+    include prometheus3
 }

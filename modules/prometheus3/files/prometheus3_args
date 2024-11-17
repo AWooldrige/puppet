@@ -3,4 +3,6 @@
 # Due to shell escaping, to pass backslashes for regexes, you need to double
 # them (\\d for \d). If running under systemd, you need to double them again
 # (\\\\d to mean \d), and escape newlines too.
-ARGS="--web.listen-address=127.0.0.1:9090"
+
+# TODO: Don't want to be having 0.0.0.0, use the proxy
+ARGS="--web.listen-address=0.0.0.0:9393 --storage.tsdb.path=/var/lib/prometheus3 --storage.tsdb.retention.size=80GB --config.file=/etc/prometheus3/prometheus3.yml --web.enable-otlp-receiver"

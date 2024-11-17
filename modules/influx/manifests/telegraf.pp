@@ -5,12 +5,17 @@ class influx::telegraf {
         ensure => installed,
         require => Apt::Source['influxdb']
     } ->
+    base::addusertogroup { 'Allow telgraf access to Wooldrige PKI certificates':
+        ensure => 'exists',
+        username => 'telegraf',
+        groupname => 'wooldrigepkicertaccess',
+        require => [Group['wooldrigepkicertaccess']]
+    } ->
     file { '/etc/telegraf/telegraf.conf':
         source  => 'puppet:///modules/influx/telegraf/telegraf.conf',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['telegraf'],
         notify  => Service['telegraf']
     } ->
     file { '/etc/telegraf/telegraf.d/woolie-plugins.conf':
@@ -18,7 +23,6 @@ class influx::telegraf {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['telegraf'],
         notify  => Service['telegraf']
     } ->
     file { '/etc/telegraf/telegraf.d/raspi-temps.conf':
@@ -26,7 +30,13 @@ class influx::telegraf {
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        require => Package['telegraf'],
+        notify  => Service['telegraf']
+    } ->
+    file { '/etc/telegraf/telegraf.d/output-to-websh1.conf':
+        source  => 'puppet:///modules/influx/telegraf/output-to-websh1.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
         notify  => Service['telegraf']
     } ->
     service { 'telegraf':

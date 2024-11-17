@@ -1,10 +1,5 @@
 class raspi::tiddlywiki {
 
-    exec { 'daemon-reload':
-        command => '/usr/bin/systemctl daemon-reload',
-        refreshonly => true
-    }
-
     exec { 'Install tiddlywiki npm package':
        command => '/usr/bin/npm install -g tiddlywiki',
        creates => '/usr/local/bin/tiddlywiki',

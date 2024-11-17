@@ -1,5 +1,10 @@
 class base::packages {
 
+    exec { 'daemon-reload':
+        command => '/usr/bin/systemctl daemon-reload',
+        refreshonly => true
+    }
+
     # Essential
     package { [
         'duplicity',
@@ -46,5 +51,13 @@ class base::packages {
         # 'python3.7-venv',
         ]:
         ensure => installed
+    }
+
+    # Place to store manually downloaded ones
+    file { '/var/cache/packages':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755'
     }
 }

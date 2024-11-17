@@ -63,17 +63,56 @@ For main desktop to get Dropbox client running again:
 
 3) Add credentials not managed by Puppet
 ----------------------------------------
-For workstations:
+For both:
+
+ 1. Generate client (+server if needed) certificates using process below. Add
+    in to `/etc/wooldrigepki/`
+
+For desktops:
 
  1. Transfer SSH keys from another machine.
 
-For webpi:
+For servers:
 
  2. Set `[ddns]` in `/home/woolie/.aws/credentials`
- 3. Set `/etc/nginx/secrets/photos.htpasswd` contents from password store
- 3. Set `/etc/nginx/secrets/cg.htpasswd` contents from password store
- 3. Restore tiddlywiki backup using `/var/ww/tw/ww`
- 3. Install pihole using instructions from [https://pi-hole.net/]
+ 3. Set `/etc/nginx/secrets/h.htpasswd` contents from password store
+
+
+Generating X.509 certs
+======================
+
+All machines (create a client cert):
+
+1. Open XCA
+2. New Certificate
+3. Use this Certificate for signing: `WooldrigePKI root CA 1`
+4. Template for the new certificate: `<short_hostname> client certificate` ->
+   Apply all.
+5. Subject:
+    1. Internal Name: `<short_hostname> client certificate`
+    2. organizationalUnitName: `server` or `desktop`
+    3. Subject -> commonName: `<short_hostname>`
+6. Subject -> Private key -> Generate a new key -> Keytype: `ED25519`
+7. Extensions -> Time range: `20 years`
+8. OK: `Adjust date and continue`
+9. Certificate -> Export -> Export format: `PEM chain`
+    1. Copy into `/etc/wooldrigepki/certificates/client.pem` (644)
+10. Private Key -> Export -> Export format: `PEM private`
+    1. Copy into `/etc/wooldrigepki/privatekeys/client.pem` (644)
+
+Additional for servers (create a server cert):
+
+1. Follow same as above for client certs, except in addition.
+2. Template for the new certificate: `<short_hostname> server certificate` ->
+   Apply all.
+3. Subject:
+    1. Internal Name: `<short_hostname> server certificate`
+4. Extensions -> X509v3 Subject Alternative Name: `DNS:copycn,
+   DNS:<short_hostname.h.wooldrige.co.uk>, DNS <short_hostname>.local`
+9. Certificate -> Export -> Export format: `PEM chain`
+    1. Copy into `/etc/wooldrigepki/certificates/server.pem` (644)
+10. Private Key -> Export -> Export format: `PEM private`
+    1. Copy into `/etc/wooldrigepki/privatekeys/server.pem` (644)
 
 
 Naming convention

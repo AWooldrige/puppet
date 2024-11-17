@@ -22,9 +22,10 @@ class grafana {
         enable     => true
     }
 
-    exec { 'Allow nginx access to grafana socket':
-        unless => '/bin/grep -q "grafana\\S*www-data" /etc/group',
-        command => '/sbin/usermod -aG grafana www-data',
+    base::addusertogroup { 'Allow nginx access to grafana unix domain socket':
+        ensure => 'exists',
+        username => 'www-data',
+        groupname => 'grafana',
         require => [Package['nginx'], Package['grafana']]
     }
 
