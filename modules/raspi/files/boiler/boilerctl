@@ -15,6 +15,7 @@ from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 DB_PATH = '/var/lib/boilerctl.sqlite3'
+DS18B20_DB_PATH = '/var/ds18b20_readings.db'
 
 # Warmest temp that CWC should start tail off at
 COLD_WEATHER_COMPENSATION_START_TEMP = 6
@@ -212,6 +213,26 @@ def return_temp_to_efficiency(return_temp):
         raise Exception(f"Boiler return temp > {return_range_adp[1]}C")
 
 
+def calculate_boiler_efficiency_metric_if_possible():
+    try:
+        con = sqlite3.connect(DS18B20_DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        res = cur.execute("""
+            SELECT * FROM readings
+            WHERE probe_name = 'boiler_return'
+            ORDER BY time_utc_iso8601 DESC
+            LIMIT 1""",
+            ).fetchone()
+        con.close()
+
+        if res:
+            efficiency = return_temp_to_efficiency(res['temperature_celcius'])
+            send_metric('boiler_efficiency_pct', efficiency)
+    except:
+        logging.exception("Unable to calculate boiler efficiency.")
+
+
 def move_dial_to_temp(desired_temp_c):
     send_metric('desired_temp_celcius', desired_temp_c)
     last_record = read_most_recent_time_series_value_from_local_db('desired_temp')
@@ -312,6 +333,8 @@ def autoset():
     else:
         send_metric('in_low_temp_period', 0)
         move_dial_to_temp(70)
+
+    calculate_boiler_efficiency_metric_if_possible()
 
 
 @cli.command()

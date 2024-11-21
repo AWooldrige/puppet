@@ -191,7 +191,7 @@
                     {
                         "Name": "boilerpi.h.wooldrige.co.uk.",
                         "Type": "A",
-                        "ResourceRecords": [ "192.168.50.5" ],
+                        "ResourceRecords": [ "192.168.50.6" ],
                         "TTL": "300"
                     },
                     {

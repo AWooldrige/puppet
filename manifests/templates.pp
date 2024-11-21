@@ -18,6 +18,7 @@ class basenode::workstation inherits basenode {
     include ubutils::epsonscanner
     include workstation::packages
     include woolie::workstationprefs
+    include influx::telegraf
 
     # dconf not used by lightdm
     include dconf

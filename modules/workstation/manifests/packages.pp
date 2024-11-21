@@ -7,6 +7,7 @@ class workstation::packages {
         'libimage-exiftool-perl',
         'sqlitebrowser',
         'podman',
+        'xca',
         'python3-websockets',  # Needed for vim ghost-text plugin
         'python3-pandas',
         'python3-fuzzywuzzy',  # Accounts
@@ -29,13 +30,9 @@ class workstation::packages {
         ]:
         ensure => installed
     }
-    package { [
-        's3sup'
-        ]:
-        ensure => installed,
-        provider => 'pip3',
-        require => Package['python3-pip'],
-        install_options => ['--break-system-packages']
+
+    pipx::package { 's3sup':
+        ensure => 'installed'
     }
 
 

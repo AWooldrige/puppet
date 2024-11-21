@@ -96,9 +96,9 @@ All machines (create a client cert):
 7. Extensions -> Time range: `20 years`
 8. OK: `Adjust date and continue`
 9. Certificate -> Export -> Export format: `PEM chain`
-    1. Copy into `/etc/wooldrigepki/certificates/client.pem` (644)
+    1. Copy into `/etc/wooldrigepki/certificates/client.pem`
 10. Private Key -> Export -> Export format: `PEM private`
-    1. Copy into `/etc/wooldrigepki/privatekeys/client.pem` (644)
+    1. Copy into `/etc/wooldrigepki/privatekeys/client.pem`
 
 Additional for servers (create a server cert):
 
@@ -110,9 +110,11 @@ Additional for servers (create a server cert):
 4. Extensions -> X509v3 Subject Alternative Name: `DNS:copycn,
    DNS:<short_hostname.h.wooldrige.co.uk>, DNS <short_hostname>.local`
 9. Certificate -> Export -> Export format: `PEM chain`
-    1. Copy into `/etc/wooldrigepki/certificates/server.pem` (644)
+    1. Copy into `/etc/wooldrigepki/certificates/server.pem`
 10. Private Key -> Export -> Export format: `PEM private`
-    1. Copy into `/etc/wooldrigepki/privatekeys/server.pem` (644)
+    1. Copy into `/etc/wooldrigepki/privatekeys/server.pem`
+
+Then run puppet again so it can set the correct file permissions
 
 
 Naming convention
