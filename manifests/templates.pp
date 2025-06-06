@@ -2,6 +2,7 @@ class basenode {
     include base::packages
     include base::utilitylibs
     include base::pki
+    include toggles
     include gdpup
     include motd
     include ntp
@@ -37,7 +38,6 @@ class pi inherits basenode {
     include raspi::bootconfig
     include avahi
     include influx::telegraf
-    include toggles
     include escalate
 }
 class webpi inherits pi {

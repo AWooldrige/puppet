@@ -15,7 +15,8 @@ GIT_REMOTE_CHANGES="no"
 
 # -----------
 #
-if ! is_toggle_on "enabled_gdpup"; then
+#
+if [ "$FORCE" == "no" ] && ! is_toggle_on "enabled_gdpup"; then
     log "gdpup disabled via /etc/toggles.toml"
     exit 0
 fi
