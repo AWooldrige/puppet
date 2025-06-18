@@ -60,6 +60,24 @@ class nginx {
         notify  => Service['nginx']
     }
 
+    file { '/var/spool/nginx':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755'
+    }
+    file { '/etc/nginx/conf.d/proxy.conf':
+        source  => 'puppet:///modules/nginx/conf.d/proxy.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [
+            Package['nginx'],
+            File['/var/spool/nginx']
+        ],
+        notify  => Service['nginx']
+    }
+
     # A handy port that responds in a ping style
     file { "/etc/nginx/sites-available/ping":
         source  => 'puppet:///modules/nginx/sites-available/ping',
@@ -168,12 +186,33 @@ class nginx {
         ]
     }
 
+    file { '/etc/systemd/system/nginx.service.d':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
+        require => Package['nginx']
+    } ->
+    file { '/etc/systemd/system/nginx.service.d/hardening.conf':
+        source  => 'puppet:///modules/nginx/nginx.service.hardening.conf',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
+        notify  => [
+           Exec['daemon-reload'],
+           Service['nginx']
+        ],
+        require => Package['nginx']
+    } ->
     service { 'nginx':
         ensure     => running,
         enable     => true,
         hasstatus  => true,
         hasrestart => true,
-        require   => File['/etc/nginx/nginx.conf']
+        require   => [
+            File['/etc/nginx/nginx.conf'],
+            File['/var/spool/nginx']
+        ]
     }
 
     # Utility reload exec for other modules
