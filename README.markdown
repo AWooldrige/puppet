@@ -92,7 +92,8 @@ All machines (create a client cert):
     1. Internal Name: `<short_hostname> client certificate`
     2. organizationalUnitName: `server` or `desktop`
     3. Subject -> commonName: `<short_hostname>`
-6. Subject -> Private key -> Generate a new key -> Keytype: `ED25519`
+6. Subject -> Private key -> Generate a new key -> Keytype: `ED25519` (or `RSA`
+   if planning to import into Firefox, as that can't handle anything else)
 7. Extensions -> Time range: `20 years`
 8. OK: `Adjust date and continue`
 9. Certificate -> Export -> Export format: `PEM chain`

@@ -183,6 +183,12 @@
                         "ResourceRecords": [ "h.wooldrige.co.uk" ]
                     },
                     {
+                        "Name": "hass.h.wooldrige.co.uk.",
+                        "Type": "CNAME",
+                        "TTL": "300",
+                        "ResourceRecords": [ "h.wooldrige.co.uk" ]
+                    },
+                    {
                         "Name": "websh1.h.wooldrige.co.uk.",
                         "Type": "A",
                         "ResourceRecords": [ "192.168.50.7" ],

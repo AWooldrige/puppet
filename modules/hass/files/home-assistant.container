@@ -1,0 +1,34 @@
+[Unit]
+Description=Home Assistant container
+After=network.target
+
+[Container]
+ContainerName=homeassistant
+Image=ghcr.io/home-assistant/home-assistant:stable
+Label=io.containers.autoupdate=registry
+
+Volume=/var/lib/homeassistant:/config
+Volume=/etc/localtime:/etc/localtime:ro
+
+Environment="PUID=19004"
+Environment="PGID=21004"
+Environment=TZ=Europe/London
+Environment=DISABLE_JEMALLOC=true
+
+PublishPort=8123:8123
+
+Network=host
+
+#Privileged=true
+#Volume=/run/dbus:/run/dbus:ro
+
+#TODO once zigbeeready
+#Device=/dev/zigbee:/dev/ttyUSB0
+
+
+[Service]
+Restart=unless-stopped
+
+
+[Install]
+WantedBy=default.target

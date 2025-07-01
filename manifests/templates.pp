@@ -12,6 +12,7 @@ class basenode {
     include woolie
     include woolie::ubuntuprefs
     include secure
+    include podman
 }
 
 class basenode::workstation inherits basenode {
@@ -81,4 +82,6 @@ class websh1 inherits pi {
     include grafana
     include raspi::tiddlywiki
     include prometheus3
+    include raspi::hass
+    include hass
 }
