@@ -1,10 +1,5 @@
 class base::packages {
 
-    exec { 'daemon-reload':
-        command => '/usr/bin/systemctl daemon-reload',
-        refreshonly => true
-    }
-
     # Essential
     package { [
         'duplicity',

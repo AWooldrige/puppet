@@ -1,0 +1,3 @@
+# ATTRS determined from lsusb output:
+# Bus 004 Device 002: ID 10c4:ea60 Silicon Labs CP210x UART Bridge
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="zigbee"

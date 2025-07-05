@@ -16,15 +16,14 @@ Environment=TZ=Europe/London
 Environment=DISABLE_JEMALLOC=true
 
 PublishPort=8123:8123
-
 Network=host
 
 #Privileged=true
+#AddDevice=/dev/zigbee:/dev/ttyUSB0
+AddDevice=/dev/zigbee:/dev/ttyUSB0
+
+# Might be needed in the future for bluetooth integration
 #Volume=/run/dbus:/run/dbus:ro
-
-#TODO once zigbeeready
-#Device=/dev/zigbee:/dev/ttyUSB0
-
 
 [Service]
 Restart=unless-stopped

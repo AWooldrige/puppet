@@ -1,6 +1,7 @@
 class basenode {
     include base::packages
     include base::utilitylibs
+    include base::utildefs
     include base::pki
     include toggles
     include gdpup

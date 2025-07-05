@@ -23,6 +23,17 @@ class hass {
         ]
     }
 
+    file { '/etc/udev/rules.d/99-sonoff-zigbee.rules':
+        source  => 'puppet:///modules/hass/99-sonoff-zigbee.rules',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        notify => [
+            Exec['udev-reload'],
+            Service['home-assistant']
+        ]
+    }
+
     file { ['/etc/containers', '/etc/containers/systemd']:
         ensure => 'directory',
         owner => 'root',
@@ -53,6 +64,7 @@ class hass {
         ensure  => running,
         enable  => true,
         require => [
+            File['/etc/udev/rules.d/99-sonoff-zigbee.rules'],
             Exec['verify-quadlet-configs'],
             Exec['daemon-reload']
         ]
