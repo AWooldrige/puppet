@@ -18,5 +18,8 @@ http:
    - 0.0.0.0/0
   ip_ban_enabled: false
 
+prometheus:
+  namespace: hass
+
 logger:
   default: info

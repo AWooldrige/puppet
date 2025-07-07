@@ -51,11 +51,16 @@ class prometheus3 {
         notify => Service['nginx']
     } ->
     file { '/etc/prometheus3/prometheus3.yml':
-        source  => 'puppet:///modules/prometheus3/prometheus3.yml',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        notify  => Service['prometheus3']
+        notify  => Service['prometheus3'],
+        content => epp(
+            'prometheus3/prometheus3.yml.epp',
+            {
+                'home_assistant_long_lived_access_token' => $secure::home_assistant_long_lived_access_token
+            }
+        )
     } ->
     file { '/etc/systemd/system/prometheus3.service':
         source  => 'puppet:///modules/prometheus3/prometheus3.service',

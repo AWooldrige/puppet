@@ -10,6 +10,7 @@ class hass {
         comment => 'Home assistant user',
         uid => 19004,
         gid => 'homeassistant',
+        groups => ['bluetooth'],
         require => Group['homeassistant']
     }
 
@@ -60,10 +61,25 @@ class hass {
         refreshonly => true
     }
 
+    # Needed by HASS bluetooth integration
+    package { 'bluez':
+        ensure => installed
+    }
+
+    package { 'dbus-broker':
+        ensure => installed
+    } ->
+    service { 'dbus-broker':
+        ensure => running,
+        enable => true
+    }
+
     service { 'home-assistant':
         ensure  => running,
         enable  => true,
         require => [
+            Package['bluez'],
+            Service['dbus-broker'],
             File['/etc/udev/rules.d/99-sonoff-zigbee.rules'],
             Exec['verify-quadlet-configs'],
             Exec['daemon-reload']

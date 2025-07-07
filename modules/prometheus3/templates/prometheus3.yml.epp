@@ -8,6 +8,17 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['127.0.0.1:9393']
+  - job_name: "hass"
+    scrape_interval: 60s
+    metrics_path: /api/prometheus
+
+    # Long-Lived Access Token
+    authorization:
+      credentials: "<%= $home_assistant_long_lived_access_token %>"
+
+    scheme: http
+    static_configs:
+      - targets: ['127.0.0.1:8123']
 
 
 otlp:

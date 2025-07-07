@@ -20,10 +20,12 @@ Network=host
 
 #Privileged=true
 #AddDevice=/dev/zigbee:/dev/ttyUSB0
+
+# Pass through the Sonoff device
 AddDevice=/dev/zigbee:/dev/ttyUSB0
 
-# Might be needed in the future for bluetooth integration
-#Volume=/run/dbus:/run/dbus:ro
+# Pass dbus through for bluetooth
+Volume=/run/dbus:/run/dbus:ro
 
 [Service]
 Restart=unless-stopped
