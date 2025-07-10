@@ -21,5 +21,14 @@ http:
 prometheus:
   namespace: hass
 
+alarm_control_panel:
+  - platform: manual
+    name: Home alarm
+    unique_id: home_alarm_20250710
+    code_arm_required: false
+    arming_states:
+      - armed_away
+      - armed_night
+
 logger:
   default: info
