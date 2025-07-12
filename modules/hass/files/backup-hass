@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+set -Eeuo pipefail
+source /usr/share/wpu/wpu_shell
+trap escalate_if_anything_fails ERR
+
+D="/var/lib/homeassistant/backups/"
+if [ ! -d "$D" ]; then
+    error "${D} not present"
+fi
+
+backuptool backup hass "$D"

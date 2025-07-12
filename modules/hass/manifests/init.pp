@@ -106,4 +106,23 @@ class hass {
         provider => 'shell',
         refreshonly => true
     }
+
+
+    file { '/usr/local/sbin/backup-hass':
+        source => 'puppet:///modules/hass/backup-hass',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755'
+    }
+    cron { 'Backup hass daliy':
+        ensure  => present,
+        command => '/usr/bin/systemd-cat -t "backup-hass" /usr/local/sbin/backup-hass',
+        # Home assistant backups default to running between 04:45 and 05:45
+        hour => [7],
+        minute => 5,
+        require => [
+            File['/usr/local/sbin/backup-hass'],
+            File['/var/lib/homeassistant']
+        ]
+    }
 }
