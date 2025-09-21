@@ -249,8 +249,8 @@ def in_low_temp_period_now():
     now = datetime.datetime.now(tz_lon)
 
     high_temp_periods = [
-        ("03:30", "04:30"),
-        ("14:00", "15:00")
+        ("02:30", "04:00"),
+        ("13:30", "15:00")
     ]
     click.echo(f"Evaluating if current time of {now.time()} falls within high or low temp period")
     for start, end in high_temp_periods:
