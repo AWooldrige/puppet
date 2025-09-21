@@ -4,6 +4,7 @@ class workstation::packages {
         # 'libpango1.0-0',  # Dropbox needs this
         'python3-gpg',    # Dropbox needs this
         'vim-gtk3',
+        'libexif-dev',  # Used for image gem
         'libimage-exiftool-perl',
         'sqlitebrowser',
         'podman',
