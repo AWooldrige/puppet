@@ -18,10 +18,10 @@ DB_PATH = '/var/lib/boilerctl.sqlite3'
 DS18B20_DB_PATH = '/var/ds18b20_readings.db'
 
 # Warmest temp that CWC should start tail off at
-COLD_WEATHER_COMPENSATION_START_TEMP = 6
+COLD_WEATHER_COMPENSATION_START_TEMP = 10
 
 # Coldest temp that CWC should apply full additional compensation by
-COLD_WEATHER_COMPENSATION_FULL_TEMP = -10
+COLD_WEATHER_COMPENSATION_FULL_TEMP = -5
 
 
 def send_metric(name, value):
