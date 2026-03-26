@@ -76,4 +76,16 @@ class woolie::workstationprefs {
         mode => '0755',
         require => File[$bindir]
     }
+
+    file { "${bindir}/refresh_dropbox_ejected_copy_backup":
+        ensure => file,
+        source  => 'puppet:///modules/woolie/bin/refresh_dropbox_ejected_copy_backup',
+        owner => $woolie::uname,
+        group => $woolie::uname,
+        mode => '0755',
+        require => [
+            File[$bindir],
+            Package['pv']
+        ]
+    }
 }

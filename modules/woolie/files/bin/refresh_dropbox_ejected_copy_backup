@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+########################################
+# Configuration
+########################################
+DROPBOX_SRC_DIR="/media/woolie/bulkstorage/Dropbox"
+BACKUP_DST_DIR="/media/woolie/dbbackup/dropbox-backup"
+
+WELL_KNOWN_FILE=".well_known.txt"
+WELL_KNOWN_CONTENT="woolie_dropbox_perm_test_file"
+
+
+########################################
+# Script
+########################################
+fail() {
+    echo "ERROR: $1" >&2
+    exit 1
+}
+
+check_dir() {
+    local dir="$1"
+    [[ -d "$dir" ]] || fail "Directory does not exist: $dir"
+    local file="$dir/$WELL_KNOWN_FILE"
+    [[ -f "$file" ]] || fail "Missing $WELL_KNOWN_FILE in $dir"
+    local content
+    content=$(<"$file")
+    [[ "$content" == "$WELL_KNOWN_CONTENT" ]] \
+        || fail "Invalid contents in $file"
+}
+
+check_dir "$DROPBOX_SRC_DIR"
+check_dir "$BACKUP_DST_DIR"
+
+echo "Source: $DROPBOX_SRC_DIR"
+echo "Backup: $BACKUP_DST_DIR"
+
+read -r -p "Continue to next stage (previewing changes)? (yes/no): " confirm
+[[ "$confirm" == "yes" ]] || {
+    echo "Aborting."
+    exit 0
+}
+
+echo
+echo "Preview of rsync actions (dry-run):"
+rsync -a --delete --itemize-changes --human-readable --info=progress2 --dry-run \
+    "$DROPBOX_SRC_DIR/" "$BACKUP_DST_DIR/"
+
+echo
+read -r -p "Proceed with applying changes to the backup? (yes/no): " confirm
+[[ "$confirm" == "yes" ]] || {
+    echo "Aborting. No changes applied."
+    exit 0
+}
+
+echo "Running rsync backup..."
+rsync -a --delete --itemize-changes --human-readable --info=progress2 \
+    "$DROPBOX_SRC_DIR/" "$BACKUP_DST_DIR/"
+
+echo "Backup completed."

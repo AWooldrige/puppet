@@ -7,7 +7,6 @@ class workstation::packages {
         'libexif-dev',  # Used for image gem
         'libimage-exiftool-perl',
         'sqlitebrowser',
-        'podman',
         'xca',
         'python3-websockets',  # Needed for vim ghost-text plugin
         'python3-pandas',

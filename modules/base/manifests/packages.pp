@@ -32,6 +32,7 @@ class base::packages {
         'tree',
         'strace',
         'ack',
+        'pv',
         'iotop',
         'htop',
         'powertop',
