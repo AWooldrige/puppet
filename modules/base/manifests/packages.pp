@@ -3,7 +3,7 @@ class base::packages {
     # Essential
     package { [
         'duplicity',
-        'python3-boto',  # Should be required by Duplicity in the future
+        'python3-boto3', # Needed by duplicity for S3 backups
         'python3-pip',
         'git',
         'zip',

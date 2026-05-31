@@ -4,6 +4,9 @@ node /^hplaptop\d+/ {
 node /^laptop.+/ {
     include laptop
 }
+node /^ltpdh.+/ {
+    include laptop
+}
 node /^lendh1/ {
     include desktop
 }
