@@ -1,0 +1,6 @@
+pool 0.uk.pool.ntp.org iburst
+pool 1.uk.pool.ntp.org iburst
+pool 2.uk.pool.ntp.org iburst
+pool 3.uk.pool.ntp.org iburst
+pool 0.pool.ntp.org iburst
+server ntp.ubuntu.com iburst
