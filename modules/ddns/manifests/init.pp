@@ -1,6 +1,6 @@
 class ddns {
     package { [
-            'python3-boto3',
+            # 'python3-boto3',  # Provided by base packages module
             'python3-dnspython',
             # 'python3-miniupnpc'  # Not available in Debian yet
         ]:
