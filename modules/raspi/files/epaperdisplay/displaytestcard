@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+#
+# displaytestcard - render a test-card placeholder to the Waveshare 7.5" V2
+# epaper panel (epd7in5_V2, 800x480 landscape).
+
+import logging
+import logging.handlers
+import sys
+
+# Puppet clones the Waveshare e-Paper repo to /opt/epaperlibs.
+sys.path.append('/opt/epaperlibs/RaspberryPi_JetsonNano/python/lib')
+from waveshare_epd import epd7in5_V2  # noqa: E402  (import after sys.path tweak)
+
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw  # noqa: E402
+
+# 7.5" V2 panel resolution
+PANEL_WIDTH = 800
+PANEL_HEIGHT = 480
+
+# Pillow mode '1' matches the panel's 1-bit black/white buffer
+BLACK = 0
+WHITE = 255
+
+BORDER_WIDTH = 4
+CORNER_MARKER = 60
+
+
+def build_test_card():
+    """
+    Build the 800x480 landscape test card as a 1-bit PIL.Image.
+
+    The card contains:
+      * a continuous border 
+      * a filled marker in each of the four corners
+      * an orientation indicator in one corner
+      * one contiguous fully black region and one contiguous fully white
+    """
+    img = Image.new('1', (PANEL_WIDTH, PANEL_HEIGHT), WHITE)
+    draw = ImageDraw.Draw(img)
+
+    right = PANEL_WIDTH - 1   # column 799
+    bottom = PANEL_HEIGHT - 1  # row 479
+
+    # Continuous border reaching the outermost pixel row/column on all four
+    # edges 
+    draw.rectangle([0, 0, right, bottom], outline=BLACK, width=BORDER_WIDTH)
+
+    # Distinct filled square markers in three corners. The top-left
+    # corner is reserved for the orientation indicator below.
+    m = CORNER_MARKER
+    draw.rectangle([right - m, 0, right, m], fill=BLACK)            # top-right
+    draw.rectangle([0, bottom - m, m, bottom], fill=BLACK)         # bottom-left
+    draw.rectangle([right - m, bottom - m, right, bottom], fill=BLACK)  # bottom-right
+
+    # Orientation indicator: a filled right-triangle in the top-left corner
+    # only
+    draw.polygon([(0, 0), (m, 0), (0, m)], fill=BLACK)
+
+    # Contiguous fully black region
+    black_w, black_h = 150, 150
+    black_block = np.zeros((black_h, black_w), dtype=np.uint8)  # all 0 => black
+    black_x, black_y = 300, 165
+    img.paste(Image.fromarray(black_block, mode='L').convert('1'),
+              (black_x, black_y))
+
+    # Contiguous fully white region. Drawn as a white fill with a
+    # thin black outline so the region is clearly delimited for contrast
+    # checking
+    white_w, white_h = 150, 150
+    white_x, white_y = black_x + black_w + 40, black_y
+    draw.rectangle(
+        [white_x, white_y, white_x + white_w, white_y + white_h],
+        fill=WHITE, outline=BLACK, width=2)
+
+    return img
+
+
+LOG_TAG = 'displaytestcard'
+
+
+def _configure_logging():
+    """
+    Configure logging to both syslog (/dev/log) and stdout.
+    """
+    logger = logging.getLogger(LOG_TAG)
+    logger.setLevel(logging.INFO)
+
+    fmt = logging.Formatter(LOG_TAG + '[%(process)d]: %(message)s')
+
+    # StreamHandler stdout (captured by the journal via the unit)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(fmt)
+    logger.addHandler(stream_handler)
+
+    # SysLogHandle local syslog socket.
+    try:
+        syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
+        syslog_handler.setFormatter(fmt)
+        logger.addHandler(syslog_handler)
+    except (OSError, IOError):
+        logger.warning('syslog socket /dev/log unavailable; '
+                       'logging to stdout only')
+
+    return logger
+
+
+def main():
+    logger = _configure_logging()
+
+    try:
+        image = build_test_card()
+        epd = epd7in5_V2.EPD()
+        epd.init()
+        epd.display(epd.getbuffer(image))
+        epd.sleep()
+    except Exception:
+        logger.error('Failed to render epaper test card', exc_info=True)
+        sys.exit(1)
+
+    logger.info('Epaper test card rendered successfully')
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

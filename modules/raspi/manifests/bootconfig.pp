@@ -1,6 +1,6 @@
 class raspi::bootconfig {
 
-    file { '/boot/config.txt':
+    file { '/boot/firmware/config.txt':
         source => 'puppet:///modules/raspi/config.txt',
         owner  => 'root',
         group  => 'root',

@@ -1,0 +1,16 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+[Unit]
+Description=Render epaper test card once
+After=syslog.target
+
+[Service]
+Type=oneshot
+SyslogIdentifier=displaytestcard
+StandardOutput=journal+console
+ExecStart=/usr/local/bin/displaytestcard
+
+[Install]
+WantedBy=multi-user.target

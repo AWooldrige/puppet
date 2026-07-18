@@ -5,28 +5,25 @@ class raspi::epaperdisplay {
         refreshonly => true
     }
 
-    package { ['python3-pil', 'python3-numpy', 'python3-watchdog']:
-        ensure => installed
-    } ->
     exec { 'Clone waveshare ePaper repo':
        command => '/usr/bin/git clone https://github.com/waveshare/e-Paper /opt/epaperlibs',
        creates => '/opt/epaperlibs/README.md',
        require => Package['git']
     } ->
-    file { '/usr/local/bin/watchanddisplay':
-        source => 'puppet:///modules/raspi/epaperdisplay/watchanddisplay',
+    file { '/usr/local/bin/displaytestcard':
+        source => 'puppet:///modules/raspi/epaperdisplay/displaytestcard',
         owner  => 'root',
         group  => 'root',
         mode   => '0755',
     } ->
-    file { "/etc/systemd/system/watchanddisplay.service":
-        source => 'puppet:///modules/raspi/epaperdisplay/watchanddisplay.service',
-        owner => 'root',
-        group => 'root',
-        mode => '0644',
+    file { '/etc/systemd/system/displaytestcard.service':
+        source => 'puppet:///modules/raspi/epaperdisplay/displaytestcard.service',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
         notify => Exec['daemon-reload']
     } ->
-    service { 'watchanddisplay':
+    service { 'displaytestcard':
         ensure => running,
         enable => true
     }

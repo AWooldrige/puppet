@@ -134,6 +134,7 @@ All lowercase
 Allocated hostnames:
 
  * websh1
+ * epdsh1
 
 
 
@@ -146,8 +147,8 @@ DHCP reservations
 | Description | MAC | Reserved IP |
 | ----------- | --- | ----------- |
 | webpi Pi 4 eth0 | dc:a6:32:8b:96:48 | 192.168.50.2 |
-| epaperpi Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.50.3 |
-| epaperpi Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
+| epdsh1 Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.50.3 |
+| epdsh1 Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
 | boilerpi Pi 2 eth0 | B8:27:EB:6F:AF:69 | 192.168.50.5 |
 | boilerpi Pi 2 wlan0 | 80:1f:02:af:5a:81 | 192.168.50.6 |
 | websh1 Pi 5 eth0 | 2C:CF:67:27:0C:D7 | 192.168.50.7 |

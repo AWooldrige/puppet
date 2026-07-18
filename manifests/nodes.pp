@@ -14,8 +14,8 @@ node /^lendh1/ {
 node /^webpi/ {
     include webpi
 }
-node /^epaperpi/ {
-    include epaperpi
+node /^epdsh1/ {
+    include epdsh1
 }
 node /^boilerpi/ {
     include boilerpi

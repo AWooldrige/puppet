@@ -56,11 +56,10 @@ class kitchentvpi inherits pi {
     include raspi::noscreenblanking
     include raspi::inforad
 }
-class epaperpi inherits pi {
+class epdsh1 inherits pi {
     include raspi::wifi
     include raspi::spi
     include raspi::epaperdisplay
-    include raspi::epim
     include raspi::pmsensor
 }
 class boilerpi inherits pi {
