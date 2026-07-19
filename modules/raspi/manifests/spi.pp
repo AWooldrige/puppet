@@ -15,6 +15,10 @@ class raspi::spi {
         ensure => installed,
     }
 
+    package { ['python3-spidev', 'python3-gpiozero']:
+        ensure => installed,
+    }
+
     package { ['python3-pil', 'python3-numpy']:
         ensure => installed,
     }

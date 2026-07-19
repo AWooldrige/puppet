@@ -17,7 +17,7 @@ class raspi::pmsensor {
         creates => "${venv}/bin/python3",
     } ->
     exec { 'Install sds011 into pmsensor venv':
-        command  => "${venv}/bin/pip install sds011",
+        command  => "${venv}/bin/pip install py-sds011==0.9",
         unless   => "${venv}/bin/python3 -c 'import sds011'",
         provider => 'shell',
     } ->
