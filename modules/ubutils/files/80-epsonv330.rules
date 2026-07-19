@@ -1,1 +1,1 @@
-ATTRS{manufacturer}=="EPSON",DRIVERS=="usb",SUBSYSTEMS=="usb",ATTRS{idVendor}=="04b8",ATTRS{idProduct}=="*",MODE="0777"
+ATTRS{manufacturer}=="EPSON",DRIVERS=="usb",SUBSYSTEMS=="usb",ATTRS{idVendor}=="04b8",ATTRS{idProduct}=="*",MODE="0664",GROUP="scanner",ENV{libsane_matched}="yes"

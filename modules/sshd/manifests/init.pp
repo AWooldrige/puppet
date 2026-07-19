@@ -13,13 +13,24 @@ class sshd {
     else {
         $sshd_config_source = "puppet:///modules/sshd/sshd_config"
     }
+
     file { '/etc/ssh/sshd_config':
-        source  => $sshd_config_source,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        require => [Package['openssh-server'], Group['sshallowedlogin']]
+        source       => $sshd_config_source,
+        owner        => 'root',
+        group        => 'root',
+        mode         => '0644',
+        validate_cmd => '/usr/sbin/sshd -t -f %',
+        require      => [Package['openssh-server'], Group['sshallowedlogin']],
+        notify       => Service['ssh'],
     }
+
+    exec { 'Disable ssh.socket in favour of ssh.service':
+        command => '/usr/bin/systemctl disable --now ssh.socket',
+        onlyif  => '/usr/bin/systemctl is-active --quiet ssh.socket',
+        require => Package['openssh-server'],
+        before  => Service['ssh'],
+    }
+
     service { 'ssh':
         ensure     => running,
         hasstatus  => true,

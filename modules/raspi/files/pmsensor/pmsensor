@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/opt/pmsensor-venv/bin/python3
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+# Runs under the /opt/pmsensor-venv
 from sds011 import SDS011
 
 

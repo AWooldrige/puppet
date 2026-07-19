@@ -14,9 +14,6 @@ accel-profile='adaptive'
 clock-show-date=true
 clock-show-seconds=true
 show-battery-percentage=true
-font-name='Garuda 11'
-document-font-name='Garuda 11'
-monospace-font-name='Ubuntu Mono 11'
 
 [org/gnome/desktop/peripherals/touchpad]
 two-finger-scrolling-enabled=true

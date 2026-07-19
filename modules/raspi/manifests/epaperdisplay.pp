@@ -1,10 +1,5 @@
 class raspi::epaperdisplay {
 
-    exec { 'daemon-reload':
-        command => '/usr/bin/systemctl daemon-reload',
-        refreshonly => true
-    }
-
     exec { 'Clone waveshare ePaper repo':
        command => '/usr/bin/git clone https://github.com/waveshare/e-Paper /opt/epaperlibs',
        creates => '/opt/epaperlibs/README.md',

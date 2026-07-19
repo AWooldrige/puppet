@@ -1,5 +1,9 @@
 class raspi::ds18b20 {
 
+    package { 'python3-tenacity':
+        ensure => installed,
+    }
+
     file { '/etc/ds18b20_manager.conf' :
         ensure => present,
         mode => '0755',

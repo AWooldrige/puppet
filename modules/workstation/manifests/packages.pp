@@ -10,7 +10,10 @@ class workstation::packages {
         'xca',
         'python3-websockets',  # Needed for vim ghost-text plugin
         'python3-pandas',
-        'python3-fuzzywuzzy',  # Accounts
+        # 'fuzzywuzzy' was renamed upstream to 'thefuzz'. python3-thefuzz is
+        # available on 24.04 and later. NOTE: accounts scripts must import from
+        # `thefuzz` (e.g. `from thefuzz import fuzz`), not `fuzzywuzzy`.
+        'python3-thefuzz',  # Accounts (fuzzy matching)
         'python3-structlog',
         # https://github.com/rbenv/ruby-build/discussions/2012#discussioncomment-4619519
         'libyaml-dev',  # Needed for installing nanoc gem (one of the deps)

@@ -5,11 +5,19 @@ class ubutils::epsonscanner {
         ensure => installed,
     }
 
+    base::addusertogroup { 'Allow woolie to use SANE scanners':
+        ensure    => 'exists',
+        username  => 'woolie',
+        groupname => 'scanner',
+        require   => Package['libsane1'],
+    }
+
     file { "/etc/udev/rules.d/80-epsonv330.rules":
         source  => 'puppet:///modules/ubutils/80-epsonv330.rules',
         owner   => 'root',
         group   => 'root',
-        mode    => '0644'
+        mode    => '0644',
+        notify  => Exec['udev-reload'],
     }
 
     # Next manually install iscan DEB from:

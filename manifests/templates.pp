@@ -66,6 +66,13 @@ class boilerpi inherits pi {
     include raspi::autowifirestart
     include raspi::ds18b20
     include raspi::boiler
+
+    # ds18b20_manager uses lgpio (falls back to RPi.GPIO): install lgpio on Ubuntu 24.04+ (RPi.GPIO unpackaged, sysfs GPIO gone), RPi.GPIO on the older OS.
+    if $facts['os']['release']['major'] in ['22.04', '11'] {
+        package { 'python3-rpi.gpio': ensure => installed }
+    } else {
+        package { 'python3-lgpio': ensure => installed }
+    }
 }
 
 
