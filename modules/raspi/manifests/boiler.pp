@@ -4,7 +4,7 @@ class raspi::boiler {
         ensure => installed
     }
 
-    # pytz + InfluxDB client: pip3 on pre-PEP-668 hosts (22.04/Raspbian 11), apt packages on Ubuntu 24.04+ (system pip3 is blocked there) - works on the current OS and after upgrade.
+    # pytz + InfluxDB client: pip3 on pre-PEP-668 hosts (22.04/Raspbian 11), apt packages on Ubuntu 24.04+
     if $facts['os']['release']['major'] in ['22.04', '11'] {
         package { ['pytz', 'influxdb-client']:
             ensure   => installed,

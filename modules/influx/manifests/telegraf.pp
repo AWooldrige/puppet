@@ -39,6 +39,19 @@ class influx::telegraf {
         mode    => '0644',
         notify  => Service['telegraf']
     } ->
+    file { '/etc/systemd/system/telegraf.service.d':
+        ensure => directory,
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
+    } ->
+    file { '/etc/systemd/system/telegraf.service.d/10-opts.conf':
+        source => 'puppet:///modules/influx/telegraf/10-opts.conf',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
+        notify => [Exec['daemon-reload'], Service['telegraf']],
+    } ->
     service { 'telegraf':
         ensure     => running,
         hasstatus  => true,
