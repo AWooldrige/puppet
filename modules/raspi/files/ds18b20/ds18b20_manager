@@ -7,21 +7,10 @@ import json
 import socket
 import sqlite3
 
+import lgpio
 import tenacity
 
 DS18B20_POWER_GPIO_PIN = 17
-
-"""
-As of 2022-10-13, I could install lgpio using pip3, but it's pointless because
-the actual linux binary isn't included. This has to be manually installed. I
-could puppet the installation, but this is the lazy approach.
-"""
-lgpio_available = False
-try:
-    import lgpio
-    lgpio_available = True
-except ModuleNotFoundError:
-    import RPi.GPIO as GPIO
 
 
 def send_metric(name, value):
@@ -36,22 +25,12 @@ def reset_w1_power_rail():
     """
     send_metric('bus_reset', 1)
     print("Powering off w1 power rail")
-    pin = DS18B20_POWER_GPIO_PIN
 
-    if lgpio_available:
-        print(" -> using lgpio library")
-        h = lgpio.gpiochip_open(0)
-        lgpio.gpio_claim_output(h, pin)
-        lgpio.gpio_write(h, pin, 0)
-        time.sleep(3)
-        lgpio.gpio_write(h, pin, 1)
-    else:
-        print(" -> using RPi.GPIO as lgpio library not available")
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, GPIO.LOW)
-        time.sleep(3)
-        GPIO.output(pin, GPIO.HIGH)
+    chip = lgpio.gpiochip_open(0)
+    lgpio.gpio_claim_output(chip, DS18B20_POWER_GPIO_PIN)
+    lgpio.gpio_write(chip, DS18B20_POWER_GPIO_PIN, 0)
+    time.sleep(3)
+    lgpio.gpio_write(chip, DS18B20_POWER_GPIO_PIN, 1)
     print("Power returned to w1 power rail")
     time.sleep(5)
 

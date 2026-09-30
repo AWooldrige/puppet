@@ -1,4 +1,0 @@
-#########################################################################
-##   This file is controlled by Puppet - changes will be overwritten   ##
-#########################################################################
-x11vnc -bg -nevershared -forever -nopw -display :0

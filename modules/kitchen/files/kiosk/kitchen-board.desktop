@@ -1,0 +1,11 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+[Desktop Entry]
+Type=Application
+Name=Kitchen board
+Comment=Put the wall panel back into kiosk mode
+Exec=systemctl --user start kitchen-kiosk
+Icon=x-office-calendar
+Terminal=false
+Categories=Utility;

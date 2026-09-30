@@ -1,0 +1,16 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+#
+# These are the keys that would blank the panel, dim it, or break the scaling
+
+/org/gnome/desktop/session/idle-delay
+/org/gnome/desktop/screensaver/idle-activation-enabled
+/org/gnome/desktop/screensaver/lock-enabled
+/org/gnome/desktop/screensaver/ubuntu-lock-on-suspend
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type
+/org/gnome/settings-daemon/plugins/power/idle-dim
+/org/gnome/settings-daemon/plugins/power/power-button-action
+/org/gnome/desktop/interface/text-scaling-factor
+/org/gnome/desktop/notifications/show-banners

@@ -1,10 +1,5 @@
 class raspi::h {
 
-    exec { 'Check manually added credentials file is present for h (from LastPass)':
-       command => "/usr/bin/bash -c 'echo \"WARNING: YOU MUST MANUALLY ADD .htpasswd FILE FOR h\"; false'",
-       unless  => '/usr/bin/test -f /etc/nginx/secrets/h.htpasswd',
-    }
-
     certbot::cert { 'h.wooldrige.co.uk':
         ensure => 'installed',
         extraargs => ' -d websh1.h.wooldrige.co.uk'
@@ -44,7 +39,6 @@ class raspi::h {
         mode   => '0644',
         require => [
             Package['nginx'],
-            Exec['Check manually added credentials file is present for h (from LastPass)'],
             Certbot::Cert['h.wooldrige.co.uk']
         ],
         notify => Exec['reload-nginx']

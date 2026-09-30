@@ -3,14 +3,37 @@
 #########################################################################
 network:
     version: 2
+<% unless $ethernets.empty { -%>
     ethernets:
-        eth0:
+<% $ethernets.each |$interface, $address| { -%>
+        <%= $interface %>:
             optional: true
-            dhcp4: true
+            dhcp4: false
+            addresses: ["<%= $address %>/24"]
+            routes:
+                - to: default
+                  via: "<%= $gateway %>"
+                  metric: 100
+            nameservers:
+                addresses: ["<%= $nameservers.join('", "') %>"]
+<% } -%>
+<% } -%>
+<% unless $wifis.empty { -%>
     wifis:
-        wlan0:
+<% $wifis.each |$interface, $address| { -%>
+        <%= $interface %>:
             optional: true
-            dhcp4: true
+            dhcp4: false
+            regulatory-domain: "<%= $regulatory_domain %>"
+            addresses: ["<%= $address %>/24"]
+            routes:
+                - to: default
+                  via: "<%= $gateway %>"
+                  metric: 600
+            nameservers:
+                addresses: ["<%= $nameservers.join('", "') %>"]
             access-points:
                 "<%= $wifi_ssid %>":
                     password: "<%= $wifi_password %>"
+<% } -%>
+<% } -%>

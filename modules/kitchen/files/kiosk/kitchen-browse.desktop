@@ -1,0 +1,11 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+[Desktop Entry]
+Type=Application
+Name=Web browser
+Comment=Stop the kiosk and open an ordinary browser window
+Exec=/usr/local/bin/kitchen-browse %u
+Icon=firefox
+Terminal=false
+Categories=Network;WebBrowser;

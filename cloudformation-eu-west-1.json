@@ -195,15 +195,15 @@
                         "TTL": "300"
                     },
                     {
-                        "Name": "boilerpi.h.wooldrige.co.uk.",
+                        "Name": "blrsh1.h.wooldrige.co.uk.",
                         "Type": "A",
                         "ResourceRecords": [ "192.168.50.6" ],
                         "TTL": "300"
                     },
                     {
-                        "Name": "webpi.h.wooldrige.co.uk.",
+                        "Name": "ktcdh1.h.wooldrige.co.uk.",
                         "Type": "A",
-                        "ResourceRecords": [ "192.168.50.2" ],
+                        "ResourceRecords": [ "192.168.50.9" ],
                         "TTL": "300"
                     },
                     {

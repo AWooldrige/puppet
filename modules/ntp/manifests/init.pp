@@ -32,6 +32,11 @@ class ntp {
         require => File['/etc/chrony/sources.d/woolie-ntp.sources']
     }
 
+    service { 'chrony-wait':
+        enable  => true,
+        require => Service['chrony']
+    }
+
     exec { 'Set correct timezone':
         command  => "timedatectl set-timezone Europe/London",
         unless   => "timedatectl status | grep 'Time zone: Europe/London'",

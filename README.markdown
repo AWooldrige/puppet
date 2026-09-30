@@ -1,27 +1,166 @@
 Bootstrapping a system from scratch
 ===================================
 
-1) Install OS
--------------
-For Raspberry Pi:
+## 1) Install Ubuntu
+If installing on Raspberry Pi SD card. From a workstation:
 
- 1. Install latest Ubuntu server LTS.
- 2. Connect with ethernet and SSH to local IP with `ssh -o
-    PasswordAuthentication=yes -o
-    PreferredAuthentications=keyboard-interactive,password -o
-    PubkeyAuthentication=no ubuntu@<IP>`
+ 1. Raspberry Pi Imager
+ 2. Other general-purpose OS -> Ubuntu, Server or Desktop LTS
+ 3. Skip OS customisation.
+ 4. Eject and reinsert, ready to seed with provisioning step next.
 
-For Ubuntu Desktops:
+If installing on workstation from live CD/USB:
 
- 1. Enable full drive encryption during install. This reduces risk from
-    hardware theft.
- 2. Do not create a user named `woolie` as part of setup, instead create a
-    temporary user named 'tmpbootstrap'. This will only be used to run puppet
-    initially and should be removed after. Puppet needs to create the `woolie`
-    user to keep UIDs/GIDs in sync.
- 3. Set hostname if asked, following scheme of {model}{increment}.
+ 1. Enable full drive encryption.
+ 2. Create a temporary user `tmpbootstrap`, not `woolie` (Puppet creates
+    `woolie`).
+ 3. Set the hostname per naming convention below.
 
 
+## 2) Prepare the workstation to perform the provisioning
+
+The remaining steps run from a workstation. Keep `puppet` and
+`puppet-secure` in the same directory, e.g.:
+
+    ~/checkouts/puppet
+    ~/checkouts/puppet-secure
+
+Restore the age credential at `~/.config/sops/age/keys.txt`, setting mode
+`0600`. Edit `fleet.yaml` with SOPS:
+
+    cd ~/checkouts/puppet-secure
+    sops fleet.yaml
+
+Add the host's role and any host specific values. For a Raspberry Pi, add one
+static address for every interface needed. For example, a Pi with both Ethernet
+and WiFi gets two addresses:
+
+    blrsh1:
+      role: pi
+      addresses:
+        eth0: 192.168.50.5
+        wlan0: 192.168.50.6
+
+Workstations normally omit `addresses` entirely and use DHCP.
+
+Return to the provisioning tools and configure temporary env vars:
+
+    cd ~/checkouts/puppet/provision
+    S=../../puppet-secure
+    H=ktcdh1
+    IP=192.168.50.9
+
+`IP` is separate from the `addresses` map. It's just the one address the
+workstation uses to connect to the host during bootstrap. For a workstation,
+`IP` must be set as its current DHCP address.
+
+Issue the client cert (do not issue a replacement certificate after a
+re-flash):
+
+    ./issue_cert.py $H --ca-key $S/ca/root-ca.key.yaml --store $S/certs/$H.yaml
+
+Issue a server cert as well, if needed:
+
+    ./issue_cert.py $H --ca-key $S/ca/root-ca.key.yaml --server --store $S/certs/$H-server.yaml
+
+
+## 3) Provisioning a headless Raspberry Pi
+
+ 1. Write the cloud-init config to the SD card:
+
+       ./provision.py $H --fleet $S/fleet.yaml --seed /run/media/woolie/system-boot
+
+ 2. Insert the SD card and boot the Pi, wait enough time (possibly an hour+ on
+    older Pis) for cloud-init and unattended-upgrades to run. For desktop
+    images, also wait until the SSH server is installed by cloud-init.
+ 3. Connect over port 22:
+
+       ssh tmpbootstrap@$IP
+
+ 4. Push the certificates and rendered secure module:
+
+       ./provision.py $H --fleet $S/fleet.yaml --certs $S/certs --ssh tmpbootstrap@$IP
+
+ 5. Install Puppet and apply (also see section 5 on applying changes not yet
+    pushed):
+
+       ssh tmpbootstrap@$IP 'wget -qO- https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash'
+
+    This moves SSH to port 3222 and ends non-zero while `tmpbootstrap` exists.
+
+ 6. Connect as woolie on the new port, then remove the temporary account:
+
+       ssh -p 3222 woolie@$IP
+       sudo userdel -r tmpbootstrap
+       sudo rm /etc/sudoers.d/90-cloud-init-users
+
+ 7. Run the apply again through the new account so Puppet finishes cleanly:
+
+       ssh -t -p 3222 woolie@$IP 'sudo /root/puppet/apply.sh'
+
+## 4) Interactive workstation
+
+Same as section 3 from step 3 onwards, no seed and no static address. Two
+differences:
+
+ 1. The interactive installer replaces step 1. Create `tmpbootstrap`, set the
+    hostname, install and enable SSH, then add the public key from
+    `modules/woolie/manifests/ubuntuprefs.pp` to `tmpbootstrap`'s
+    `~/.ssh/authorized_keys`.
+ 2. Workstations don't have their password managed, so keep the bootstrap
+    SSH session open and set it by hand before deleting `tmpbootstrap`:
+
+       sudo passwd woolie
+
+
+## 5) Applying puppet changes that are not pushed
+
+`bootstrap.sh` clones from GitHub, if needing to apply from a local copy:
+
+ 1. Seed or install as above, then push the certificates and secure module.
+ 2. Install Puppet and the modules without applying:
+
+       ssh tmpbootstrap@$IP 'sudo env SKIP_APPLY=1 bash -s' < bootstrap.sh
+
+ 3. Apply the local tree (syncs to `~/puppet_rsync_copy`, runs `apply.sh`):
+
+       ./sync_to_host.sh -p 22 --apply tmpbootstrap@$IP
+
+
+The secret store
+================
+`puppet-secure` is a private repo, encrypted using sops + age.
+
+    .sops.yaml                age recipient
+    fleet.yaml                fleet and per-host secrets
+    ca/root-ca.key.yaml       root CA private key
+    certs/<host>.yaml         issued leaf certificates
+    certs/<host>-server.yaml  issues server certificates
+
+The age identity is kept separate. On a new machine paste all three lines
+into `~/.config/sops/age/keys.txt`, then set 600.
+
+These credentials also live elsewhere:
+
+ * Workstation LUKS passphrases
+ * Home Assistant's backup encryption key
+
+
+Certificates for phones
+=======================
+
+    ./issue_cert.py pxlmh1 --ca-key $S/ca/root-ca.key.yaml \
+        --store $S/certs/pxlmh1.yaml --p12-out ~/pxlmh1.p12
+
+Android: Settings -> Security -> Encryption & credentials -> Install a
+certificate -> VPN & app user certificate
+
+Add the CN to `$wiki_allowed` in
+`modules/nginx/files/conf.d/client-authorisation.conf`
+
+
+Main desktop extras (lendh1)
+============================
 For main desktop to auto decrypt and mount the internal SATA HDD:
 
  1. Configure auto unlocking of partition:
@@ -46,76 +185,8 @@ For main desktop to get Dropbox client running again:
  3. Change Dropbox storage location to `/media/woolie/bulkstorage` (it will create a `/Dropbox` dir within).
  4. Quit/stop the Dropbox application (very important).
  5. `rm -rf /media/woolie/bulkstorage/Dropbox/*`
- 6. `mv /media/woolie/bulkstorage/Dropbox_tmpold/* /media/woolie/bulkstorage/Dropbox/`
+ 6. `mv /media/woolie/bulkstorage/Dropbox_old/* /media/woolie/bulkstorage/Dropbox/`
  7. Start Dropbox again and wait a long time for it to index.
-
-
-
-2) Run puppet
--------------
-
- 1. If bootstrapping a host that needs a static IP, ensure the router
-    configuration is set as in this README. If changing a hardware used for the
-    same host, update the MAC address in the README/router.
- 2. Set hostname with `sudo hostnamectl set-hostname "{model}{increment}`
- 3. Run the bootstrap script: `wget -q -O - https://raw.github.com/AWooldrige/puppet/master/bootstrap.sh | sudo bash`
-
-
-3) Add credentials not managed by Puppet
-----------------------------------------
-For both:
-
- 1. Generate client (+server if needed) certificates using process below. Add
-    in to `/etc/wooldrigepki/`
-
-For desktops:
-
- 1. Transfer SSH keys from another machine.
-
-For servers:
-
- 2. Set `[ddns]` in `/home/woolie/.aws/credentials`
- 3. Set `/etc/nginx/secrets/h.htpasswd` contents from password store
-
-
-Generating X.509 certs
-======================
-
-All machines (create a client cert):
-
-1. Open XCA
-2. New Certificate
-3. Use this Certificate for signing: `WooldrigePKI root CA 1`
-4. Template for the new certificate: `<short_hostname> client certificate` ->
-   Apply all.
-5. Subject:
-    1. Internal Name: `<short_hostname> client certificate`
-    2. organizationalUnitName: `server` or `desktop`
-    3. Subject -> commonName: `<short_hostname>`
-6. Subject -> Private key -> Generate a new key -> Keytype: `ED25519` (or `RSA`
-   if planning to import into Firefox, as that can't handle anything else)
-7. Extensions -> Time range: `20 years`
-8. OK: `Adjust date and continue`
-9. Certificate -> Export -> Export format: `PEM chain`
-    1. Copy into `/etc/wooldrigepki/certificates/client.pem`
-10. Private Key -> Export -> Export format: `PEM private`
-    1. Copy into `/etc/wooldrigepki/privatekeys/client.pem`
-
-Additional for servers (create a server cert):
-
-1. Follow same as above for client certs, except in addition.
-2. Template for the new certificate: `<short_hostname> server certificate` ->
-   Apply all.
-3. Subject:
-    1. Internal Name: `<short_hostname> server certificate`
-4. Extensions -> X509v3 Subject Alternative Name: `DNS:copycn,
-   DNS:<short_hostname.h.wooldrige.co.uk>, DNS <short_hostname>.local`
-9. Certificate -> Export -> Export format: `PEM chain`
-    1. Copy into `/etc/wooldrigepki/certificates/server.pem`
-10. Private Key -> Export -> Export format: `PEM private`
-    1. Copy into `/etc/wooldrigepki/privatekeys/server.pem`
-
-Then run puppet again so it can set the correct file permissions
 
 
 Naming convention
@@ -126,36 +197,36 @@ All lowercase
 | Char | Field | Options |
 | ---- | ----- | ------- |
 | 1-3  | Purpose | (free choice) |
-| 4    | Type | d:desktop, s:server |
+| 4    | Type | d:desktop, s:server, m:mobile |
 | 5    | Location | h:home |
 | 6+   | Unique num | 1 onwards |
 
+Character 4 also becomes the certificate's OU, derived by `issue_cert.py`.
 
 Allocated hostnames:
 
  * websh1
- * epdsh1
-
+ * ktcdh1
+ * blrsh1
+ * pxlmh1 (phone, certificate only, no Puppet)
 
 
 Router configuration
 ====================
 
-DHCP reservations
------------------
+Static addresses
+----------------
 
-| Description | MAC | Reserved IP |
-| ----------- | --- | ----------- |
-| webpi Pi 4 eth0 | dc:a6:32:8b:96:48 | 192.168.50.2 |
-| epdsh1 Pi 3 eth0 | b8:27:eb:3c:0c:11 | 192.168.50.3 |
-| epdsh1 Pi 3 wlan0 | b8:27:eb:69:59:44 | 192.168.50.4 |
-| boilerpi Pi 2 eth0 | B8:27:EB:6F:AF:69 | 192.168.50.5 |
-| boilerpi Pi 2 wlan0 | 80:1f:02:af:5a:81 | 192.168.50.6 |
-| websh1 Pi 5 eth0 | 2C:CF:67:27:0C:D7 | 192.168.50.7 |
-| websh1 Pi 5 wlan0 | TODO | 192.168.50.8 |
+Set on the machines by `raspi::network`, from the `addresses` map in
+`fleet.yaml`. Router DHCP pool configured to not start before `.100`.
 
-These also have convenience DNS entries created under
-`<hostname>.wooldrige.co.uk`.
+| Description | Address |
+| ----------- | ------- |
+| blrsh1 Pi 3 eth0 | 192.168.50.5 |
+| blrsh1 Pi 3 wlan0 | 192.168.50.6 |
+| websh1 Pi 5 eth0 | 192.168.50.7 |
+| websh1 Pi 5 wlan0 | 192.168.50.8 |
+| ktcdh1 Pi 4 wlan0 | 192.168.50.9 |
 
 
 Port forwarding
@@ -173,7 +244,8 @@ Puppet config conventions
 
 Files
 ------------------------------
-Each file should be prepended with the following text.
+Each file that gets written to a host's filesystem should be prepended with the
+following text:
 
     #########################################################################
     ##   This file is controlled by Puppet - changes will be overwritten   ##
@@ -188,13 +260,5 @@ To see log output for the main crons:
 
  * `sudo journalctl -t 'gdpup'`
  * `sudo journalctl -t 'ddns'`
-
-
-Documentation
-==============================
-
-User strategy
-------------------------------
-Each machine has one main user, `woolie`. This user is used for SSH remote
-access and local access. The user should always have a password set and should
-also require it for sudo (no passwordless sudo, even on remote machines).
+ * `sudo journalctl -t 'kitchen'`
+ * `sudo journalctl -t 'panel-backlight'`

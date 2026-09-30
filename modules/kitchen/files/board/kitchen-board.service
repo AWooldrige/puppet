@@ -1,0 +1,75 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+[Unit]
+Description=Kitchen calendar and weather board
+After=network-online.target
+Wants=network-online.target
+# Don't render wrong day after initial boot (no RTC on pi)
+After=time-sync.target
+Wants=time-sync.target
+
+[Service]
+Type=simple
+SyslogIdentifier=kitchen
+Restart=always
+RestartSec=10
+
+WorkingDirectory=/opt
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/kitchen-venv/bin/python3 -m kitchen.app --config /etc/kitchen/config.toml
+
+User=kitchen
+Group=kitchen
+# The panel backlight and touchscreen are group-owned by paneltouch
+SupplementaryGroups=paneltouch
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectProc=invisible
+# ProcSubset=pid deliberately absent: it hides everything in /proc that is not
+# a pid directory, including /proc/net/wireless, which is where wifi strength
+ProtectSystem=strict
+RemoveIPC=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+UMask=0077
+
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Expands to /var/lib/kitchen
+StateDirectory=kitchen
+StateDirectoryMode=0750
+
+# ProtectKernelTunables=yes remounts /sys read-only, and this service writes the
+# backlight there.
+ProtectKernelTunables=no
+
+# PrivateDevices=yes hides /dev/input
+PrivateDevices=no
+DevicePolicy=closed
+DeviceAllow=char-input r
+
+CPUQuota=40%
+MemoryAccounting=true
+MemoryHigh=180M
+MemoryMax=250M
+TasksMax=32
+
+[Install]
+WantedBy=multi-user.target

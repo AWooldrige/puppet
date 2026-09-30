@@ -1,6 +1,8 @@
 [Unit]
 Description=Home Assistant container
-After=network.target
+# The pis have no clock battery
+After=network.target time-sync.target
+Wants=time-sync.target
 
 [Container]
 ContainerName=homeassistant
@@ -10,8 +12,6 @@ Label=io.containers.autoupdate=registry
 Volume=/var/lib/homeassistant:/config
 Volume=/etc/localtime:/etc/localtime:ro
 
-Environment="PUID=19004"
-Environment="PGID=21004"
 Environment=TZ=Europe/London
 Environment=DISABLE_JEMALLOC=true
 
@@ -26,6 +26,15 @@ AddDevice=/dev/zigbee:/dev/ttyUSB0
 
 # Pass dbus through for bluetooth
 Volume=/run/dbus:/run/dbus:ro
+
+# Podman confines containers with its generated containers-default profile,
+# which on 26.04 includes D-Bus and denies the opening Hello call, so the
+# bluetooth integration cannot reach the bus
+PodmanArgs=--security-opt apparmor=unconfined
+
+# No AddCapability=NET_ADMIN / NET_RAW, which Home Assistant's container
+# documentation asks for. Bluetooth runs in its degraded mode beacuse of this,
+# which is ok
 
 [Service]
 Restart=unless-stopped

@@ -1,3 +1,10 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
 # ATTRS determined from lsusb output:
 # Bus 004 Device 002: ID 10c4:ea60 Silicon Labs CP210x UART Bridge
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="zigbee"
+#
+# ModemManager probes every new tty looking for a modem, and a CP210x bridge looks
+# enough like one that it can hold the port open while ZHA is trying to claim it.
+# Tagging the device tells ModemManager to leave it alone.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="zigbee", ENV{ID_MM_DEVICE_IGNORE}="1"

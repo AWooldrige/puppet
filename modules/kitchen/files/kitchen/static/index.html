@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+Sized for a 516x917 CSS-pixel portrait viewport.
+-->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Kitchen board</title>
+<link rel="stylesheet" href="/board.css">
+</head>
+<body>
+
+<!-- Absorbs the first touch after an overnight wake, so that it only turns the
+     screen on rather than also pressing whatever is underneath. -->
+<div id="wake-shield" class="wake-shield" hidden aria-hidden="true"></div>
+
+<div id="shell" class="shell">
+
+  <header id="topbar" class="topbar">
+    <div class="topbar-text">
+      <h1 id="today-date" class="today-date">&nbsp;</h1>
+    </div>
+    <div class="topbar-actions">
+      <button id="refresh" class="icon-button" type="button"
+              aria-label="Refresh now">
+        <span aria-hidden="true">&#8635;</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
+
+  <main id="main" class="main">
+
+    <section id="board" class="board" aria-label="Calendar board">
+
+      <div id="hero" class="hero">
+        <p class="hero-label">Next up</p>
+        <p id="hero-title" class="hero-title">&nbsp;</p>
+        <p id="hero-when" class="hero-when">&nbsp;</p>
+        <p id="hero-where" class="hero-where" hidden>&nbsp;</p>
+      </div>
+
+      <div id="sections" class="sections"></div>
+
+      <p id="empty" class="empty" hidden>Nothing in the calendar.</p>
+    </section>
+
+    <!-- Home Assistant and Grafana. Cross-origin, so touches inside are invisible
+         to this page and idle detection is done on the device instead. -->
+    <iframe id="frame-home" class="frame" title="Control" hidden
+            src="about:blank"></iframe>
+    <iframe id="frame-graphs" class="frame" title="Graphs" hidden
+            src="about:blank"></iframe>
+
+    <div id="frame-error" class="frame-error" hidden>
+      <p class="frame-error-title">Can&rsquo;t reach that page</p>
+      <p id="frame-error-detail" class="frame-error-detail"></p>
+      <button id="frame-retry" class="text-button" type="button">Try again</button>
+    </div>
+
+  </main>
+
+  <button id="weather" class="weather" type="button"
+          aria-expanded="false" aria-controls="forecast">
+    <span id="weather-line" class="weather-line">Weather&hellip;</span>
+    <span class="weather-chevron" aria-hidden="true">&#9650;</span>
+  </button>
+
+  <footer id="status" class="status">
+    <span id="status-updated">Updated --:--</span>
+    <span id="status-next">Refresh --:--</span>
+    <span id="status-wifi">WiFi --%</span>
+    <span id="status-load">Load --</span>
+    <span id="status-flag" class="status-flag"></span>
+  </footer>
+
+  <!-- The data-tab values are the wire names the controller matches on
+       (scheduler.BOARD_PAGE), so only the labels here are free to change. -->
+  <nav class="tabs" aria-label="Screens">
+    <button class="tab is-active" type="button" data-tab="board"
+            aria-current="page">Calendar</button>
+    <button class="tab" type="button" data-tab="home">Control</button>
+    <button class="tab" type="button" data-tab="graphs">Graphs</button>
+    <button class="tab" type="button" data-tab="screenoff">Screen off</button>
+  </nav>
+
+</div>
+
+
+<div id="event-overlay" class="overlay" hidden role="dialog" aria-modal="true"
+     aria-labelledby="event-title">
+  <div class="overlay-card">
+    <p id="event-when" class="overlay-when"></p>
+    <h2 id="event-title" class="overlay-title"></h2>
+    <p id="event-where" class="overlay-where" hidden></p>
+    <p id="event-range" class="overlay-range" hidden></p>
+    <button id="event-close" class="text-button" type="button">Close</button>
+  </div>
+</div>
+
+<div id="forecast" class="overlay" hidden role="dialog" aria-modal="true"
+     aria-labelledby="forecast-title">
+  <div class="overlay-card">
+    <h2 id="forecast-title" class="overlay-title">Next 3 days</h2>
+    <ul id="forecast-list" class="forecast-list"></ul>
+    <button id="forecast-close" class="text-button" type="button">Close</button>
+  </div>
+</div>
+
+<script src="/board.js"></script>
+</body>
+</html>

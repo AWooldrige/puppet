@@ -16,6 +16,11 @@ server {
     ssl_client_certificate /etc/wooldrigepki/certificates/root.pem;
     ssl_verify_client on;
 
+    # Comes from conf.d/client-authorisation.conf
+    if ($client_blocked) {
+        return 403;
+    }
+
     root /var/www/h.wooldrige.co.uk;
     index index.html;
 

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#########################################################################
-##   This file is controlled by Puppet - changes will be overwritten   ##
-#########################################################################
-set -eu
-killall -g -r chromium-browser

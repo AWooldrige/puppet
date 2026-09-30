@@ -10,16 +10,12 @@ Host websh1
     # This way it works on + off local network.
     Hostname h.wooldrige.co.uk
 
-Host boilerpi
-    Hostname boilerpi.h.wooldrige.co.uk
-    ProxyJump websh1
-
-Host webpi
-    Hostname webpi.h.wooldrige.co.uk
+Host blrsh1 ktcdh1
+    Hostname %h.h.wooldrige.co.uk
     ProxyJump websh1
 
 # General settings must be placed _after_ more specific ones
-Host websh1* boilerpi* webpi*
+Host websh1 blrsh1 ktcdh1 lendh1 ltpdh1 ltpdh2 hplaptop2
     Port 3222
     User woolie
     IdentityFile ~/.ssh/id_puppet_woolie_2018_12_04_ec

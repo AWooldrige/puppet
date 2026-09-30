@@ -9,12 +9,13 @@ class raspi::pmsensor {
         require => Package['telegraf']
     }
 
-    package { 'python3-venv':
-        ensure => installed,
-    } ->
+    # kitchen::board also needs this on ktcdh1
+    stdlib::ensure_packages(['python3-venv'])
+
     exec { 'Create pmsensor venv':
         command => "/usr/bin/python3 -m venv ${venv}",
         creates => "${venv}/bin/python3",
+        require => Package['python3-venv'],
     } ->
     exec { 'Install sds011 into pmsensor venv':
         command  => "${venv}/bin/pip install py-sds011==0.9",

@@ -1,0 +1,82 @@
+import re
+import unittest
+from pathlib import Path
+
+from kitchen import scheduler
+
+STATIC = Path(__file__).resolve().parent.parent / 'kitchen/static'
+HTML = (STATIC / 'index.html').read_text()
+CSS = (STATIC / 'board.css').read_text()
+JS = (STATIC / 'board.js').read_text()
+
+
+class Shell(unittest.TestCase):
+
+    def test_anything_hidden_can_actually_be_hidden(self):
+        """
+        A class that sets display beats the hidden attribute, because the user
+        agent's [hidden] rule is weaker. The board sits behind an absolutely
+        positioned error panel, so getting this wrong paints the error over every
+        tab and looks like a network fault rather than a stylesheet one.
+        """
+        classes = set()
+        for tag in re.findall(r'<[^>]*\bhidden\b[^>]*>', HTML):
+            found = re.search(r'class="([^"]+)"', tag)
+            if found:
+                classes.update(found.group(1).split())
+        self.assertIn('frame-error', classes, 'expected the error panel to be hidden')
+
+        for name in sorted(classes):
+            block = re.search(r'\.' + re.escape(name) + r'\s*\{([^}]*)\}', CSS)
+            if block and re.search(r'\bdisplay\s*:', block.group(1)):
+                self.assertRegex(
+                    CSS, r'\.' + re.escape(name) + r'\[hidden\]',
+                    f'.{name} sets display, so it needs a [hidden] override')
+
+    def test_the_tab_names_are_the_ones_the_controller_matches(self):
+        # Labels are free to change; these values go to /api/page and drive the
+        # revert-to-board rule.
+        tabs = re.findall(r'data-tab="([^"]+)"', HTML)
+        self.assertIn(scheduler.BOARD_PAGE, tabs)
+        self.assertEqual(['board', 'home', 'graphs', 'screenoff'], tabs)
+
+    def test_home_and_graphs_each_get_their_own_persistent_frame(self):
+        """
+        One shared iframe reset to about:blank on every tab switch was what made
+        Control and Graphs slow to open: the whole page had to reload from
+        scratch every time. Two frames, each left pointed at its URL once loaded,
+        is what makes a repeat visit instant.
+        """
+        self.assertIn('id="frame-home"', HTML)
+        self.assertIn('id="frame-graphs"', HTML)
+        self.assertNotIn('id="frame"', HTML)
+        self.assertIn("frames: { home: el('frame-home'), graphs: el('frame-graphs') }",
+                       JS)
+        # Never reset a frame back to about:blank once loaded: that was what forced
+        # a full reload on every visit. (It's fine for the word to appear in a
+        # comment explaining that; only an actual assignment matters here.)
+        self.assertNotRegex(JS, r"\.src\s*=\s*['\"]about:blank")
+
+    def test_calendar_only_chrome_is_toggled_by_tab(self):
+        """
+        The date, weather and status rows describe the calendar; Control and
+        Graphs fill that space with their own UI. Only the tab bar should stay up
+        on every screen.
+        """
+        self.assertIn("show(dom.topbar, onBoard)", JS)
+        self.assertIn("show(dom.weather, onBoard)", JS)
+        self.assertIn("show(dom.status, onBoard)", JS)
+
+    def test_every_el_lookup_has_a_matching_id_in_the_html(self):
+        """
+        el(id) returns null for a ref removed from the HTML but left in the dom
+        object. wire() calling .addEventListener on that null throws synchronously,
+        which aborts start() before the first board poll and leaves the shell
+        showing nothing but placeholders with no error visible anywhere.
+        """
+        html_ids = set(re.findall(r'\bid="([^"]+)"', HTML))
+        js_ids = set(re.findall(r"\bel\('([^']+)'\)", JS))
+        missing = js_ids - html_ids
+        self.assertFalse(
+            missing,
+            f'board.js looks up id(s) not present in index.html: {sorted(missing)}')

@@ -135,17 +135,20 @@ if [[ ${#PASSPHRASE} -le 10 ]] ; then
     error "Key in /etc/backuptool_passphrase looks too short"
 fi
 
-# Duplicity can't use boto named credentials profiles yet.  Grab these from the
-# credentials profile manually.  This is fairly fragile, but effective.
-#
-# TODO: Move these to secure puppet
-export AWS_ACCESS_KEY_ID="$(grep -A 20 '\[ddns\]' /home/woolie/.aws/credentials | grep 'aws_access_key_id=' | head -n 1 | cut -d'=' -f2)"
+# Duplicity can't use boto's named credential profies, so read the [backuptool]
+# one directly.
+function aws_credential {
+    sed -n '/^\[backuptool\]/,/^\[/p' /home/woolie/.aws/credentials \
+        | sed -n "s/^${1}[[:space:]]*=[[:space:]]*//p" | head -n 1
+}
+
+export AWS_ACCESS_KEY_ID="$(aws_credential aws_access_key_id)"
 if [ ${#AWS_ACCESS_KEY_ID} -le 10 ]; then
-    error "AWS_ACCESS_KEY_ID shorter than expected."
+    error "No usable aws_access_key_id in the [backuptool] profile."
 fi;
-export AWS_SECRET_ACCESS_KEY="$(grep -A 20 '\[ddns\]' /home/woolie/.aws/credentials | grep 'aws_secret_access_key=' | head -n 1 | cut -d'=' -f2)"
+export AWS_SECRET_ACCESS_KEY="$(aws_credential aws_secret_access_key)"
 if [ ${#AWS_SECRET_ACCESS_KEY} -le 10 ]; then
-    error "AWS_SECRET_ACCESS_KEY shorter than expected."
+    error "No usable aws_secret_access_key in the [backuptool] profile."
 fi;
 
 if [ "$_arg_hostname" = "current-system" ]; then
@@ -163,21 +166,20 @@ if [ "$_arg_action" = "backup" ]; then
         --name "$_arg_name" \
         --allow-source-mismatch \
         --full-if-older-than 1M  \
-        $LOCAL_PATH \
-        $REMOTE_PATH
+        "$LOCAL_PATH" \
+        "$REMOTE_PATH"
 fi
 
 if [ "$_arg_action" = "restore" ]; then
-    if [ ! -z "$(find $LOCAL_PATH -mindepth 1 -maxdepth 1)" ]; then
+    if [ -n "$(find "$LOCAL_PATH" -mindepth 1 -maxdepth 1)" ]; then
         error "Directory to restore into is not empty: $LOCAL_PATH"
     fi
+    # --full-if-older-than only means anything to a backup, so it is not passed here.
     /usr/bin/duplicity \
         restore \
         --name "$_arg_name" \
-        --allow-source-mismatch \
-        --full-if-older-than 1M  \
-        $REMOTE_PATH \
-        $LOCAL_PATH
+        "$REMOTE_PATH" \
+        "$LOCAL_PATH"
 fi
 
 send_statsd "backuptool.success,action=$_arg_action,name=$_arg_name:1|c"

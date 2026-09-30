@@ -43,11 +43,26 @@ class base::packages {
         'python3-tenacity',
         'python3-click',
         'python3-requests',
-        # 'python3.7', Not available on raspbian
-        # 'python3.7-venv',
         ]:
         ensure => installed
     }
+
+    # Every apt invocation on the box waits for the lock instead of failing on it,
+    # Puppet's package provider included. unattended-upgrades can hold it for half
+    # an hour on a newly installed machine.
+    file { '/etc/apt/apt.conf.d/99-lock-timeout':
+        ensure  => 'file',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => @("EOT")
+            //######################################################################
+            //##   This file is controlled by Puppet - changes will be overwritten ##
+            //######################################################################
+            DPkg::Lock::Timeout "1800";
+            | EOT
+    }
+    File['/etc/apt/apt.conf.d/99-lock-timeout'] -> Package<| |>
 
     # Place to store manually downloaded ones
     file { '/var/cache/packages':

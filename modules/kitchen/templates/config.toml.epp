@@ -1,0 +1,80 @@
+<%- |
+    Array[String[1]] $calendar_ids,
+    Numeric          $weather_latitude,
+    Numeric          $weather_longitude,
+| -%>
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+[server]
+# API is unauthenticated by design and must never be reachable off-box.
+bind = "127.0.0.1"
+port = 5273
+
+[calendar]
+timezone = "Europe/London"
+# Far enough ahead to fill the "Later" section without paging forever.
+lookahead_days = 60
+calendar_ids = [
+<% $calendar_ids.each |$id| { -%>
+    "<%= $id %>",
+<% } -%>
+]
+service_account_file = "/etc/kitchen/service-account.json"
+
+[weather]
+latitude = <%= $weather_latitude %>
+longitude = <%= $weather_longitude %>
+timezone = "Europe/London"
+# Rapid button presses must not hammer weather service
+cache_minutes = 10
+# How long a cached forecast may be served after a fetch failure
+max_stale_hours = 6
+# Today plus the two days the weather panel expands to.
+forecast_days = 3
+
+[refresh]
+interval_minutes = 30
+# Floor between manual refresh presses, enforced by the API.
+min_manual_interval_seconds = 10
+
+[state]
+dir = "/var/lib/kitchen"
+# Beyond this, the "may be out of date" banner appears over cached events.
+stale_hours = 6
+
+[health]
+# websh1. By IP: this is a reachability probe for the offline banner
+upstream_host = "192.168.50.7"
+upstream_port = 443
+check_timeout_seconds = 2
+
+[metrics]
+# InfluxDB line protocol
+enabled = true
+host = "127.0.0.1"
+port = 8094
+measurement = "kitchen"
+
+[tabs]
+# Both go via the local mTLS proxy (kitchen::proxy); the client certificate never
+# enters the browser.
+home_url = "http://127.0.0.1:5274/"
+# Deliberately not Grafana's own ?kiosk: that hides the whole navigation chrome
+graphs_url = "http://127.0.0.1:5275/grafana/d/7c33f8b1-0505-4306-8c33-cfdcf0a77ad8/kitchen-pi-default?orgId=1&from=now-6h&to=now&timezone=browser&refresh=1m"
+
+[schedule]
+timezone = "Europe/London"
+on_hour = 6
+off_hour = 21
+# After an overnight touch-to-wake, stay on until this many minutes idle.
+overnight_hold_minutes = 5
+# Idle time on a non-board tab before reverting to the board.
+revert_after_seconds = 120
+
+[backlight]
+device_glob = "/sys/class/backlight/panel_backlight*"
+
+[activity]
+# Stable name from the udev rule in raspi::touchdisplay
+device = "/dev/input/kitchen-touch"

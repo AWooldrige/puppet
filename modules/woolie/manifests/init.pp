@@ -23,7 +23,18 @@ class woolie {
                              Group['wooldrigepkicertaccess']]
     }
 
-    exec { "Verify manual password set for user 'woolie'":
+    # provision.py installs credentials before the user exists, and creates
+    # the home directory as rooot. useradd then finds it already there and
+    # does update ownership, so the directory has to be managed here.
+    file { $homedir:
+        ensure  => 'directory',
+        owner   => $uname,
+        group   => $uname,
+        mode    => '0755',
+        require => User[$uname]
+    }
+
+    exec { "Verify password set for user 'woolie'":
         command     => "echo 'Password not set for \'woolie\' user. Set manually with \'passwd woolie\''; false",
         unless      => "passwd --status woolie | grep '^woolie P'",
         provider    => "shell",

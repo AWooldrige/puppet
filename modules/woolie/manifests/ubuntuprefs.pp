@@ -18,7 +18,7 @@ class woolie::ubuntuprefs {
         user    => $uname,
         type    => 'ssh-ed25519',
         key     => 'AAAAC3NzaC1lZDI1NTE5AAAAIGZexCanfqleYleuE4foaxv/vciAOkukYdecrYqH1OW+',
-        require => User[$uname]
+        require => [User[$uname], File[$homedir]]
     }
     file { "${homedir}/.ssh/config":
         source  => 'puppet:///modules/woolie/dotfiles/ssh_config',
@@ -27,6 +27,8 @@ class woolie::ubuntuprefs {
         mode    => '0644',
         require => Ssh_authorized_key[$uname]
     }
+
+    Ssh_authorized_key[$uname] -> Service['ssh']
 
 
     ###########################################################################

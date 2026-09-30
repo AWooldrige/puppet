@@ -1,0 +1,94 @@
+#!/bin/bash
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+# bl_power is documented stable kernel ABI: 0 = FB_BLANK_UNBLANK,
+# 4 = FB_BLANK_POWERDOWN.
+
+set -uo pipefail
+
+readonly SYSFS_ROOT="${PANEL_BACKLIGHT_SYSFS_ROOT:-/sys/class/backlight}"
+readonly DEVICE_GLOB="${PANEL_BACKLIGHT_GLOB:-panel_backlight*}"
+readonly PANEL_GROUP="${PANEL_BACKLIGHT_GROUP:-paneltouch}"
+readonly SKIP_CHOWN="${PANEL_BACKLIGHT_SKIP_CHOWN:-0}"
+
+# journald picks stdout
+log() {
+    echo "[$(date --rfc-3339=ns)] $*"
+}
+
+configure_device() {
+    local dev="$1"
+    local name max
+
+    name="$(basename "${dev}")"
+
+    if [[ ! -r "${dev}/max_brightness" ]]; then
+        log "Error: ${name} has no readable max_brightness, skipping"
+        return 1
+    fi
+
+    max="$(<"${dev}/max_brightness")"
+    if [[ ! "${max}" =~ ^[0-9]+$ ]] || (( max == 0 )); then
+        log "Error: ${name} max_brightness is '${max}', skipping"
+        return 1
+    fi
+
+    # Brightness before unblanking
+    if ! echo "${max}" > "${dev}/brightness"; then
+        log "Error: failed writing brightness=${max} to ${name}"
+        return 1
+    fi
+
+    # Re-asserted here as well as in the udev rule because systemd-backlight, or
+    # a stale saved state, may have set it back.
+    if ! echo 0 > "${dev}/bl_power"; then
+        log "Error: failed writing bl_power=0 to ${name}"
+        return 1
+    fi
+
+    log "${name}: brightness=${max} bl_power=0"
+
+    if [[ "${SKIP_CHOWN}" == "1" ]]; then
+        return 0
+    fi
+
+    # Group write on these two attributes is the only privilege the board service
+    # gets. It is not in the video group and does not run as root.
+    local attr
+    for attr in bl_power brightness; do
+        if ! chgrp "${PANEL_GROUP}" "${dev}/${attr}"; then
+            log "Error: failed chgrp ${PANEL_GROUP} on ${name}/${attr}"
+            return 1
+        fi
+        if ! chmod g+w "${dev}/${attr}"; then
+            log "Error: failed chmod g+w on ${name}/${attr}"
+            return 1
+        fi
+    done
+
+    log "${name}: bl_power and brightness writable by group ${PANEL_GROUP}"
+}
+
+main() {
+    local found=0
+    local failed=0
+    local dev
+
+    shopt -s nullglob
+    for dev in "${SYSFS_ROOT}"/${DEVICE_GLOB}; do
+        [[ -d "${dev}" ]] || continue
+        found=1
+        configure_device "${dev}" || failed=1
+    done
+    shopt -u nullglob
+
+    if (( found == 0 )); then
+        log "Error: no backlight matching ${SYSFS_ROOT}/${DEVICE_GLOB}"
+        return 1
+    fi
+
+    return "${failed}"
+}
+
+main "$@"

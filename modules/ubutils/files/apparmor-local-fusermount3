@@ -1,0 +1,16 @@
+# This file is controlled by Puppet - local changes will be overwritten.
+#
+# Flatpak apps cannot run the setuid fusermount3 inside their sandbox, so they
+# run the host binary instead:
+#
+#     flatpak-spawn --host --forward-fd=$_FUSE_COMMFD fusermount3 ...
+#
+# The packaged profile has no unix rules for that peer, so AppArmor denies the
+# descriptor at exec:
+#
+#     apparmor="DENIED" operation="file_inherit" class="net" profile="fusermount3"
+#       family="unix" sock_type="stream" requested="send receive" peer="bwrap"
+
+unix (getattr, getopt, setopt) type=stream addr=none,
+unix (send, receive) type=stream addr=none peer=(label=bwrap, addr=none),
+unix (send, receive) type=stream addr=none peer=(label=unpriv_bwrap, addr=none),

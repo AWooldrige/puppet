@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
+# Installs puppet, clones this repo and applies it. Safe to re-run.
+# Secrets must already be in place: run provision.py against the host first.
 set -eu
 
-# Script principle:
-# 1) Idempotent. It should be possible to run this script multiple times.
+# Wait for the apt lock rather than failing on it. On a freshly installed box
+# unattended-upgrades can take a long time.
+APT="apt -o DPkg::Lock::Timeout=1800"
 
 function log {
     echo "[$(date --rfc-3339=ns)] ${1}"
@@ -11,9 +14,9 @@ function log {
 function install {
     dpkg -s "$1" && return 0
     for attempt in {1..5}; do
-        if ! apt install -y "$1"; then
+        if ! $APT install -y "$1"; then
             echo "Could not install ${1} after attempt ${attempt}"
-            apt update -y --fix-missing
+            $APT update -y --fix-missing
             sleep 2
         else
             break
@@ -21,30 +24,13 @@ function install {
     done
 }
 
-function initialise_securepuppet {
-    SP_DIR="/etc/securepuppet/modules/secure/manifests"
-    if [ ! -d "$SP_DIR" ]; then
-        log "Creating secure puppet module directory at: $SP_DIR"
-        mkdir -p "$SP_DIR"
-    fi
-
-    SP_MFST="${SP_DIR}/init.pp"
-    if ! grep 'class secure' "$SP_MFST" 1> /dev/null 2> /dev/null; then
-        log "Creating secure puppet manifest file: $SP_MFST"
-        echo 'class secure {}' > "$SP_MFST"
-    fi
-    chmod -R 600 /etc/securepuppet
-}
-
-if [ -f "/root/puppet/.git/HEAD" ]; then
-    log "/root/puppet/ already exists, not re-cloning"
-else
+if [ ! -f "/root/puppet/.git/HEAD" ]; then
     log 'Updating apt repos'
-    apt update -y
+    $APT update -y
 
     log 'Upgrading apt packages'
     # https://askubuntu.com/a/1431746
-    NEEDRESTART_MODE=a apt upgrade -y
+    NEEDRESTART_MODE=a $APT upgrade -y
 
     log 'Installing git and puppet'
     install git
@@ -58,12 +44,7 @@ else
 
     log 'Cloning puppet confs repo to /root/puppet'
     /usr/bin/git clone --depth=1 https://github.com/AWooldrige/puppet.git /root/puppet
-
-    log 'Installing puppet modules'
-    initialise_securepuppet
 fi
 
-log 'Complete, now:'
-log '  1) Optional: populate /etc/securepuppet'
-log '  2) Optional: modify local /root/puppet'
-log '  3) cd /root/puppet && ./apply.sh'
+cd /root/puppet
+[ -n "${SKIP_APPLY:-}" ] || exec ./apply.sh

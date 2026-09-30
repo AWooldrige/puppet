@@ -1,0 +1,11 @@
+#!/bin/sh
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+# Open an ordinary browser window on the panel.
+#
+# This uses Firefox's default profile, not the kiosk one.
+set -eu
+
+systemctl --user stop kitchen-kiosk || true
+exec /snap/bin/firefox "$@"

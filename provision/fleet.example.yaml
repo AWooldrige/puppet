@@ -1,0 +1,83 @@
+# The shape of fleet.yaml in the puppet-secure repo. Every value here is fake.
+
+fleet:
+  wifi_ssid: ExampleNetwork
+  wifi_password: example-wifi-password
+  google_chat_webhook_url: https://chat.googleapis.com/v1/spaces/EXAMPLE/messages?key=example
+  gateway: 192.168.50.1
+  nameservers: [192.168.50.1]
+  regulatory_domain: GB
+
+# `addresses` maps each interface to its static address, below the router's pool so
+# nothing can collide with a lease. The seed and raspi::network both read it, so they
+# agree after the first apply. Omit it for anything that roams, like a laptop or a
+# phone, which takes an address from the pool instead.
+#
+# `woolie_password_hash` appears only on the headless hosts, which include
+# woolie::managedpassword. One long random value, generated once and shared by all of
+# them, with the plaintext in the password manager: sudo there is passwordless, so
+# nobody types it. It is repeated per host rather than put in `fleet` because `fleet`
+# values reach workstations too, and workstations deliberately have none - theirs is
+# the memorised password, so no hash of it is written down anywhere.
+hosts:
+  lendh1:
+    role: desktop
+
+  ltpdh1:
+    role: desktop
+
+  ltpdh2:
+    role: desktop
+
+  hplaptop2:
+    role: desktop
+
+  # Wired and wireless at the same time. Each interface gets its own address, and
+  # ethernet takes the lower route metric so it wins.
+  blrsh1:
+    role: pi
+    addresses:
+      eth0: 192.168.50.5
+      wlan0: 192.168.50.6
+    woolie_password_hash: $6$examplesalt$exampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleex
+
+  ktcdh1:
+    role: pi
+    addresses:
+      wlan0: 192.168.50.9
+    woolie_password_hash: $6$examplesalt$exampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleex
+    kitchen_calendar_ids:
+      - example.household@group.calendar.google.com
+      - example.bins@group.calendar.google.com
+    kitchen_weather_latitude: 51.5
+    kitchen_weather_longitude: -0.12
+    kitchen_service_account_json: |
+      {
+        "type": "service_account",
+        "project_id": "example-project",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nNOTAKEY\n-----END PRIVATE KEY-----\n",
+        "client_email": "example@example-project.iam.gserviceaccount.com",
+        "token_uri": "https://oauth2.googleapis.com/token"
+      }
+
+  # Ethernet only.
+  websh1:
+    role: server
+    addresses:
+      eth0: 192.168.50.7
+    woolie_password_hash: $6$examplesalt$exampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleexampleex
+    home_assistant_long_lived_access_token: example.long.lived.token.not.real
+    # Deliberately awkward: a dollar, a quote and a backslash
+    backuptool_passphrase: example $notavariable 'quoted' back\slash
+
+  pxlmh1:
+    role: mobile
+
+artefacts:
+  aws_profiles:
+    ddns:
+      access_key_id: AKIAEXAMPLEDDNS00000
+      secret_access_key: exampleexampleexampleexampleexampleddns
+    backuptool:
+      access_key_id: AKIAEXAMPLEBACKUP000
+      secret_access_key: exampleexampleexampleexampleexamplebkup

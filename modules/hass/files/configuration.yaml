@@ -11,6 +11,9 @@ scene: !include scenes.yaml
 
 homeassistant:
   external_url: "https://hass.h.wooldrige.co.uk/"
+  # Puppet-managed automations/rest_commands live here so they don't clash with the
+  # UI editor (which owns automations.yaml).
+  packages: !include_dir_named packages
 
 http:
   use_x_forwarded_for: true

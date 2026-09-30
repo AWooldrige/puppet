@@ -11,14 +11,11 @@ node /^lendh1/ {
     include desktop
 }
 
-node /^webpi/ {
-    include webpi
+node /^ktcdh1/ {
+    include ktcdh1
 }
-node /^epdsh1/ {
-    include epdsh1
-}
-node /^boilerpi/ {
-    include boilerpi
+node /^blrsh1/ {
+    include blrsh1
 }
 node /^websh1/ {
     include websh1

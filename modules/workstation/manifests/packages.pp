@@ -15,6 +15,9 @@ class workstation::packages {
         # `thefuzz` (e.g. `from thefuzz import fuzz`), not `fuzzywuzzy`.
         'python3-thefuzz',  # Accounts (fuzzy matching)
         'python3-structlog',
+        'python3-yaml',  # Reads the fleet secret manifest, see provision/
+        'python3-cryptography',  # Issues the PKI leaves, see provision/issue_cert.py
+        'age',
         # https://github.com/rbenv/ruby-build/discussions/2012#discussioncomment-4619519
         'libyaml-dev',  # Needed for installing nanoc gem (one of the deps)
         'ledger',

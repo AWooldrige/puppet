@@ -1,0 +1,17 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+#
+# On Ubuntu the Touch Display 2 comes up with bl_power set to FB_BLANK_POWERDOWN, so
+# the display is detected, GNOME draws to it, but nothing can be seen.
+#
+# ACTION=="add|change" rather than just add: the backlight is re-announced as a
+# change event on some boots.
+
+# Unblank inline so it happens as soon as the device appears, then let systemd run
+# the init script for brightness and permissions. TAG+="systemd" is required for
+# SYSTEMD_WANTS to work.
+ACTION=="add|change", SUBSYSTEM=="backlight", KERNEL=="panel_backlight*", ATTR{bl_power}="0", TAG+="systemd", ENV{SYSTEMD_WANTS}+="panel-backlight-init.service"
+
+# Group read only. The board service only needs to detect that input happened.
+ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_TOUCHSCREEN}=="1", GROUP="paneltouch", MODE="0640", SYMLINK+="input/kitchen-touch"

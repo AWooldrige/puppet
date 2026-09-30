@@ -1,0 +1,47 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+#
+# Started by udev via SYSTEMD_WANTS once the Touch Display 2 backlight exists.
+# Not enabled: there is nothing to do before the device appears.
+
+[Unit]
+Description=Bring up the Raspberry Pi Touch Display 2 backlight
+# Do not fail a boot with no panel attached.
+ConditionPathIsDirectory=/sys/class/backlight
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+SyslogIdentifier=panel-backlight
+ExecStart=/usr/local/sbin/panel-backlight-init
+
+# Writing and chgrp'ing sysfs attributes needs CAP_CHOWN/CAP_FOWNER
+User=root
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateNetwork=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectProc=invisible
+ProtectSystem=strict
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# @privileged contains @chown and this unit chgrp's the backlight attributes, so add it back.
+SystemCallFilter=@chown
+UMask=0022
+
+# ProtectKernelTunables=yes would remount /sys read-only
+ProtectKernelTunables=no

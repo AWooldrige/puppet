@@ -19,18 +19,17 @@ class basenode {
 class basenode::workstation inherits basenode {
     include ubutils::sysctl
     include ubutils::epsonscanner
+    include ubutils::flatpakfuse
     include workstation::packages
+    include workstation::sops
     include woolie::workstationprefs
     include influx::telegraf
-
-    # dconf not used by lightdm
     include dconf
 }
 
 class desktop inherits basenode::workstation {
 }
 class laptop inherits basenode::workstation {
-    # Laptop specific (usually for now)
     include dconf::lowmemmachine
 }
 
@@ -41,38 +40,24 @@ class pi inherits basenode {
     include avahi
     include influx::telegraf
     include escalate
+    include woolie::nopasswordsudo
+    include woolie::managedpassword
 }
-class webpi inherits pi {
-    include ddns::remove
 
-    # Raspbian version not up-to-date enough yet.
-    # python3-lgpio only available on Ubuntu Server.
-    # ds18b20_manager autodetects, with fallback to RPi.GPIO
-    package { 'python3-lgpio': ensure => installed }
-    include raspi::ds18b20
-}
-class kitchentvpi inherits pi {
-    include raspi::autologin
-    include raspi::noscreenblanking
-    include raspi::inforad
-}
-class epdsh1 inherits pi {
-    include raspi::wifi
-    include raspi::spi
-    include raspi::epaperdisplay
+class ktcdh1 inherits pi {
+    include raspi::network
+    include raspi::touchdisplay
     include raspi::pmsensor
+    include kitchen::board
+    include kitchen::proxy
+    include kitchen::kiosk
 }
-class boilerpi inherits pi {
-    include raspi::autowifirestart
+class blrsh1 inherits pi {
+    include raspi::network
     include raspi::ds18b20
     include raspi::boiler
 
-    # ds18b20_manager uses lgpio (falls back to RPi.GPIO): install lgpio on Ubuntu 24.04+ (RPi.GPIO unpackaged, sysfs GPIO gone), RPi.GPIO on the older OS.
-    if $facts['os']['release']['major'] in ['22.04', '11'] {
-        package { 'python3-rpi.gpio': ensure => installed }
-    } else {
-        package { 'python3-lgpio': ensure => installed }
-    }
+    package { 'python3-lgpio': ensure => installed }
 }
 
 
@@ -81,7 +66,7 @@ class websh1 inherits pi {
     include backuptool
     include raspi
     include avahi
-    include docker::docker
+    include raspi::network
 
     include nginx
     include raspi::h

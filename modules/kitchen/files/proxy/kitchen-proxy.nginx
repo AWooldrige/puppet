@@ -1,0 +1,109 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+#
+# Loopback-only mTLS proxy for the kitchen panel.
+#
+# The tabs need Home Assistant and Grafana in an iframe, both behind mTLS on
+# websh1. A browser cannot present a client certificate from an iframe without one
+# in its own store.
+#
+# Both upstreams' X-Frame-Options and Content-Security-Policy are stripped so the
+# pages can be iframed.
+
+server {
+    listen 127.0.0.1:5274;
+
+    access_log /var/log/nginx/kitchen-proxy.access.log;
+    error_log /var/log/nginx/kitchen-proxy.error.log warn;
+
+    allow 127.0.0.1;
+    deny all;
+
+    location / {
+        proxy_pass https://192.168.50.7;
+
+        proxy_set_header Host hass.h.wooldrige.co.uk;
+        proxy_ssl_name hass.h.wooldrige.co.uk;
+        proxy_ssl_server_name on;
+
+        proxy_ssl_certificate /etc/wooldrigepki/certificates/client.pem;
+        proxy_ssl_certificate_key /etc/wooldrigepki/privatekeys/client.pem;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        # Both listeners proxy to the same address with a different
+        # proxy_ssl_name, and the upstream session cache is keyed on the address
+        # alone. Reuse therefore offers one vhost a session belonging to the
+        # other.
+        proxy_ssl_session_reuse off;
+
+        # Home Assistant's frontend is a websocket application.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+
+        proxy_hide_header X-Frame-Options;
+        proxy_hide_header Content-Security-Policy;
+        proxy_hide_header Content-Security-Policy-Report-Only;
+
+        proxy_redirect https://hass.h.wooldrige.co.uk/ http://127.0.0.1:5274/;
+        proxy_redirect http://hass.h.wooldrige.co.uk/ http://127.0.0.1:5274/;
+    }
+}
+
+server {
+    listen 127.0.0.1:5275;
+
+    access_log /var/log/nginx/kitchen-proxy.access.log;
+    error_log /var/log/nginx/kitchen-proxy.error.log warn;
+
+    allow 127.0.0.1;
+    deny all;
+
+    # An allow-list rather than a filter. h.wooldrige.co.uk also serves TiddlyWiki,
+    # which this device must not reach, so everything outside the Grafana prefix is
+    # refused
+    location / {
+        return 403 "This device is only allowed Grafana.\n";
+    }
+
+    location = /grafana {
+        return 302 /grafana/;
+    }
+
+    location /grafana/ {
+        # No URI part on proxy_pass, so the prefix is passed through unchanged.
+        proxy_pass https://192.168.50.7;
+
+        proxy_set_header Host h.wooldrige.co.uk;
+        proxy_ssl_name h.wooldrige.co.uk;
+        proxy_ssl_server_name on;
+
+        proxy_ssl_certificate /etc/wooldrigepki/certificates/client.pem;
+        proxy_ssl_certificate_key /etc/wooldrigepki/privatekeys/client.pem;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        # See the note on the Home Assistant listener above.
+        proxy_ssl_session_reuse off;
+
+        # Grafana uses websockets for live panels.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+
+        proxy_hide_header X-Frame-Options;
+        proxy_hide_header Content-Security-Policy;
+        proxy_hide_header Content-Security-Policy-Report-Only;
+
+        proxy_redirect https://h.wooldrige.co.uk/grafana/ http://127.0.0.1:5275/grafana/;
+        proxy_redirect http://h.wooldrige.co.uk/grafana/ http://127.0.0.1:5275/grafana/;
+    }
+}

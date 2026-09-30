@@ -2,10 +2,7 @@ class nginx {
     include certbot
     include stdlib
 
-    package { [
-            'nginx',
-            'apache2-utils' # has htpasswd in
-        ]:
+    package { 'nginx':
         ensure => installed
     }
 
@@ -21,15 +18,6 @@ class nginx {
         '/etc/nginx/sites-enabled/default'
         ]:
         ensure => 'absent',
-    }
-
-    # Mainly for storing htpasswd files
-    file { '/etc/nginx/secrets':
-        ensure => 'directory',
-        owner  => 'root',
-        group  => 'root',
-        mode   => '0755',
-        require => Package['nginx']
     }
 
     # From: https://ssl-config.mozilla.org/ffdhe4096.txt
@@ -53,6 +41,15 @@ class nginx {
 
     file { '/etc/nginx/conf.d/log-formats.conf':
         source  => 'puppet:///modules/nginx/conf.d/log-formats.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Package['nginx'],
+        notify  => Service['nginx']
+    }
+
+    file { '/etc/nginx/conf.d/client-authorisation.conf':
+        source  => 'puppet:///modules/nginx/conf.d/client-authorisation.conf',
         owner   => 'root',
         group   => 'root',
         mode    => '0644',

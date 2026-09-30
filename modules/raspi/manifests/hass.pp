@@ -12,7 +12,6 @@ class raspi::hass {
         mode   => '0644',
         require => [
             Package['nginx'],
-            Exec['Check manually added credentials file is present for h (from LastPass)'],
             Certbot::Cert['hass.h.wooldrige.co.uk'],
             File['/var/www/h.wooldrige.co.uk/noauth/auth_required.html']
         ],

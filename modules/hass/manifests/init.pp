@@ -11,7 +11,7 @@ class hass {
         uid => 19004,
         gid => 'homeassistant',
         groups => ['bluetooth'],
-        require => Group['homeassistant']
+        require => [Group['homeassistant'], Package['bluez']]
     }
 
     file { '/var/lib/homeassistant':
@@ -58,12 +58,34 @@ class hass {
     exec { 'verify-quadlet-configs':
         command => '/usr/lib/systemd/system-generators/podman-system-generator --dryrun',
         provider => 'shell',
-        refreshonly => true
+        refreshonly => true,
+        require => Package['podman']
     }
 
-    # Needed by HASS bluetooth integration
+    # Needed by HASS bluetooth integration.
     package { 'bluez':
         ensure => installed
+    } ->
+    service { 'bluetooth':
+        ensure => running,
+        enable => true
+    }
+
+    file { '/etc/dbus-1/system.d/home-assistant-bluetooth.conf':
+        source  => 'puppet:///modules/hass/home-assistant-bluetooth-dbus.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => Service['bluetooth'],
+        notify  => [
+            Exec['reload-dbus-config'],
+            Service['home-assistant']
+        ]
+    }
+
+    exec { 'reload-dbus-config':
+        command     => '/usr/bin/busctl call org.freedesktop.DBus / org.freedesktop.DBus ReloadConfig',
+        refreshonly => true
     }
 
     package { 'dbus-broker':
@@ -79,7 +101,10 @@ class hass {
         enable  => true,
         require => [
             Package['bluez'],
+            Service['bluetooth'],
             Service['dbus-broker'],
+            File['/etc/dbus-1/system.d/home-assistant-bluetooth.conf'],
+            Exec['reload-dbus-config'],
             File['/etc/udev/rules.d/99-sonoff-zigbee.rules'],
             Exec['verify-quadlet-configs'],
             Exec['daemon-reload']
@@ -92,21 +117,44 @@ class hass {
         group   => 'root',
         mode    => '0644',
         require => [
-            File['/var/lib/homeassistant']
+            File['/var/lib/homeassistant'],
+            File['/var/lib/homeassistant/packages']
         ],
         notify => [
             Service['home-assistant'],
             Exec['verify-home-assistant-configuration-yaml']
         ]
     }
-    # There's an obvious initial install race condition here that I need to
-    # sort out at some point
     exec { 'verify-home-assistant-configuration-yaml':
         command => 'podman exec homeassistant python -m homeassistant --script check_config --config /config',
         provider => 'shell',
-        refreshonly => true
+        refreshonly => true,
+        require => Service['home-assistant']
     }
 
+    file { '/var/lib/homeassistant/packages':
+        ensure  => 'directory',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        require => File['/var/lib/homeassistant'],
+    }
+
+    file { [
+            '/etc/nginx/sites-enabled/epaper-board',
+            '/etc/nginx/sites-available/epaper-board'
+        ]:
+        ensure => 'absent',
+        notify => Exec['reload-nginx']
+    }
+    file { '/var/lib/homeassistant/packages/epaper.yaml':
+        ensure  => 'absent',
+        require => File['/var/lib/homeassistant/packages'],
+        notify  => [
+            Service['home-assistant'],
+            Exec['verify-home-assistant-configuration-yaml']
+        ]
+    }
 
     file { '/usr/local/sbin/backup-hass':
         source => 'puppet:///modules/hass/backup-hass',
@@ -117,7 +165,6 @@ class hass {
     cron { 'Backup hass daliy':
         ensure  => present,
         command => '/usr/bin/systemd-cat -t "backup-hass" /usr/local/sbin/backup-hass',
-        # Home assistant backups default to running between 04:45 and 05:45
         hour => [7],
         minute => 5,
         require => [

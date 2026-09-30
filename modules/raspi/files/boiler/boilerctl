@@ -3,6 +3,7 @@ import os
 import math
 import socket
 import datetime
+import fcntl
 import time
 import unittest
 import logging
@@ -12,10 +13,10 @@ import requests
 import pytz
 import click
 from gpiozero import Servo
-from gpiozero.pins.pigpio import PiGPIOFactory
 
 DB_PATH = '/var/lib/boilerctl.sqlite3'
 DS18B20_DB_PATH = '/var/ds18b20_readings.db'
+LOCK_PATH = '/run/boilerctl.lock'
 
 # Warmest temp that CWC should start tail off at
 COLD_WEATHER_COMPENSATION_START_TEMP = 10
@@ -101,8 +102,6 @@ def read_most_recent_time_series_value_from_local_db(name):
 
 
 def move(pos):
-    pigpio_f = PiGPIOFactory()
-
     """
     Spec sheet[1] for the SF180M says:
         - full min: 0.5ms
@@ -112,17 +111,18 @@ def move(pos):
     [1] https://m.media-amazon.com/images/I/81+CuFyNFcL.pdf
     """
     servo = Servo(
-        12,  # GPIO 12 (header pin 32, hardware PWM 0)
+        12,  # GPIO 12 (header pin 32)
         initial_value=None,  # Otherwise this blasts the servo to 'mid' as it defaults to 0
         min_pulse_width=0.5/1000,
         max_pulse_width=2.5/1000,
-        pin_factory=pigpio_f  # Using pigpio to allow hardware PWM, removing jitter
     )
 
     send_metric('desired_servo_position', pos)
     servo.value = pos
-    time.sleep(5)
-    servo.detach()
+    try:
+        time.sleep(2)
+    finally:
+        servo.detach()
 
 
 def get_outside_temp_from_open_meteo():
@@ -233,10 +233,14 @@ def calculate_boiler_efficiency_metric_if_possible():
         logging.exception("Unable to calculate boiler efficiency.")
 
 
+def desired_temp_matches(last_record, desired_temp_c):
+    return bool(last_record and abs(last_record['value'] - desired_temp_c) < 0.5)
+
+
 def move_dial_to_temp(desired_temp_c):
     send_metric('desired_temp_celcius', desired_temp_c)
     last_record = read_most_recent_time_series_value_from_local_db('desired_temp')
-    if last_record and last_record['time_delta_from_now'].total_seconds() < (60*2) and last_record['value'] > (desired_temp_c - 0.5) and last_record['value'] < (desired_temp_c + 0.5):
+    if desired_temp_matches(last_record, desired_temp_c):
         click.echo(f"Boiler dial already set to {desired_temp_c}C +/- 0.5C ({last_record['value']}), not moving again.")
     else:
         click.echo(f"Moving boiler dial to {desired_temp_c}C")
@@ -350,11 +354,24 @@ if __name__ == "__main__":
     assert temp_to_servo_position(40) == -1
     assert temp_to_servo_position(75) == 1
     assert temp_to_servo_position(57.5) == 0
-
-    initialise_sqlite_db_if_needed()
+    assert desired_temp_matches({'value': 40, 'time_delta_from_now': datetime.timedelta(days=1)}, 40)
+    assert not desired_temp_matches({'value': 40}, 41)
 
     cli.add_command(calibrate)
     cli.add_command(autoset)
     cli.add_command(evaluate)
     cli.add_command(demo)
-    cli()
+
+    lock_file = open(LOCK_PATH, 'w')
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        lock_file.close()
+        click.echo('Another boilerctl command is already running; skipping.')
+        raise SystemExit(0)
+
+    try:
+        initialise_sqlite_db_if_needed()
+        cli()
+    finally:
+        lock_file.close()

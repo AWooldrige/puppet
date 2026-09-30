@@ -1,0 +1,514 @@
+/*
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+Kitchen board styles. Target viewport is 516x917 CSS px in portrait, read from across
+a kitchen, so type is larger than a phone's and every touch target is at least 44px.
+Firefox's devPixelsPerPx does the scaling, which is why these are plain px values.
+*/
+
+:root {
+    --ink: #12161c;
+    --ink-soft: #566070;
+    --ink-faint: #8c95a3;
+    --paper: #ffffff;
+    --paper-alt: #f2f4f7;
+    --rule: #d8dde5;
+    --accent: #1b4f9c;
+    --warn-bg: #8a2b12;
+    --warn-ink: #ffffff;
+    --accent-soft: #e8f0fb;
+    --good: #1c6b3a;
+    --warn: #8a5a12;
+    --tap: 44px;
+    --row: 40px;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", "Cantarell", "DejaVu Sans", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.3;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.topbar {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 12px 6px;
+    border-bottom: 2px solid var(--ink);
+}
+
+.topbar[hidden] {
+    display: none;
+}
+
+.topbar-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.today-date {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.today-summary {
+    margin: 1px 0 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+.topbar-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.icon-button {
+    width: var(--tap);
+    height: var(--tap);
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink);
+    background: var(--paper-alt);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+}
+
+.icon-button:active {
+    background: var(--rule);
+}
+
+.icon-button.is-busy {
+    color: var(--ink-faint);
+}
+
+.banner {
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--warn-ink);
+    background: var(--warn-bg);
+}
+
+.banner ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.main {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.board {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.hero {
+    padding: 8px 12px;
+    background: var(--paper-alt);
+    border-bottom: 1px solid var(--rule);
+}
+
+.hero-label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+}
+
+.hero-title {
+    margin: 1px 0 0;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.hero-when {
+    margin: 2px 0 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.hero-where {
+    margin: 1px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.section-heading {
+    margin: 0;
+    padding: 4px 12px 3px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+    background: var(--accent);
+}
+
+.event-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.event {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--row);
+    padding: 5px 12px;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    background: var(--paper);
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+}
+
+.event:active {
+    background: var(--paper-alt);
+}
+
+.event.is-today {
+    border-left: 5px solid var(--accent);
+    padding-left: 7px;
+    background: var(--accent-soft);
+}
+
+.event-day {
+    flex: 0 0 54px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.event-day small {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-soft);
+}
+
+.event-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.event-title {
+    display: block;
+    font-size: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.event-where {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event.is-today .event-time {
+    color: var(--accent);
+}
+
+.event-time {
+    flex: 0 0 auto;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+}
+
+.empty {
+    margin: 0;
+    padding: 24px 12px;
+    font-size: 17px;
+    color: var(--ink-soft);
+    text-align: center;
+}
+
+.frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--paper);
+}
+
+.frame-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    background: var(--paper);
+}
+
+/* Without this the display above beats the hidden attribute and the error panel
+   covers the board on every tab. */
+.frame-error[hidden] {
+    display: none;
+}
+
+.frame-error-title {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.frame-error-detail {
+    margin: 0;
+    font-size: 15px;
+    color: var(--ink-soft);
+}
+
+.weather {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--row);
+    padding: 6px 12px;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    background: var(--paper);
+    border: 0;
+    border-top: 3px solid var(--ink);
+}
+
+.weather[hidden] {
+    display: none;
+}
+
+.weather:active {
+    background: var(--paper-alt);
+}
+
+.weather-line {
+    min-width: 0;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.weather-chevron {
+    flex: 0 0 auto;
+    font-size: 11px;
+    color: var(--ink-faint);
+}
+
+.status {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+}
+
+.status[hidden] {
+    display: none;
+}
+
+/* The body clips rather than scrolls, so anything too wide for the viewport is
+   silently lost off the right hand edge. Shrinking beats disappearing. */
+.status > * {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.status-flag {
+    font-weight: 700;
+    color: var(--good);
+}
+
+.status-flag.is-stale {
+    color: var(--warn);
+}
+
+.status-flag.is-bad {
+    color: var(--warn-bg);
+}
+
+.tabs {
+    display: flex;
+    border-top: 1px solid var(--rule);
+}
+
+.tab {
+    flex: 1 1 0;
+    /* min-width defaults to auto for a flex item, which stops the labels shrinking
+       and pushes the last tab off the screen. */
+    min-width: 0;
+    white-space: nowrap;
+    min-height: 48px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: var(--paper-alt);
+    border: 0;
+    border-right: 1px solid var(--rule);
+}
+
+.tab:last-child {
+    border-right: 0;
+}
+
+.tab.is-active {
+    color: var(--paper);
+    background: var(--ink);
+}
+
+.tab:active {
+    background: var(--ink-light);
+}
+
+.tab.is-loading {
+    background: var(--ink-light);
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(18, 22, 28, 0.55);
+}
+
+.overlay[hidden] {
+    display: none;
+}
+
+.overlay-card {
+    width: 100%;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--paper);
+    border-radius: 14px;
+}
+
+.overlay-when {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.overlay-title {
+    margin: 4px 0 0;
+    font-size: 23px;
+    line-height: 1.2;
+}
+
+.overlay-where,
+.overlay-range {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: var(--ink-soft);
+}
+
+.forecast-list {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.forecast-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 16px;
+    border-bottom: 1px solid var(--rule);
+}
+
+.forecast-day {
+    font-weight: 700;
+}
+
+.forecast-detail {
+    color: var(--ink-soft);
+    text-align: right;
+}
+
+.text-button {
+    width: 100%;
+    min-height: var(--tap);
+    margin-top: 14px;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--paper);
+    background: var(--ink);
+    border: 0;
+    border-radius: 10px;
+}
+
+.wake-shield {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: transparent;
+}
+
+.wake-shield[hidden] {
+    display: none;
+}
+
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
