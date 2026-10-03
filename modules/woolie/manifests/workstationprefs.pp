@@ -88,4 +88,18 @@ class woolie::workstationprefs {
             Package['pv']
         ]
     }
+
+    file { ['/home/woolie/.kiro', '/home/woolie/.kiro/steering']:
+        ensure => directory,
+        owner => 'woolie',
+        group => 'woolie',
+        require => User[$woolie::uname]
+    }
+
+    file { '/home/woolie/.kiro/steering/writing-voice.md':
+        ensure => link,
+        target => '/home/woolie/checkouts/puppet-secure/kiro/steering/writing-voice.md',
+        owner => 'woolie',
+        group => 'woolie',
+    }
 }
