@@ -1,39 +1,60 @@
 class ddns {
-    package { [
-            # 'python3-boto3',  # Provided by base packages module
-            'python3-dnspython',
-            # 'python3-miniupnpc'  # Not available in Debian yet
-        ]:
+    # python3-boto3, python3-click and python3-requests come from base::packages
+    package { 'python3-dnspython':
         ensure => installed
-    } ->
-    # The credentials file itself is written by provision/
-    file { '/home/woolie/.aws':
-        ensure  => 'directory',
-        owner   => 'woolie',
-        group   => 'woolie',
-        mode    => '0755',
-        require => User['woolie']
-    } ->
+    }
+
     file { '/usr/local/bin/ddns':
-        source  => 'puppet:///modules/ddns/ddns',
+        source  => 'puppet:///modules/ddns/ddns.py',
         owner   => 'root',
         group   => 'root',
         mode    => '0755',
         require => [
+            Package['python3-boto3'],
             Package['python3-click'],
+            Package['python3-dnspython'],
             Package['python3-requests']
         ]
-    } ->
-    cron { 'Check Dynamic DNS entry at regular intervals':
-        ensure  => present,
-        command => '/usr/bin/systemd-cat -t "ddns" /usr/local/bin/ddns',
-        minute  => [0, 10, 20, 30, 40, 50],
-        user    => 'woolie'
-    } ->
-    cron { 'Check Dynamic DNS entry at boot':
-        ensure  => present,
-        command => '/usr/bin/systemd-cat -t "ddns" /usr/local/bin/ddns',
-        special => 'reboot',
-        user    => 'woolie'
+    }
+
+    file { '/etc/systemd/system/ddns.service':
+        source => 'puppet:///modules/ddns/ddns.service',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
+        notify => Exec['daemon-reload']
+    }
+
+    file { '/etc/systemd/system/ddns.timer':
+        source => 'puppet:///modules/ddns/ddns.timer',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0644',
+        notify => Exec['daemon-reload']
+    }
+
+    # /etc/aws/ddns.credentials is written by provision/
+    service { 'ddns.timer':
+        ensure  => running,
+        enable  => true,
+        require => [
+            File['/usr/local/bin/ddns'],
+            File['/etc/systemd/system/ddns.service'],
+            File['/etc/systemd/system/ddns.timer'],
+            File['/usr/local/sbin/escalate'],
+            Exec['daemon-reload']
+        ]
+    }
+
+    cron { [
+            'Check Dynamic DNS entry at regular intervals',
+            'Check Dynamic DNS entry at boot'
+        ]:
+        ensure => absent,
+        user   => 'woolie'
+    }
+
+    file { '/home/woolie/.aws/credentials':
+        ensure => absent
     }
 }

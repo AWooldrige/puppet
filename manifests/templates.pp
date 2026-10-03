@@ -23,6 +23,7 @@ class basenode::workstation inherits basenode {
     include workstation::packages
     include workstation::sops
     include woolie::workstationprefs
+    include woolie::passwordsudo
     include influx::telegraf
     include dconf
 }

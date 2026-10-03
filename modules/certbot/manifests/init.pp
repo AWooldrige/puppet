@@ -19,20 +19,29 @@ class certbot {
         group   => 'root',
         mode    => '0755'
     } ->
-    file { '/etc/woolie_user_certbot_env_vars.conf':
-        source  => 'puppet:///modules/certbot/woolie_user_certbot_env_vars.conf',
+    file { '/etc/systemd/system/certbot.service.d':
+        ensure  => 'directory',
         owner   => 'root',
         group   => 'root',
         mode    => '0755'
     } ->
-    file_line { 'Add Route53 AWS credentials in to certbot renewal timer/oneshot service':
-        # Adding this in to the certbot provided systemd timer isn't very nice,
-        # but it's the only way to get auto renewals to use the correct
-        # credentials. See: https://github.com/certbot/certbot/issues/7873
-        ensure  => present,
+    file { '/etc/systemd/system/certbot.service.d/aws.conf':
+        source  => 'puppet:///modules/certbot/certbot.service.aws.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        notify  => Exec['daemon-reload']
+    }
+
+    file_line { 'Remove the EnvironmentFile from the vendor certbot.service':
+        ensure  => absent,
         path    => '/usr/lib/systemd/system/certbot.service',
         line    => 'EnvironmentFile=/etc/woolie_user_certbot_env_vars.conf',
-        after   => '^\[Service\]$'
+        require => Package['python3-certbot'],
+        notify  => Exec['daemon-reload']
+    } ->
+    file { '/etc/woolie_user_certbot_env_vars.conf':
+        ensure  => absent
     }
 }
 

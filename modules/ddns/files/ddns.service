@@ -1,0 +1,53 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+[Unit]
+Description=Point the Route53 record for h.wooldrige.co.uk at this network's address
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+SyslogIdentifier=ddns
+ExecStart=/usr/local/bin/ddns
+TimeoutStartSec=5min
+
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+LoadCredential=aws:/etc/aws/ddns.credentials
+LoadCredential=google_chat_webhook_url:/etc/google_chat_webhook_url
+Environment=AWS_SHARED_CREDENTIALS_FILE=%d/aws
+
+DynamicUser=yes
+StateDirectory=ddns
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProcSubset=pid
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+RemoveIPC=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+UMask=0077
+
+MemoryMax=256M
+TasksMax=32

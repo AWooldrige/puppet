@@ -135,10 +135,10 @@ if [[ ${#PASSPHRASE} -le 10 ]] ; then
     error "Key in /etc/backuptool_passphrase looks too short"
 fi
 
-# Duplicity can't use boto's named credential profies, so read the [backuptool]
+# Duplicity can't use boto's named credential profiles, so read the [backuptool]
 # one directly.
 function aws_credential {
-    sed -n '/^\[backuptool\]/,/^\[/p' /home/woolie/.aws/credentials \
+    sed -n '/^\[backuptool\]/,/^\[/p' /etc/aws/backuptool.credentials \
         | sed -n "s/^${1}[[:space:]]*=[[:space:]]*//p" | head -n 1
 }
 

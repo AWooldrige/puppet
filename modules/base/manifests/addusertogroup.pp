@@ -6,7 +6,7 @@ define base::addusertogroup (
 
     if $ensure == 'exists' {
         exec { "Ensure user ${username} added to group ${groupname}":
-            unless => "/bin/grep -q '${groupname}\\S*${username}' /etc/group",
+            unless => "/usr/bin/id -nG ${username} | /bin/grep -qw ${groupname}",
             command => "/sbin/usermod -aG ${groupname} ${username}"
         }
     }

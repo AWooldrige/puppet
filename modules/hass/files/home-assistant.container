@@ -33,7 +33,7 @@ Volume=/run/dbus:/run/dbus:ro
 PodmanArgs=--security-opt apparmor=unconfined
 
 # No AddCapability=NET_ADMIN / NET_RAW, which Home Assistant's container
-# documentation asks for. Bluetooth runs in its degraded mode beacuse of this,
+# documentation asks for. Bluetooth runs in its degraded mode because of this,
 # which is ok
 
 [Service]

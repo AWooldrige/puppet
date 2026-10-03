@@ -193,12 +193,19 @@ class Secrets(unittest.TestCase):
             path.write_text(script)
             subprocess.run(['sh', '-n', str(path)], check=True)
 
+    def test_each_aws_consumer_gets_only_its_own_key(self):
+        profiles = MANIFEST['artefacts']['aws_profiles']
+        for name, other in (('ddns', 'backuptool'), ('backuptool', 'ddns')):
+            spec = next(f for f in provision.FILES if f['source'] == f'aws:{name}')
+            self.assertEqual(f'/etc/aws/{name}.credentials', spec['path'])
+            self.assertEqual(('0600', None), (spec['mode'], spec.get('owner')))
+            rendered = provision.content_for(spec['source'], 'websh1', MANIFEST, None)
+            self.assertIn(profiles[name]['secret_access_key'], rendered)
+            self.assertNotIn(profiles[other]['secret_access_key'], rendered)
+
     def test_backuptool_reads_its_own_credentials_section(self):
-        # The real extraction, lifted from modules/backuptool/files/backuptool. It
-        # must find the [backuptool] profile and not the [ddns] one above it.
-        rendered = provision.aws_credentials(MANIFEST['artefacts']['aws_profiles'])
-        self.assertIn('[ddns]', rendered)
-        self.assertIn('[backuptool]', rendered)
+        # The real extraction, lifted from modules/backuptool/files/backuptool.
+        rendered = provision.content_for('aws:backuptool', 'websh1', MANIFEST, None)
         with tempfile.TemporaryDirectory() as scratch:
             path = Path(scratch) / 'credentials'
             path.write_text(rendered)
@@ -209,8 +216,6 @@ class Secrets(unittest.TestCase):
                 capture_output=True, text=True)
         expected = MANIFEST['artefacts']['aws_profiles']['backuptool']['access_key_id']
         self.assertEqual(expected, found.stdout.strip())
-        self.assertNotEqual(MANIFEST['artefacts']['aws_profiles']['ddns']['access_key_id'],
-                            found.stdout.strip())
 
 
 class Certificates(unittest.TestCase):

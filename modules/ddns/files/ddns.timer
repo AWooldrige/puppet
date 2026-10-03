@@ -1,0 +1,12 @@
+#########################################################################
+##   This file is controlled by Puppet - changes will be overwritten   ##
+#########################################################################
+
+[Unit]
+Description=Check the Route53 record for h.wooldrige.co.uk every 5 minutes
+
+[Timer]
+OnCalendar=*:0/5
+
+[Install]
+WantedBy=timers.target

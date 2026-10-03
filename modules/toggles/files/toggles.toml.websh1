@@ -8,5 +8,5 @@
 # TOML boolean values: true/false
 
 # Setting enabled to false prevents write behaviour
-enabled_gdpup = false
+enabled_gdpup = true
 enabled_backups = true

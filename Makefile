@@ -7,6 +7,7 @@ test: test-python test-shell test-provision
 
 test-python:
 	cd modules/kitchen/files && python3 -B -m unittest discover -v
+	cd modules/ddns/files && python3 -B -m unittest -v test_ddns
 
 test-shell:
 	./modules/kitchen/files/tests/test_panel_backlight_init.sh

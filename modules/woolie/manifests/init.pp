@@ -13,13 +13,12 @@ class woolie {
         uid             => 18001,  # Best to sync UIDs across machines
         gid             => $uname,
         # Need to be in the video group to be able to use omxplayer on RPIs
-        groups          => ['sudo', 'sshallowedlogin', 'passwordsudo', 'video', 'dialout', 'wooldrigepkicertaccess'],
+        groups          => ['sudo', 'sshallowedlogin', 'video', 'dialout', 'wooldrigepkicertaccess'],
         shell           => '/bin/bash',
         home            => $homedir,
         managehome      => true,
         purge_ssh_keys  => true,
         require         => [ Group['sshallowedlogin'],
-                             Group['passwordsudo'],
                              Group['wooldrigepkicertaccess']]
     }
 

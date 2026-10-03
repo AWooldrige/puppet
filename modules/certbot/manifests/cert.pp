@@ -10,7 +10,7 @@ define certbot::cert (
         exec { "issuing_certbot_cert_for_${domain}":
             creates => "/etc/letsencrypt/live/${domain}/privkey.pem",
             environment => [
-                'AWS_SHARED_CREDENTIALS_FILE=/home/woolie/.aws/credentials',
+                'AWS_SHARED_CREDENTIALS_FILE=/etc/aws/ddns.credentials',
                 'AWS_PROFILE=ddns'
             ],
             command => "/usr/bin/certbot certonly --noninteractive --agree-tos -m certificates@wooldrige.co.uk --dns-route53 -d ${domain}${extraargs}" ,

@@ -13,11 +13,9 @@ import yaml
 REPO = Path(__file__).resolve().parent.parent
 SECURE_REFERENCE = re.compile(r'\$secure::([a-z_][a-z0-9_]*)')
 
-# Numeric ids so files can land before Puppet has created the users and groups.
-# All three are pinned in the manifests.
+# Numeric ids so files can land before Puppet has created the groups. The PKI
+# group's id is pinned in the manifests.
 ROOT = '0'
-WOOLIE = '18001'
-WOOLIE_GROUP = '20001'
 PKI_GROUP = '19004'
 
 MANAGED = ('desktop', 'pi', 'server')
@@ -40,8 +38,10 @@ FILES = (
      'group': PKI_GROUP, 'source': 'server:private_key', 'roles': ('server',)},
     {'path': '/etc/securepuppet/modules/secure/manifests/init.pp', 'mode': '0600',
      'source': 'secure', 'roles': MANAGED},
-    {'path': '/home/woolie/.aws/credentials', 'mode': '0600',
-     'owner': WOOLIE, 'group': WOOLIE_GROUP, 'source': 'aws', 'roles': ('server',)},
+    {'path': '/etc/aws/ddns.credentials', 'mode': '0600',
+     'source': 'aws:ddns', 'roles': ('server',)},
+    {'path': '/etc/aws/backuptool.credentials', 'mode': '0600',
+     'source': 'aws:backuptool', 'roles': ('server',)},
 )
 
 
@@ -237,13 +237,10 @@ def render_secure(manifest, hostname):
     return f'# Written by provision.py for {hostname}\nclass secure {{\n{body}\n}}\n'
 
 
-def aws_credentials(profiles):
-    """One profile per consumer, each with its own credentials."""
-    return '\n'.join(
-        f'[{name}]\n'
-        f'aws_access_key_id={values["access_key_id"]}\n'
-        f'aws_secret_access_key={values["secret_access_key"]}\n'
-        for name, values in profiles.items())
+def aws_credentials(name, values):
+    return (f'[{name}]\n'
+            f'aws_access_key_id={values["access_key_id"]}\n'
+            f'aws_secret_access_key={values["secret_access_key"]}\n')
 
 
 def missing_secrets(manifest):
@@ -264,7 +261,7 @@ def content_for(source, hostname, manifest, certs):
     if kind == 'secure':
         return render_secure(manifest, hostname)
     if kind == 'aws':
-        return aws_credentials(manifest['artefacts']['aws_profiles'])
+        return aws_credentials(field, manifest['artefacts']['aws_profiles'][field])
     suffix = '-server' if kind == 'server' else ''
     path = Path(certs) / f'{hostname}{suffix}.yaml'
     if not path.exists():
