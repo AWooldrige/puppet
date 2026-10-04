@@ -27,10 +27,13 @@ class Occurrence:
     location: Optional[str]
     multi_day: bool
     end_day: Optional[dt.date] = None
+    first_day: Optional[dt.date] = None
 
     def __post_init__(self):
         if self.end_day is None:
             self.end_day = self.day
+        if self.first_day is None:
+            self.first_day = self.day
 
     def sort_key(self):
         t = self.start_time or dt.time(0, 0)
@@ -99,6 +102,7 @@ def expand_event(event, window_start, window_end, tzinfo):
         title=title,
         day=visible_start,
         end_day=last_day,
+        first_day=start_day,
         all_day=all_day,
         start_time=start_time if (not all_day and not multi_day) else None,
         end_time=end_time if (not all_day and not multi_day) else None,

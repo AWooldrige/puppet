@@ -13,8 +13,7 @@ port = 5273
 
 [calendar]
 timezone = "Europe/London"
-# Far enough ahead to fill the "Later" section without paging forever.
-lookahead_days = 60
+lookahead_days = 35
 calendar_ids = [
 <% $calendar_ids.each |$id| { -%>
     "<%= $id %>",
@@ -32,6 +31,16 @@ cache_minutes = 10
 max_stale_hours = 6
 # Today plus the two days the weather panel expands to.
 forecast_days = 3
+
+[bank_holidays]
+url = "https://www.gov.uk/bank-holidays.json"
+division = "england-and-wales"
+cache_hours = 24
+
+[envelopes]
+url = "http://127.0.0.1:5275/kitchen/envelopes.json"
+timeout_seconds = 10
+stale_after_days = 9
 
 [refresh]
 interval_minutes = 30

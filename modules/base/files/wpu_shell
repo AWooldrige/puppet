@@ -12,13 +12,10 @@ function error {
     exit 1
 }
 
-function is_toggle_on {
+function is_toggle_off {
     local name="$1"
-    if grep "${name} = true" /etc/toggles.toml > /dev/null 2>&1; then
-        return 0
-    else
-        return 1
-    fi
+    grep -qsE "^[[:space:]]*${name}[[:space:]]*=[[:space:]]*false[[:space:]]*$" \
+        "${TOGGLES_FILE:-/etc/toggles.toml}"
 }
 
 function escalate_if_anything_fails {

@@ -19,7 +19,7 @@ GIT_REMOTE_CHANGES="no"
 #
 # The toggle is a kill switch, so -f means "apply even though the remote has not
 # moved" rather than "ignore the toggle".
-if ! is_toggle_on "enabled_gdpup"; then
+if is_toggle_off "enabled_gdpup"; then
     [ -f "$DISABLED_MARKER" ] || touch "$DISABLED_MARKER"
     DISABLED_DAYS=$(( ($(date +%s) - $(stat -c %Y "$DISABLED_MARKER")) / 86400 ))
     log "gdpup disabled via /etc/toggles.toml, for ${DISABLED_DAYS} days"

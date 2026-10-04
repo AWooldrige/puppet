@@ -133,19 +133,3 @@ def fetch_weather(cfg, metrics=None):
                 metrics.send("weather_stale", 1)
             return cached["data"]
         return None
-
-
-_SEP = "   \u00b7   "
-
-
-def format_line(weather):
-    if not weather:
-        return _SEP.join(["Today", "Weather --", "Low --\u00b0 High --\u00b0",
-                          "UV --"])
-    lo, hi, uv = weather.get("temp_min"), weather.get("temp_max"), weather.get("uv_max")
-    lo_str = f"{round(lo)}\u00b0" if lo is not None else "--\u00b0"
-    hi_str = f"{round(hi)}\u00b0" if hi is not None else "--\u00b0"
-    uv_str = f"UV {round(uv)} {uv_category(round(uv))}" if uv is not None else "UV --"
-    return _SEP.join(["Today", weather["description"],
-                      f"Low {lo_str} High {hi_str}", uv_str])
-

@@ -22,6 +22,7 @@ class basenode::workstation inherits basenode {
     include ubutils::flatpakfuse
     include workstation::packages
     include workstation::sops
+    include workstation::vocalinux
     include woolie::workstationprefs
     include woolie::passwordsudo
     include influx::telegraf
@@ -49,6 +50,7 @@ class ktcdh1 inherits pi {
     include raspi::network
     include raspi::touchdisplay
     include raspi::pmsensor
+    include raspi::cpugovernor
     include kitchen::board
     include kitchen::proxy
     include kitchen::kiosk
@@ -57,6 +59,7 @@ class blrsh1 inherits pi {
     include raspi::network
     include raspi::ds18b20
     include raspi::boiler
+    include raspi::cpugovernor
 
     package { 'python3-lgpio': ensure => installed }
 }

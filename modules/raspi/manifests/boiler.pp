@@ -2,10 +2,13 @@ class raspi::boiler {
 
     package { [
             'python3-gpiozero',
-            'python3-tz',
-            'python3-influxdb-client'
+            'python3-tz'
         ]:
         ensure => installed
+    }
+
+    package { 'python3-influxdb-client':
+        ensure => absent
     }
 
     file { '/usr/bin/boilerctl':

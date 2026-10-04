@@ -38,7 +38,7 @@ class Shell(unittest.TestCase):
         # revert-to-board rule.
         tabs = re.findall(r'data-tab="([^"]+)"', HTML)
         self.assertIn(scheduler.BOARD_PAGE, tabs)
-        self.assertEqual(['board', 'home', 'graphs', 'screenoff'], tabs)
+        self.assertEqual(['board', 'money', 'home', 'graphs', 'screenoff'], tabs)
 
     def test_home_and_graphs_each_get_their_own_persistent_frame(self):
         """
@@ -66,6 +66,12 @@ class Shell(unittest.TestCase):
         self.assertIn("show(dom.topbar, onBoard)", JS)
         self.assertIn("show(dom.weather, onBoard)", JS)
         self.assertIn("show(dom.status, onBoard)", JS)
+
+    def test_frames_render_in_the_background_rather_than_being_hidden(self):
+        for frame in re.findall(r'<iframe[^>]*>', HTML):
+            self.assertNotIn(' hidden', frame)
+        self.assertNotRegex(JS, r'show\((frame|otherFrame|dom\.frames\[name\]),')
+        self.assertRegex(CSS, r'\.board \{[^}]*z-index: 1;[^}]*background: var\(--paper\)')
 
     def test_every_el_lookup_has_a_matching_id_in_the_html(self):
         """

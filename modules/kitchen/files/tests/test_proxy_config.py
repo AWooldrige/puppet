@@ -37,7 +37,9 @@ class ProxyConfig(unittest.TestCase):
         # The device must not reach anything else on that vhost, whatever the
         # server side allows.
         grafana = self.config[self.config.index('listen 127.0.0.1:5275;'):]
-        self.assertIn('location /grafana/ {', grafana)
+        locations = re.findall(r'location\s+([^{]+?)\s*\{', grafana)
+        self.assertEqual(sorted(locations), [
+            '/', '/grafana/', '= /grafana', '= /kitchen/envelopes.json'])
         self.assertIn('return 403', grafana)
 
     def test_both_listeners_are_loopback_only(self):

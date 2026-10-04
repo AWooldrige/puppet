@@ -38,24 +38,20 @@ Sized for a 516x917 CSS-pixel portrait viewport.
   <main id="main" class="main">
 
     <section id="board" class="board" aria-label="Calendar board">
+      <div id="days" class="days"></div>
+    </section>
 
-      <div id="hero" class="hero">
-        <p class="hero-label">Next up</p>
-        <p id="hero-title" class="hero-title">&nbsp;</p>
-        <p id="hero-when" class="hero-when">&nbsp;</p>
-        <p id="hero-where" class="hero-where" hidden>&nbsp;</p>
-      </div>
-
-      <div id="sections" class="sections"></div>
-
-      <p id="empty" class="empty" hidden>Nothing in the calendar.</p>
+    <section id="money" class="money" aria-label="Envelopes" hidden>
+      <div id="money-body"></div>
+      <p id="money-empty" class="money-empty" hidden>No envelope summary yet. It
+        appears after the next reconciliation.</p>
     </section>
 
     <!-- Home Assistant and Grafana. Cross-origin, so touches inside are invisible
          to this page and idle detection is done on the device instead. -->
-    <iframe id="frame-home" class="frame" title="Control" hidden
+    <iframe id="frame-home" class="frame" title="Control"
             src="about:blank"></iframe>
-    <iframe id="frame-graphs" class="frame" title="Graphs" hidden
+    <iframe id="frame-graphs" class="frame" title="Graphs"
             src="about:blank"></iframe>
 
     <div id="frame-error" class="frame-error" hidden>
@@ -66,8 +62,7 @@ Sized for a 516x917 CSS-pixel portrait viewport.
 
   </main>
 
-  <button id="weather" class="weather" type="button"
-          aria-expanded="false" aria-controls="forecast">
+  <button id="weather" class="weather" type="button">
     <span id="weather-line" class="weather-line">Weather&hellip;</span>
     <span class="weather-chevron" aria-hidden="true">&#9650;</span>
   </button>
@@ -85,6 +80,7 @@ Sized for a 516x917 CSS-pixel portrait viewport.
   <nav class="tabs" aria-label="Screens">
     <button class="tab is-active" type="button" data-tab="board"
             aria-current="page">Calendar</button>
+    <button class="tab" type="button" data-tab="money">Money</button>
     <button class="tab" type="button" data-tab="home">Control</button>
     <button class="tab" type="button" data-tab="graphs">Graphs</button>
     <button class="tab" type="button" data-tab="screenoff">Screen off</button>
@@ -93,23 +89,13 @@ Sized for a 516x917 CSS-pixel portrait viewport.
 </div>
 
 
-<div id="event-overlay" class="overlay" hidden role="dialog" aria-modal="true"
-     aria-labelledby="event-title">
+<div id="day-overlay" class="overlay" hidden role="dialog" aria-modal="true"
+     aria-labelledby="day-title">
   <div class="overlay-card">
-    <p id="event-when" class="overlay-when"></p>
-    <h2 id="event-title" class="overlay-title"></h2>
-    <p id="event-where" class="overlay-where" hidden></p>
-    <p id="event-range" class="overlay-range" hidden></p>
-    <button id="event-close" class="text-button" type="button">Close</button>
-  </div>
-</div>
-
-<div id="forecast" class="overlay" hidden role="dialog" aria-modal="true"
-     aria-labelledby="forecast-title">
-  <div class="overlay-card">
-    <h2 id="forecast-title" class="overlay-title">Next 3 days</h2>
-    <ul id="forecast-list" class="forecast-list"></ul>
-    <button id="forecast-close" class="text-button" type="button">Close</button>
+    <h2 id="day-title" class="overlay-title"></h2>
+    <p id="day-weather" class="overlay-weather" hidden></p>
+    <ul id="day-list" class="day-list"></ul>
+    <button id="day-close" class="text-button" type="button">Close</button>
   </div>
 </div>
 

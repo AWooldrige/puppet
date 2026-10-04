@@ -20,7 +20,7 @@ port = 5273
 
 [calendar]
 timezone = "Europe/London"
-lookahead_days = 60
+lookahead_days = 35
 calendar_ids = ["a@example.com", "b@example.com"]
 service_account_file = "{state_dir}/service-account.json"
 
@@ -31,6 +31,16 @@ timezone = "Europe/London"
 cache_minutes = 10
 max_stale_hours = 6
 forecast_days = 3
+
+[bank_holidays]
+url = "http://127.0.0.1:9/bank-holidays.json"
+division = "england-and-wales"
+cache_hours = 24
+
+[envelopes]
+url = "http://127.0.0.1:9/kitchen/envelopes.json"
+timeout_seconds = 10
+stale_after_days = 9
 
 [refresh]
 interval_minutes = 30

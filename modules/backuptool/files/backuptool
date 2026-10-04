@@ -123,7 +123,7 @@ if [ ! -d "$_arg_dir" ]; then
     error "$_arg_dir does not exist"
 fi
 
-if ! is_toggle_on "enabled_backups"; then
+if is_toggle_off "enabled_backups"; then
     log "Aborting as backups disabled via /etc/toggles.toml"
     exit 0
 fi

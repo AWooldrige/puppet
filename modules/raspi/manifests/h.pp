@@ -32,6 +32,25 @@ class raspi::h {
         group  => 'www-data',
         mode   => '0644'
     }->
+    file { '/srv/kitchen':
+        ensure  => 'directory',
+        owner   => 'woolie',
+        group   => 'www-data',
+        mode    => '2750',
+        require => User['woolie']
+    }
+    file { '/etc/nginx/h.wooldrige.co.uk.d/kitchen-data.conf':
+        source  => 'puppet:///modules/raspi/kitchen-data.conf',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => [
+            File['/etc/nginx/h.wooldrige.co.uk.d'],
+            File['/etc/nginx/conf.d/client-authorisation.conf']
+        ],
+        notify  => Exec['reload-nginx']
+    }
+
     file { "/etc/nginx/sites-available/h.wooldrige.co.uk":
         source  => 'puppet:///modules/raspi/sites-available/h.wooldrige.co.uk',
         owner  => 'root',

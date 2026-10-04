@@ -20,6 +20,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import board as board_mod
 from . import config as config_mod
+from . import envelopes as envelopes_mod
 from . import logging_setup
 from . import state as state_mod
 from .metrics import Metrics, NullMetrics
@@ -124,6 +125,7 @@ class RefreshLoop(threading.Thread):
     def run(self):
         while not self._stopping:
             self.cache.refresh()
+            envelopes_mod.refresh(self.cache.cfg, self.cache.metrics)
             self._wait_until_stale(self.today_fn())
             self._wake.clear()
 
@@ -222,6 +224,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._state()
         if path == "/api/ui":
             return self._ui()
+        if path == "/api/envelopes":
+            return self._envelopes()
         return self._static(path)
 
     def do_HEAD(self):
@@ -244,6 +248,12 @@ class Handler(BaseHTTPRequestHandler):
             # on screen and shows the banner instead of blanking the board.
             return self._send_json(503, {"error": "no board data yet"})
         return self._send_json(200, payload)
+
+    def _envelopes(self):
+        summary = envelopes_mod.current(self.cfg)
+        if summary is None:
+            return self._send_json(503, {"error": "no envelope summary yet"})
+        return self._send_json(200, summary)
 
     def _state(self):
         if self.controller is None:

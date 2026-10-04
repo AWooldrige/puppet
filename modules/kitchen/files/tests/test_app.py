@@ -11,6 +11,7 @@ directly.
 
 import datetime as dt
 import json
+import os
 import tempfile
 import threading
 import time
@@ -30,12 +31,7 @@ from . import support
 PAYLOAD = {
     "generated_at": 1.0,
     "event_count": 1,
-    "today": {"date": "2026-07-22", "date_text": "Wednesday 22 July",
-              "weekday_text": "Wednesday", "events": [], "event_count": 0,
-              "next_event": None},
-    "sections": [],
-    "weather": {"available": False, "summary_text": "Today", "today": None,
-                "days": []},
+    "days": [],
     "status": {"updated_text": "09:00", "next_refresh_text": "09:30",
                "wifi_percent": 90, "load_average": 0.5},
     "health": {"ok": True, "stale": False, "from_cache": False,
@@ -133,6 +129,18 @@ class RoutingTests(ServerTestCase):
         self.assertEqual(json.loads(body)["event_count"], 1)
         self.assertEqual(headers.get("Cache-Control"), "no-store")
 
+    def test_envelopes_are_503_before_any_summary(self):
+        self.assertEqual(self.get("/api/envelopes")[0], 503)
+
+    def test_envelopes_serve_the_kept_summary_with_its_age(self):
+        from . import test_envelopes
+        with open(os.path.join(self.tmp.name, "envelopes_last_good.json"), "w") as f:
+            json.dump(test_envelopes.summary(), f)
+        status, body, headers = self.get("/api/envelopes")
+        self.assertEqual(status, 200)
+        self.assertIn("age_days", json.loads(body))
+        self.assertEqual(headers.get("Cache-Control"), "no-store")
+
     def test_ui_exposes_the_tab_urls(self):
         status, body, _ = self.get("/api/ui")
         self.assertEqual(status, 200)
@@ -224,7 +232,6 @@ class CacheFallbackTests(ServerTestCase):
 
         broken = json.loads(json.dumps(PAYLOAD))
         broken["health"]["calendar_ok"] = False
-        broken["sections"] = []
         broken["event_count"] = 0
         with mock.patch.object(board_mod, "build", return_value=broken), \
              mock.patch.object(board_mod, "check_upstream", return_value=True):

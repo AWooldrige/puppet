@@ -18,17 +18,14 @@ const dom = {
     refresh: el('refresh'),
     banner: el('banner'),
     board: el('board'),
-    heroTitle: el('hero-title'),
-    heroWhen: el('hero-when'),
-    heroWhere: el('hero-where'),
-    sections: el('sections'),
-    empty: el('empty'),
+    days: el('days'),
+    money: el('money'),
+    moneyBody: el('money-body'),
+    moneyEmpty: el('money-empty'),
     frames: { home: el('frame-home'), graphs: el('frame-graphs') },
     frameError: el('frame-error'),
     frameErrorDetail: el('frame-error-detail'),
     frameRetry: el('frame-retry'),
-    weather: el('weather'),
-    weatherLine: el('weather-line'),
     status: el('status'),
     statusUpdated: el('status-updated'),
     statusWifi: el('status-wifi'),
@@ -36,20 +33,20 @@ const dom = {
     statusNext: el('status-next'),
     statusFlag: el('status-flag'),
     tabs: Array.from(document.querySelectorAll('.tab')),
-    eventOverlay: el('event-overlay'),
-    eventWhen: el('event-when'),
-    eventTitle: el('event-title'),
-    eventWhere: el('event-where'),
-    eventRange: el('event-range'),
-    eventClose: el('event-close'),
-    forecast: el('forecast'),
-    forecastList: el('forecast-list'),
-    forecastClose: el('forecast-close'),
+    dayOverlay: el('day-overlay'),
+    dayTitle: el('day-title'),
+    dayWeather: el('day-weather'),
+    dayList: el('day-list'),
+    dayClose: el('day-close'),
+    weather: el('weather'),
+    weatherLine: el('weather-line'),
     wakeShield: el('wake-shield'),
 };
 
 const app = {
     payload: null,
+    payloadText: null,
+    moneyText: null,
     tabUrls: { home: null, graphs: null },
     // Loaded frames stay alive for fast tab switching.
     framesLoaded: { home: false, graphs: false },
@@ -100,97 +97,178 @@ function renderBanner(health) {
     dom.banner.replaceChildren(list);
 }
 
-function renderHero(payload) {
-    const today = payload.today;
-    dom.todayDate.textContent = today.date_text;
-
-    const next = today.next_event;
-    if (!next) {
-        dom.heroTitle.textContent = today.event_count
-            ? 'Nothing else today'
-            : 'Clear day';
-        dom.heroWhen.textContent = '';
-        show(dom.heroWhere, false);
-        return;
-    }
-    dom.heroTitle.textContent = next.title;
-    dom.heroWhen.textContent = next.time_text || 'Today';
-    if (next.location) {
-        dom.heroWhere.textContent = next.location;
-        show(dom.heroWhere, true);
-    } else {
-        show(dom.heroWhere, false);
-    }
+function localIso(date) {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-function buildEventRow(event) {
-    const row = document.createElement('button');
+function make(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) {
+        node.className = className;
+    }
+    if (text !== undefined && text !== null) {
+        node.textContent = text;
+    }
+    return node;
+}
+
+const WEATHER_ICONS = {
+    'Clear': '\u2600', 'Sunny spells': '\u2600', 'Cloudy': '\u2601',
+    'Fog': '\u2248', 'Drizzle': '\u2602', 'Rain': '\u2602', 'Showers': '\u2602',
+    'Snow': '\u2744', 'Storms': '\u26a1',
+};
+
+function weatherBadge(weather) {
+    const badge = make('span', 'day-wx');
+    badge.append(make('span', 'day-wx-icon', WEATHER_ICONS[weather.description] || '\u2601'),
+        weather.temp_max === null ? '--\u00b0' : `${Math.round(weather.temp_max)}\u00b0`);
+    return badge;
+}
+
+const BUSY_START = 7 * 60;
+const BUSY_SPAN = 15 * 60;
+
+function minutes(hhmm) {
+    return Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+}
+
+function busyBar(day) {
+    const track = make('span', 'busy');
+    for (const event of day.events) {
+        if (!event.start_time) {
+            track.classList.add('is-allday');
+            continue;
+        }
+        const from = Math.max(0, minutes(event.start_time) - BUSY_START);
+        const endTime = event.end_time && event.end_time > event.start_time
+            ? event.end_time : event.start_time;
+        const to = Math.min(BUSY_SPAN, Math.max(from + 20, minutes(endTime) - BUSY_START));
+        if (from >= BUSY_SPAN) {
+            continue;
+        }
+        const block = make('span', 'busy-block');
+        block.style.left = `${(from / BUSY_SPAN) * 100}%`;
+        block.style.width = `${((to - from) / BUSY_SPAN) * 100}%`;
+        track.appendChild(block);
+    }
+    return track;
+}
+
+function isDayOff(day) {
+    return day.is_weekend || Boolean(day.bank_holiday);
+}
+
+function buildDayRow(day, todayIso) {
+    const row = make('button', 'day');
     row.type = 'button';
-    row.className = event.is_today ? 'event is-today' : 'event';
-    row.dataset.eventId = event.id;
+    row.dataset.date = day.date;
+    row.classList.toggle('is-week-start', day.is_week_start);
+    row.classList.toggle('is-day-off', isDayOff(day));
+    row.classList.toggle('is-today', day.date === todayIso);
 
-    const day = document.createElement('span');
-    day.className = 'event-day';
-    day.textContent = event.weekday_text;
-    const date = document.createElement('small');
-    date.textContent = event.day_text;
-    day.appendChild(date);
+    const label = make('span', 'day-label', day.weekday_text);
+    label.prepend(make('b', null, day.day_number));
 
-    const body = document.createElement('span');
-    body.className = 'event-body';
-    const title = document.createElement('span');
-    title.className = 'event-title';
-    title.textContent = event.title;
-    body.appendChild(title);
-    if (event.location) {
-        const where = document.createElement('span');
-        where.className = 'event-where';
-        where.textContent = event.location;
-        body.appendChild(where);
+    const lane = make('span', 'day-lane');
+    const span = day.events.find((event) => event.multi_day);
+    if (span) {
+        lane.classList.add('is-on', `is-${span.continues}`);
     }
 
-    const time = document.createElement('span');
-    time.className = 'event-time';
-    time.textContent = event.time_text;
+    const items = make('span', 'day-items');
+    if (day.bank_holiday) {
+        items.appendChild(make('span', 'day-holiday', day.bank_holiday));
+    }
+    for (const event of day.events) {
+        const item = make('span', 'day-item');
+        if (event.multi_day && event.continues !== 'first') {
+            item.classList.add('is-continuing');
+            item.textContent = event.title;
+        } else if (event.multi_day || event.all_day) {
+            item.classList.add('is-allday');
+            item.textContent = event.multi_day ? `${event.title} \u2192` : event.title;
+        } else {
+            item.append(make('time', null, event.start_time), ` ${event.title}`);
+        }
+        items.appendChild(item);
+    }
+    if (!day.events.length && !day.bank_holiday) {
+        items.appendChild(make('span', 'day-free', 'free'));
+    }
 
-    row.append(day, body, time);
+    const side = make('span', 'day-side');
+    if (day.weather) {
+        side.appendChild(weatherBadge(day.weather));
+    }
+    side.appendChild(busyBar(day));
+
+    row.append(label, lane, items, side);
     return row;
 }
 
-function renderSections(payload) {
-    const fragment = document.createDocumentFragment();
-    let firstTodayRow = null;
+function isFoldable(day, todayIso) {
+    return !day.events.length && !isDayOff(day) && day.date !== todayIso;
+}
 
-    for (const section of payload.sections) {
-        const heading = document.createElement('h2');
-        heading.className = 'section-heading';
-        heading.textContent = section.name;
-        fragment.appendChild(heading);
-
-        const list = document.createElement('ul');
-        list.className = 'event-list';
-        for (const event of section.events) {
-            const item = document.createElement('li');
-            const row = buildEventRow(event);
-            if (event.is_today && firstTodayRow === null) {
-                firstTodayRow = row;
-            }
-            item.appendChild(row);
-            list.appendChild(item);
-        }
-        fragment.appendChild(list);
+function buildFreeBand(run) {
+    const first = run[0];
+    const last = run[run.length - 1];
+    const band = make('div', 'free-band');
+    band.classList.toggle('is-week-start', first.is_week_start);
+    if (run.length === 1) {
+        band.append(make('b', null, 'Free'), ` ${first.weekday_text} ${first.day_number}`);
+    } else {
+        band.append(make('b', null, `Free ${run.length} days`),
+            ` ${first.weekday_text} ${first.day_number} to ${last.weekday_text} ${last.day_number}`);
     }
+    return band;
+}
 
-    dom.sections.replaceChildren(fragment);
-    dom.sections.dataset.todayId = firstTodayRow
-        ? firstTodayRow.dataset.eventId
-        : '';
-    show(dom.empty, payload.event_count === 0);
+function renderDays(payload) {
+    const todayIso = localIso(new Date());
+    const days = payload.days.filter((day) => day.date >= todayIso);
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < days.length; i++) {
+        let j = i;
+        while (j < days.length && isFoldable(days[j], todayIso)
+               && (j === i || !days[j].is_week_start)) {
+            j++;
+        }
+        if (j > i) {
+            fragment.appendChild(buildFreeBand(days.slice(i, j)));
+            i = j - 1;
+            continue;
+        }
+        fragment.appendChild(buildDayRow(days[i], todayIso));
+    }
+    dom.days.replaceChildren(fragment);
+}
+
+const WEATHER_SWITCH_HOUR = 15;
+
+function weatherDay(payload) {
+    const todayIso = localIso(new Date());
+    const days = payload.days.filter((day) => day.date >= todayIso);
+    const index = new Date().getHours() >= WEATHER_SWITCH_HOUR ? 1 : 0;
+    return days[index] && days[index].weather ? { day: days[index], tomorrow: index === 1 } : null;
 }
 
 function renderWeather(payload) {
-    dom.weatherLine.textContent = payload.weather.summary_text;
-    dom.weather.disabled = !(payload.weather.days || []).length;
+    const pick = weatherDay(payload);
+    dom.weather.disabled = !pick;
+    if (!pick) {
+        dom.weatherLine.textContent = 'Weather unavailable';
+        return;
+    }
+    dom.weatherLine.textContent =
+        `${pick.tomorrow ? 'Tomorrow' : 'Today'}  \u00b7  ${weatherDetail(pick.day.weather)}`;
+    dom.weather.dataset.date = pick.day.date;
+}
+
+function renderDate() {
+    dom.todayDate.textContent = new Date().toLocaleDateString('en-GB',
+        { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function renderStatus(payload) {
@@ -216,15 +294,26 @@ function renderStatus(payload) {
 function render(payload) {
     app.payload = payload;
     renderBanner(payload.health);
-    renderHero(payload);
-    renderSections(payload);
+    renderDate();
+    renderDays(payload);
     renderWeather(payload);
     renderStatus(payload);
 }
 
 async function loadBoard() {
     try {
-        render(await getJson('/api/board'));
+        const resp = await fetch('/api/board', { cache: 'no-store' });
+        if (!resp.ok) {
+            throw new Error(`/api/board -> ${resp.status}`);
+        }
+        const text = await resp.text();
+        if (app.payload && text === app.payloadText) {
+            renderBanner(app.payload.health);
+            renderWeather(app.payload);
+            return;
+        }
+        app.payloadText = text;
+        render(JSON.parse(text));
     } catch (err) {
         console.warn('board load failed', err);
         dom.banner.hidden = false;
@@ -253,96 +342,52 @@ async function manualRefresh() {
     }
 }
 
-function findEvent(eventId) {
-    if (!app.payload) {
-        return null;
+function weatherDetail(weather) {
+    const lo = weather.temp_min === null ? '--' : Math.round(weather.temp_min);
+    const hi = weather.temp_max === null ? '--' : Math.round(weather.temp_max);
+    const bits = [weather.description, `${lo}\u00b0 / ${hi}\u00b0`];
+    if (weather.precip_chance !== null) {
+        bits.push(`${weather.precip_chance}% rain`);
     }
-    for (const section of app.payload.sections) {
-        for (const event of section.events) {
-            if (event.id === eventId) {
-                return event;
-            }
-        }
-    }
-    return null;
-}
-
-function openEvent(eventId) {
-    const event = findEvent(eventId);
-    if (!event) {
-        return;
-    }
-    dom.eventWhen.textContent =
-        `${event.weekday_text} ${event.day_text}${event.time_text ? ' \u00b7 ' + event.time_text : ''}`;
-    dom.eventTitle.textContent = event.title;
-    if (event.location) {
-        dom.eventWhere.textContent = event.location;
-        show(dom.eventWhere, true);
-    } else {
-        show(dom.eventWhere, false);
-    }
-    if (event.multi_day) {
-        dom.eventRange.textContent = `Runs until ${event.end_day}`;
-        show(dom.eventRange, true);
-    } else {
-        show(dom.eventRange, false);
-    }
-    show(dom.eventOverlay, true);
-    dom.eventClose.focus();
-}
-
-function openForecast() {
-    const days = (app.payload && app.payload.weather.days) || [];
-    if (!days.length) {
-        return;
-    }
-    const fragment = document.createDocumentFragment();
-    for (const day of days) {
-        const item = document.createElement('li');
-        const name = document.createElement('span');
-        name.className = 'forecast-day';
-        name.textContent = dayLabel(day.date);
-        const detail = document.createElement('span');
-        detail.className = 'forecast-detail';
-        detail.textContent = forecastDetail(day);
-        item.append(name, detail);
-        fragment.appendChild(item);
-    }
-    dom.forecastList.replaceChildren(fragment);
-    show(dom.forecast, true);
-    dom.weather.setAttribute('aria-expanded', 'true');
-    dom.forecastClose.focus();
-}
-
-function dayLabel(isoDate) {
-    const parsed = new Date(`${isoDate}T00:00:00`);
-    if (Number.isNaN(parsed.getTime())) {
-        return isoDate;
-    }
-    return parsed.toLocaleDateString('en-GB',
-        { weekday: 'short', day: 'numeric', month: 'short' });
-}
-
-function forecastDetail(day) {
-    const bits = [];
-    if (day.description) {
-        bits.push(day.description);
-    }
-    const lo = day.temp_min === null || day.temp_min === undefined
-        ? '--' : Math.round(day.temp_min);
-    const hi = day.temp_max === null || day.temp_max === undefined
-        ? '--' : Math.round(day.temp_max);
-    bits.push(`${lo}\u00b0 / ${hi}\u00b0`);
-    if (day.precip_chance !== null && day.precip_chance !== undefined) {
-        bits.push(`${day.precip_chance}% rain`);
+    if (weather.uv_text) {
+        bits.push(weather.uv_text);
     }
     return bits.join('  \u00b7  ');
 }
 
+function openDay(date) {
+    const day = app.payload && app.payload.days.find((d) => d.date === date);
+    if (!day) {
+        return;
+    }
+    const long = new Date(`${day.date}T12:00:00`).toLocaleDateString('en-GB',
+        { weekday: 'long', day: 'numeric', month: 'long' });
+    dom.dayTitle.textContent = day.bank_holiday ? `${long} \u00b7 ${day.bank_holiday}` : long;
+    if (day.weather) {
+        dom.dayWeather.textContent = weatherDetail(day.weather);
+    }
+    show(dom.dayWeather, Boolean(day.weather));
+
+    const fragment = document.createDocumentFragment();
+    for (const event of day.events) {
+        const item = make('li');
+        item.append(make('span', 'day-list-time', event.time_text),
+            make('span', 'day-list-title', event.title));
+        if (event.location) {
+            item.appendChild(make('span', 'day-list-where', event.location));
+        }
+        fragment.appendChild(item);
+    }
+    if (!day.events.length) {
+        fragment.appendChild(make('li', 'day-list-empty', 'Nothing planned'));
+    }
+    dom.dayList.replaceChildren(fragment);
+    show(dom.dayOverlay, true);
+    dom.dayClose.focus();
+}
+
 function closeOverlays() {
-    show(dom.eventOverlay, false);
-    show(dom.forecast, false);
-    dom.weather.setAttribute('aria-expanded', 'false');
+    show(dom.dayOverlay, false);
 }
 
 function setActiveTab(name) {
@@ -366,14 +411,16 @@ function setActiveTab(name) {
 
 function hideAllFrames() {
     for (const frame of Object.values(dom.frames)) {
-        show(frame, false);
+        frame.classList.remove('is-front');
     }
 }
 
 function showBoard() {
     closeOverlays();
     setActiveTab('board');
+    show(dom.money, false);
     show(dom.board, true);
+    dom.board.scrollTop = 0;
     hideAllFrames();
     show(dom.frameError, false);
 }
@@ -400,6 +447,7 @@ function showEmbedded(name) {
     closeOverlays();
     setActiveTab(name);
     show(dom.board, false);
+    show(dom.money, false);
     if (!url) {
         hideAllFrames();
         dom.frameErrorDetail.textContent = 'No address configured for this tab.';
@@ -408,7 +456,7 @@ function showEmbedded(name) {
     }
     show(dom.frameError, false);
     for (const [otherName, otherFrame] of Object.entries(dom.frames)) {
-        show(otherFrame, otherName === name);
+        otherFrame.classList.toggle('is-front', otherName === name);
     }
     if (!alreadyLoaded && tab) {
         tab.classList.add('is-loading');
@@ -416,8 +464,189 @@ function showEmbedded(name) {
     loadFrame(name);
 }
 
+function isoDiff(from, to) {
+    return Math.round((new Date(`${to}T12:00:00`) - new Date(`${from}T12:00:00`)) / 86400000);
+}
+
+function clamp01(value) {
+    return Math.max(0, Math.min(1, value));
+}
+
+function money(value, pence) {
+    const digits = pence ? 2 : 0;
+    const text = Math.abs(value).toLocaleString('en-GB',
+        { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    return `${value < 0 ? '-' : ''}\u00a3${text}`;
+}
+
+function shortDate(iso) {
+    return new Date(`${iso}T12:00:00`).toLocaleDateString('en-GB',
+        { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function budgetClock(summary) {
+    const today = localIso(new Date());
+    const asOf = summary.generated_at.slice(0, 10);
+    const total = isoDiff(summary.budget_start, summary.budget_end);
+    return {
+        total,
+        day: Math.min(total, isoDiff(summary.budget_start, today) + 1),
+        asOf,
+        elapsedToday: clamp01(isoDiff(summary.budget_start, today) / total),
+        elapsedAsOf: clamp01(isoDiff(summary.budget_start, asOf) / total),
+    };
+}
+
+function pace(envelope, clock) {
+    if (envelope.balance < 0) {
+        return 'over';
+    }
+    if (envelope.frequency !== 'Monthly' || !(envelope.monthly_budget > 0)) {
+        return 'none';
+    }
+    const gap = envelope.pct_remaining - (1 - clock.elapsedAsOf);
+    if (gap >= -0.05) {
+        return 'good';
+    }
+    return gap >= -0.2 ? 'watch' : 'behind';
+}
+
+const PACE_ORDER = { over: 0, behind: 1, watch: 2, good: 3, none: 4 };
+const PACE_TEXT = { over: 'Overspent', behind: 'Behind', watch: 'Watch', good: 'On track', none: '' };
+
+function buildMonthHeader(summary, clock) {
+    const header = make('div', 'month');
+    const line = make('p', 'month-line');
+    line.append(make('strong', null, `Budget month: day ${clock.day} of ${clock.total}`),
+        ` \u00b7 refills ${shortDate(summary.budget_end)}`);
+
+    const bar = make('div', 'month-bar');
+    const fill = make('div', 'month-fill');
+    fill.style.width = `${clock.elapsedToday * 100}%`;
+    const asOf = make('div', 'month-asof');
+    asOf.style.left = `${clock.elapsedAsOf * 100}%`;
+    bar.append(fill, asOf);
+
+    const legend = make('p', 'month-legend');
+    const ago = summary.age_days === 0 ? 'today'
+        : (summary.age_days === 1 ? 'yesterday' : `${summary.age_days} days ago`);
+    legend.append(make('span', 'key-today', 'today'),
+        make('span', 'key-asof', `balances from ${shortDate(clock.asOf)}`),
+        make('span', summary.stale ? 'is-stale' : null, `reconciled ${ago}`));
+    header.append(line, bar, legend);
+    return header;
+}
+
+function buildTransactions(envelope) {
+    if (!envelope.transactions.length) {
+        return make('p', 'tx-none', 'No transactions since the budget started');
+    }
+    const table = make('table', 'tx');
+    for (const t of envelope.transactions) {
+        const row = make('tr');
+        row.append(make('td', 'tx-date', shortDate(t.date)),
+            make('td', 'tx-amount', money(t.amount, true)),
+            make('td', 'tx-payee', t.payee), make('td', 'tx-note', t.note));
+        table.appendChild(row);
+    }
+    return table;
+}
+
+function buildEnvelope(envelope, state, clock) {
+    const item = make('details', `env is-${state}`);
+    const summary = make('summary');
+    const top = make('div', 'env-top');
+    const left = make('span', 'env-left', money(envelope.balance));
+    if (envelope.monthly_budget > 0) {
+        left.appendChild(make('small', null, ` of ${money(envelope.monthly_budget)}`));
+    }
+    top.append(make('span', 'env-name', envelope.name), left);
+    summary.appendChild(top);
+
+    if (state !== 'none') {
+        const meter = make('div', 'env-meter');
+        const fill = make('div', 'env-fill');
+        fill.style.width = `${envelope.pct_remaining * 100}%`;
+        const should = make('div', 'env-should');
+        should.style.left = `${(1 - clock.elapsedAsOf) * 100}%`;
+        meter.append(fill, should);
+        summary.appendChild(meter);
+    }
+
+    const foot = make('div', 'env-foot');
+    foot.append(make('span', 'env-tag', PACE_TEXT[state]),
+        make('span', null, envelope.transactions.length
+            ? `${money(envelope.total_spend)} spent \u00b7 tap for detail`
+            : 'nothing spent yet'));
+    summary.appendChild(foot);
+    item.append(summary, buildTransactions(envelope));
+    return item;
+}
+
+function renderMoney(summary) {
+    const clock = budgetClock(summary);
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(buildMonthHeader(summary, clock));
+
+    fragment.appendChild(make('h2', 'money-heading', 'This month'));
+    const key = summary.key
+        .map((envelope) => ({ envelope, state: pace(envelope, clock) }))
+        .sort((a, b) => PACE_ORDER[a.state] - PACE_ORDER[b.state]);
+    for (const { envelope, state } of key) {
+        fragment.appendChild(buildEnvelope(envelope, state, clock));
+    }
+
+    if (summary.longer_term.length) {
+        fragment.appendChild(make('h2', 'money-heading', 'Longer term'));
+        const tiles = make('div', 'tiles');
+        for (const envelope of summary.longer_term) {
+            const tile = make('div', 'tile');
+            tile.append(make('b', null, money(envelope.balance)),
+                make('span', null, envelope.name));
+            tiles.appendChild(tile);
+        }
+        fragment.appendChild(tiles);
+    }
+    dom.moneyBody.replaceChildren(fragment);
+}
+
+async function loadMoney() {
+    try {
+        const resp = await fetch('/api/envelopes', { cache: 'no-store' });
+        if (resp.status === 503) {
+            app.moneyText = null;
+            dom.moneyBody.replaceChildren();
+            show(dom.moneyEmpty, true);
+            return;
+        }
+        if (!resp.ok) {
+            throw new Error(`/api/envelopes -> ${resp.status}`);
+        }
+        const text = await resp.text();
+        show(dom.moneyEmpty, false);
+        if (text === app.moneyText) {
+            return;
+        }
+        app.moneyText = text;
+        renderMoney(JSON.parse(text));
+    } catch (err) {
+        console.warn('envelope load failed', err);
+    }
+}
+
+function showMoney() {
+    closeOverlays();
+    setActiveTab('money');
+    show(dom.board, false);
+    hideAllFrames();
+    show(dom.frameError, false);
+    show(dom.money, true);
+    dom.money.scrollTop = 0;
+    loadMoney();
+}
+
 function reportFrameProblem(name, detail) {
-    show(dom.frames[name], false);
+    dom.frames[name].classList.remove('is-front');
     app.framesLoaded[name] = false;
     if (app.activeTab !== name) {
         return;
@@ -465,24 +694,20 @@ async function pollState() {
 function wire() {
     dom.refresh.addEventListener('click', manualRefresh);
 
-    dom.sections.addEventListener('click', (evt) => {
-        const row = evt.target.closest('.event');
+    dom.days.addEventListener('click', (evt) => {
+        const row = evt.target.closest('.day');
         if (row) {
-            openEvent(row.dataset.eventId);
+            openDay(row.dataset.date);
         }
     });
 
-    dom.weather.addEventListener('click', openForecast);
-    dom.eventClose.addEventListener('click', closeOverlays);
-    dom.forecastClose.addEventListener('click', closeOverlays);
-
-    for (const overlay of [dom.eventOverlay, dom.forecast]) {
-        overlay.addEventListener('click', (evt) => {
-            if (evt.target === overlay) {
-                closeOverlays();
-            }
-        });
-    }
+    dom.dayClose.addEventListener('click', closeOverlays);
+    dom.weather.addEventListener('click', () => openDay(dom.weather.dataset.date));
+    dom.dayOverlay.addEventListener('click', (evt) => {
+        if (evt.target === dom.dayOverlay) {
+            closeOverlays();
+        }
+    });
     document.addEventListener('keydown', (evt) => {
         if (evt.key === 'Escape') {
             closeOverlays();
@@ -494,6 +719,8 @@ function wire() {
             const name = tab.dataset.tab;
             if (name === 'board') {
                 showBoard();
+            } else if (name === 'money') {
+                showMoney();
             } else if (name === 'screenoff') {
                 screenOff();
             } else {
@@ -510,7 +737,7 @@ function wire() {
         }
 
         show(dom.frameError, false);
-        show(frame, true);
+        frame.classList.add('is-front');
         frame.src = app.tabUrls[name];
     });
 
@@ -548,8 +775,12 @@ async function start() {
     await loadUi();
     preloadFrames();
     await loadBoard();
+    loadMoney();
     setActiveTab('board');
-    setInterval(loadBoard, BOARD_POLL_MS);
+    setInterval(() => {
+        loadBoard();
+        loadMoney();
+    }, BOARD_POLL_MS);
     setInterval(pollState, STATE_POLL_MS);
 }
 

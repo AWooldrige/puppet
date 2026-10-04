@@ -12,6 +12,7 @@ test-python:
 test-shell:
 	./modules/kitchen/files/tests/test_panel_backlight_init.sh
 	./modules/gdpup/files/tests/test_gdpup.sh
+	./modules/base/files/tests/test_wpu_shell.sh
 
 test-provision:
 	cd provision && python3 -B -m unittest discover -v

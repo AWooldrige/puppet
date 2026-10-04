@@ -22,15 +22,19 @@ fleet:
 hosts:
   lendh1:
     role: desktop
+    vocalinux_initial_prompt: Example names and words the dictation should spell right.
 
   ltpdh1:
     role: desktop
+    vocalinux_initial_prompt: Example names and words the dictation should spell right.
 
   ltpdh2:
     role: desktop
+    vocalinux_initial_prompt: Example names and words the dictation should spell right.
 
   hplaptop2:
     role: desktop
+    vocalinux_initial_prompt: Example names and words the dictation should spell right.
 
   # Wired and wireless at the same time. Each interface gets its own address, and
   # ethernet takes the lower route metric so it wins.

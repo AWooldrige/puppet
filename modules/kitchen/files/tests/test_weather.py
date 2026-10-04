@@ -36,23 +36,5 @@ class UvCategoryTests(unittest.TestCase):
         self.assertEqual(weather.uv_category(11), "Extreme")
 
 
-class WeatherFormatTests(unittest.TestCase):
-    def test_none_shows_dashes(self):
-        line = weather.format_line(None)
-        self.assertIn("Today", line)
-        self.assertIn("--", line)
-        self.assertIn("UV --", line)
-
-    def test_values_render(self):
-        line = weather.format_line(
-            {"description": "Rain", "temp_min": 8.9, "temp_max": 17.6,
-             "uv_max": 3.2})
-        self.assertIn("Today", line)
-        self.assertIn("Rain", line)
-        self.assertIn("Low 9\u00b0", line)
-        self.assertIn("High 18\u00b0", line)
-        self.assertIn("UV 3 Moderate", line)
-
-
 if __name__ == "__main__":
     unittest.main()

@@ -5,63 +5,86 @@ import datetime as dt
 import logging
 import socket
 
+from . import bank_holidays as bank_holidays_mod
 from . import calendar_source
-from . import grouping
 from . import status as status_mod
 from . import weather as weather_mod
 
 log = logging.getLogger("kitchen.board")
 
 
+def _range_text(occ):
+    return f"{occ.first_day:%a %-d %b} to {occ.end_day:%a %-d %b}"
+
+
 def _time_text(occ):
-    """
-    Label shown on the right of an event row.
-    """
     if occ.multi_day:
-        return "\u2192 " + occ.end_day.strftime("%-d %b")
+        return _range_text(occ)
     if not occ.all_day and occ.start_time is not None:
         if occ.end_time is not None:
-            return f"{occ.start_time:%H:%M}\u2013{occ.end_time:%H:%M}"
+            return f"{occ.start_time:%H:%M} to {occ.end_time:%H:%M}"
         return f"{occ.start_time:%H:%M}"
-    return "All day" if occ.all_day else ""
+    return "All day"
 
 
-def occurrence_to_dict(occ, today):
-    """
-    Convert an Occurrence into a JSON-safe event the frontend can render directly.
+def _continues(occ, day):
+    if not occ.multi_day:
+        return None
+    if day == occ.first_day:
+        return "first"
+    if day == occ.end_day:
+        return "last"
+    return "middle"
 
-    """
+
+def occurrence_to_dict(occ, day):
     return {
-        # Stable enough to key DOM nodes and to match a tapped row back to its
-        # event; not a Google id, which we deliberately don't carry around.
-        "id": f"{occ.day.isoformat()}|{occ.start_time or ''}|{occ.title}",
         "title": occ.title,
-        "day": occ.day.isoformat(),
-        "day_text": occ.day.strftime("%-d %b"),
-        "weekday_text": occ.day.strftime("%a"),
-        "end_day": occ.end_day.isoformat(),
+        "location": occ.location,
         "all_day": occ.all_day,
         "multi_day": occ.multi_day,
+        "continues": _continues(occ, day),
         "start_time": occ.start_time.strftime("%H:%M") if occ.start_time else None,
         "end_time": occ.end_time.strftime("%H:%M") if occ.end_time else None,
         "time_text": _time_text(occ),
-        "location": occ.location,
-        "is_today": occ.day == today,
     }
 
 
-def _next_event(today_events, now):
-    """
-    Return the next timed event today, or the first all-day one if there is none.
-    """
-    current = now.strftime("%H:%M")
-    for event in today_events:
-        if event["start_time"] and event["start_time"] >= current:
-            return event
-    for event in today_events:
-        if event["all_day"] or event["multi_day"]:
-            return event
-    return None
+def _day_weather(forecast):
+    return {
+        "description": forecast["description"],
+        "temp_max": forecast["temp_max"],
+        "temp_min": forecast["temp_min"],
+        "precip_chance": forecast["precip_chance"],
+        "uv_text": (f"UV {round(forecast['uv_max'])} "
+                    f"{weather_mod.uv_category(round(forecast['uv_max']))}"
+                    if forecast["uv_max"] is not None else None),
+    }
+
+
+def build_days(occurrences, today, count, holidays, weather):
+    forecasts = {f["date"]: f for f in (weather or {}).get("days", [])}
+    days = []
+    for offset in range(count):
+        day = today + dt.timedelta(days=offset)
+        iso = day.isoformat()
+        events = [occurrence_to_dict(occ, day) for occ in occurrences
+                  if occ.day <= day <= occ.end_day]
+        events.sort(key=lambda e: (not e["multi_day"], not e["all_day"],
+                                   e["start_time"] or ""))
+        days.append({
+            "date": iso,
+            "weekday_text": day.strftime("%a"),
+            "day_number": day.day,
+            "day_text": day.strftime("%-d %b"),
+            "is_today": offset == 0,
+            "is_weekend": day.weekday() >= 5,
+            "is_week_start": day.weekday() == 0,
+            "bank_holiday": holidays.get(iso),
+            "weather": _day_weather(forecasts[iso]) if iso in forecasts else None,
+            "events": events,
+        })
+    return days
 
 
 def check_upstream(cfg):
@@ -104,20 +127,6 @@ def build(cfg, state, metrics=None, now=None):
         if metrics:
             metrics.send("calendar_load_error", 1)
 
-    sections = []
-    for name, occs in grouping.group(occurrences, today):
-        sections.append({
-            "name": name,
-            "events": [occurrence_to_dict(occ, today) for occ in occs],
-        })
-
-    today_events = [
-        event
-        for section in sections
-        for event in section["events"]
-        if event["is_today"]
-    ]
-
     weather = None
     try:
         if metrics:
@@ -129,26 +138,15 @@ def build(cfg, state, metrics=None, now=None):
         # fetch_weather handles its own errors
         log.error("weather lookup raised", exc_info=True)
 
+    holidays = bank_holidays_mod.fetch(cfg, metrics)
+    days = build_days(occurrences, today, cfg["calendar"]["lookahead_days"],
+                      holidays, weather)
     upstream_ok = check_upstream(cfg)
 
     payload = {
         "generated_at": now.timestamp(),
-        "today": {
-            "date": today.isoformat(),
-            "date_text": today.strftime("%A %-d %B"),
-            "weekday_text": today.strftime("%A"),
-            "events": today_events,
-            "event_count": len(today_events),
-            "next_event": _next_event(today_events, now),
-        },
-        "sections": sections,
-        "event_count": sum(len(s["events"]) for s in sections),
-        "weather": {
-            "available": weather is not None,
-            "summary_text": weather_mod.format_line(weather),
-            "today": weather,
-            "days": (weather or {}).get("days", []),
-        },
+        "days": days,
+        "event_count": len(occurrences),
         "status": build_status(cfg, now),
         "health": {
             "calendar_ok": calendar_ok,

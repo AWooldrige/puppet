@@ -52,6 +52,10 @@ user_pref("browser.tabs.crashReporting.sendReport", false);
 // Never offer to restore a crashed session: the kiosk must come back
 user_pref("browser.sessionstore.resume_from_crash", false);
 
+user_pref("browser.sessionstore.interval", 600000);
+user_pref("browser.cache.disk.enable", false);
+user_pref("browser.cache.memory.enable", true);
+
 user_pref("extensions.pocket.enabled", false);
 user_pref("browser.newtabpage.activity-stream.showSponsored", false);
 user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);

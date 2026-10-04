@@ -51,7 +51,7 @@ make_wpu_shell() {
     local path="$1" with_escalate="$2"
     cat > "${path}" <<'EOF'
 function log { echo "$1"; }
-function is_toggle_on { [ "${FAKE_TOGGLE}" == "on" ]; }
+function is_toggle_off { [ "${FAKE_TOGGLE}" == "off" ]; }
 function escalate_if_anything_fails { echo "TRAPPED: ${BASH_COMMAND}"; }
 EOF
     if [[ "${with_escalate}" == 'with-escalate' ]]; then

@@ -61,15 +61,6 @@ def get_db_connection(config):
     return con
 
 
-def delete_old_metrics(db_con):
-    cur = db_con.cursor()
-    cur.execute(
-        "DELETE FROM readings WHERE time_utc_iso8601 < datetime('now', '-30 days');"
-    )
-    db_con.commit()
-    return db_con
-
-
 def read_temps(config):
     """
     Typical output of w1_slave:
@@ -79,38 +70,42 @@ def read_temps(config):
     con = get_db_connection(config)
     cur = con.cursor()
     data = {}
-    for key in config['probes']:
-        path = f"/sys/bus/w1/devices/{key}/w1_slave"
-        with open(path, "r") as f:
-            first_line = f.readline()
-            if not first_line.strip().endswith("YES"):
-                raise Exception(f"CRC check failed in {path} ({config['probes'][key]}): {first_line}")
-            second_line = f.readline()
-            temp = float(second_line.split('=')[1]) / 1000.0
-            if temp < -30 or temp > 100:
-                raise Exception(f"Invalid temperature '{temp}' in {path} ({config['probes'][key]}): {second_line}")
-            send_metric(config['probes'][key], temp)
-            cur.execute(
-                "INSERT INTO readings VALUES(?, ?, ?, ?)",
-                (
-                    datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
-                    config['probes'][key],
-                    key,
-                    temp
+    try:
+        cur.execute(
+            "DELETE FROM readings WHERE time_utc_iso8601 < datetime('now', '-30 days');"
+        )
+        for key in config['probes']:
+            path = f"/sys/bus/w1/devices/{key}/w1_slave"
+            with open(path, "r") as f:
+                first_line = f.readline()
+                if not first_line.strip().endswith("YES"):
+                    raise Exception(f"CRC check failed in {path} ({config['probes'][key]}): {first_line}")
+                second_line = f.readline()
+                temp = float(second_line.split('=')[1]) / 1000.0
+                if temp < -30 or temp > 100:
+                    raise Exception(f"Invalid temperature '{temp}' in {path} ({config['probes'][key]}): {second_line}")
+                send_metric(config['probes'][key], temp)
+                cur.execute(
+                    "INSERT INTO readings VALUES(?, ?, ?, ?)",
+                    (
+                        datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
+                        config['probes'][key],
+                        key,
+                        temp
+                    )
                 )
-            )
-            con.commit()
 
-            data[config['probes'][key]] = {
-                'probe_id': key,
-                'temp_celcius': temp,
-                'read_time': datetime.datetime.utcnow().isoformat()
-            }
+                data[config['probes'][key]] = {
+                    'probe_id': key,
+                    'temp_celcius': temp,
+                    'read_time': datetime.datetime.utcnow().isoformat()
+                }
+    finally:
+        con.commit()
 
     # TODO: WARNING, this isn't an atomic write.
     with open("/var/ds18b20_output.json", "w") as outf:
         json.dump(data, outf)
-    delete_old_metrics(con)
 
 
 @tenacity.retry(stop=(tenacity.stop_after_delay(20) | tenacity.stop_after_attempt(1)))

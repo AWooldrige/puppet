@@ -106,4 +106,20 @@ server {
         proxy_redirect https://h.wooldrige.co.uk/grafana/ http://127.0.0.1:5275/grafana/;
         proxy_redirect http://h.wooldrige.co.uk/grafana/ http://127.0.0.1:5275/grafana/;
     }
+
+    location = /kitchen/envelopes.json {
+        proxy_pass https://192.168.50.7;
+
+        proxy_set_header Host h.wooldrige.co.uk;
+        proxy_ssl_name h.wooldrige.co.uk;
+        proxy_ssl_server_name on;
+
+        proxy_ssl_certificate /etc/wooldrigepki/certificates/client.pem;
+        proxy_ssl_certificate_key /etc/wooldrigepki/privatekeys/client.pem;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        proxy_ssl_session_reuse off;
+    }
 }
