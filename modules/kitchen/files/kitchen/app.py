@@ -8,6 +8,7 @@ calendar and weather on a background timer, drives the panel via controller.py.
 
 import argparse
 import datetime as dt
+import hmac
 import json
 import logging
 import mimetypes
@@ -19,10 +20,12 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import board as board_mod
+from . import calendar_source
 from . import config as config_mod
 from . import envelopes as envelopes_mod
 from . import logging_setup
 from . import state as state_mod
+from . import status as status_mod
 from .metrics import Metrics, NullMetrics
 
 log = logging.getLogger("kitchen.app")
@@ -149,6 +152,39 @@ class RefreshLoop(threading.Thread):
         self._wake.set()
 
 
+def _board_diagnostics(cfg, payload, now):
+    if payload is None:
+        return None
+    generated = dt.datetime.fromtimestamp(payload["generated_at"], now.tzinfo)
+    updated = generated.strftime(
+        "%H:%M" if generated.date() == now.date() else "%-d %b %H:%M")
+    return {
+        "updated_text": updated,
+        "next_refresh_text": status_mod.next_refresh(cfg, generated),
+        "event_count": payload.get("event_count"),
+        "health": payload.get("health"),
+    }
+
+
+def diagnostics(cfg, payload, envelopes, controller, now=None):
+    now = now or dt.datetime.now(calendar_source._tz(cfg["calendar"]["timezone"]))
+    return {
+        "board": _board_diagnostics(cfg, payload, now),
+        "envelopes": None if envelopes is None else {
+            "age_days": envelopes["age_days"],
+            "stale": envelopes["stale"],
+        },
+        "controller": controller,
+        "wifi_percent": status_mod.wifi_percent(),
+        "load_average": status_mod.load_average(),
+        "uptime_seconds": status_mod.uptime_seconds(),
+        "cpu_temp_c": status_mod.cpu_temp_c(),
+        "memory_available_percent": status_mod.memory_percent_available(),
+        "disk_free_bytes": status_mod.disk_free_bytes(),
+        "under_voltage": status_mod.under_voltage(),
+    }
+
+
 class RateLimiter:
     def __init__(self, min_interval_seconds):
         self.min_interval_seconds = min_interval_seconds
@@ -164,6 +200,40 @@ class RateLimiter:
             return True
 
 
+class ScreenLock:
+    def __init__(self, pin, retry_seconds=2.0):
+        self._pin = pin.encode("utf-8")
+        self.retry_seconds = retry_seconds
+        self._guard = threading.Lock()
+        self._locked = False
+        self._last_wrong = None
+
+    @property
+    def locked(self):
+        with self._guard:
+            return self._locked
+
+    def lock(self):
+        with self._guard:
+            self._locked = True
+        log.info("screen locked")
+
+    def unlock(self, pin):
+        with self._guard:
+            now = time.monotonic()
+            if self._last_wrong is not None \
+                    and now - self._last_wrong < self.retry_seconds:
+                return "wait"
+            if not hmac.compare_digest(pin.encode("utf-8"), self._pin):
+                self._last_wrong = now
+                log.warning("wrong screen lock PIN")
+                return "wrong"
+            self._locked = False
+            self._last_wrong = None
+        log.info("screen unlocked")
+        return "ok"
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "kitchen-board"
     sys_version = ""
@@ -174,6 +244,7 @@ class Handler(BaseHTTPRequestHandler):
     refresh_limiter = None
     cfg = None
     controller = None
+    screen_lock = None
 
     def log_message(self, fmt, *args):
         # The default goes to stderr unformatted; route it through our logger so it
@@ -206,6 +277,7 @@ class Handler(BaseHTTPRequestHandler):
         if length <= 0:
             return {}
         if length > _MAX_BODY_BYTES:
+            self.close_connection = True
             return None
         raw = self.rfile.read(length)
         try:
@@ -226,6 +298,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._ui()
         if path == "/api/envelopes":
             return self._envelopes()
+        if path == "/api/diagnostics":
+            return self._diagnostics()
         return self._static(path)
 
     def do_HEAD(self):
@@ -233,12 +307,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
+        body = self._read_body()
         if path == "/api/refresh":
             return self._refresh()
         if path == "/api/screen":
-            return self._screen()
+            return self._screen(body)
         if path == "/api/page":
-            return self._page()
+            return self._page(body)
+        if path == "/api/lock":
+            self.screen_lock.lock()
+            return self._send_json(200, {"locked": True})
+        if path == "/api/unlock":
+            return self._unlock(body)
         return self._send_json(404, {"error": "not found"})
 
     def _board(self):
@@ -255,11 +335,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(503, {"error": "no envelope summary yet"})
         return self._send_json(200, summary)
 
+    def _diagnostics(self):
+        return self._send_json(200, diagnostics(
+            self.cfg, self.cache.current(), envelopes_mod.current(self.cfg),
+            self.controller.snapshot() if self.controller is not None else None))
+
     def _state(self):
         if self.controller is None:
-            return self._send_json(200, {"screen_on": True, "page": "board",
-                                         "revert_to_board": False})
-        return self._send_json(200, self.controller.snapshot())
+            snapshot = {"screen_on": True, "page": "board",
+                        "revert_to_board": False}
+        else:
+            snapshot = dict(self.controller.snapshot())
+        snapshot["locked"] = self.screen_lock.locked
+        return self._send_json(200, snapshot)
+
+    def _unlock(self, body):
+        pin = body.get("pin") if body is not None else None
+        if not isinstance(pin, str) or len(pin) > 16:
+            return self._send_json(400, {"error": "expected {\"pin\": str}"})
+        result = self.screen_lock.unlock(pin)
+        if result == "wait":
+            return self._send_json(429, {"error": "too many attempts"},
+                                   {"Retry-After": "2"})
+        if result == "wrong":
+            return self._send_json(403, {"error": "wrong PIN"})
+        return self._send_json(200, {"locked": False})
 
     def _ui(self):
         """
@@ -283,8 +383,7 @@ class Handler(BaseHTTPRequestHandler):
                          daemon=True).start()
         return self._send_json(202, {"status": "refreshing"})
 
-    def _screen(self):
-        body = self._read_body()
+    def _screen(self, body):
         if body is None or "on" not in body:
             return self._send_json(400, {"error": "expected {\"on\": bool}"})
         if self.controller is None:
@@ -292,8 +391,7 @@ class Handler(BaseHTTPRequestHandler):
         self.controller.request_screen(bool(body["on"]))
         return self._send_json(200, self.controller.snapshot())
 
-    def _page(self):
-        body = self._read_body()
+    def _page(self, body):
         if body is None or "page" not in body:
             return self._send_json(400, {"error": "expected {\"page\": str}"})
         page = str(body["page"])[:32]
@@ -332,6 +430,7 @@ def build_server(cfg, state, metrics, controller=None):
             cfg["refresh"]["min_manual_interval_seconds"]),
         "cfg": cfg,
         "controller": controller,
+        "screen_lock": ScreenLock(cfg["lock"]["pin"]),
     })
 
     address = (cfg["server"]["bind"], cfg["server"]["port"])

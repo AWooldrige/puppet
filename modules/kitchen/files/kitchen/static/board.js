@@ -9,16 +9,22 @@
 const BOARD_POLL_MS = 60000;   // background refresh is 30 min; this just re-reads
 const STATE_POLL_MS = 2000;    // screen state and revert requests
 const REFRESH_SETTLE_MS = 2500;
+const CLOCK_TICK_MS = 1000;
+const DIAG_POLL_MS = 5000;
+const LOCK_PAD_IDLE_MS = 30000;
+const PIN_MAX = 8;
 
 const el = (id) => document.getElementById(id);
 
 const dom = {
     topbar: el('topbar'),
     todayDate: el('today-date'),
+    clock: el('clock'),
     refresh: el('refresh'),
     banner: el('banner'),
     board: el('board'),
     days: el('days'),
+    boardMore: el('board-more'),
     money: el('money'),
     moneyBody: el('money-body'),
     moneyEmpty: el('money-empty'),
@@ -26,12 +32,9 @@ const dom = {
     frameError: el('frame-error'),
     frameErrorDetail: el('frame-error-detail'),
     frameRetry: el('frame-retry'),
-    status: el('status'),
-    statusUpdated: el('status-updated'),
-    statusWifi: el('status-wifi'),
-    statusLoad: el('status-load'),
-    statusNext: el('status-next'),
-    statusFlag: el('status-flag'),
+    diag: el('diag'),
+    diagBody: el('diag-body'),
+    diagFlag: el('diag-flag'),
     tabs: Array.from(document.querySelectorAll('.tab')),
     dayOverlay: el('day-overlay'),
     dayTitle: el('day-title'),
@@ -41,6 +44,14 @@ const dom = {
     weather: el('weather'),
     weatherLine: el('weather-line'),
     wakeShield: el('wake-shield'),
+    lock: el('lock'),
+    lockPrompt: el('lock-prompt'),
+    lockPad: el('lock-pad'),
+    lockDots: el('lock-dots'),
+    lockMessage: el('lock-message'),
+    lockKeys: el('lock-keys'),
+    themePicker: el('theme-picker'),
+    themeButtons: Array.from(document.querySelectorAll('#theme-picker button')),
 };
 
 const app = {
@@ -52,6 +63,11 @@ const app = {
     framesLoaded: { home: false, graphs: false },
     activeTab: 'board',
     screenOn: true,
+    locked: false,
+    lockEpoch: 0,
+    pin: '',
+    padTimer: null,
+    theme: 'light',
 };
 
 async function getJson(path) {
@@ -113,19 +129,6 @@ function make(tag, className, text) {
     return node;
 }
 
-const WEATHER_ICONS = {
-    'Clear': '\u2600', 'Sunny spells': '\u2600', 'Cloudy': '\u2601',
-    'Fog': '\u2248', 'Drizzle': '\u2602', 'Rain': '\u2602', 'Showers': '\u2602',
-    'Snow': '\u2744', 'Storms': '\u26a1',
-};
-
-function weatherBadge(weather) {
-    const badge = make('span', 'day-wx');
-    badge.append(make('span', 'day-wx-icon', WEATHER_ICONS[weather.description] || '\u2601'),
-        weather.temp_max === null ? '--\u00b0' : `${Math.round(weather.temp_max)}\u00b0`);
-    return badge;
-}
-
 const BUSY_START = 7 * 60;
 const BUSY_SPAN = 15 * 60;
 
@@ -159,13 +162,11 @@ function isDayOff(day) {
     return day.is_weekend || Boolean(day.bank_holiday);
 }
 
-function buildDayRow(day, todayIso) {
+function buildDayRow(day) {
     const row = make('button', 'day');
     row.type = 'button';
     row.dataset.date = day.date;
-    row.classList.toggle('is-week-start', day.is_week_start);
     row.classList.toggle('is-day-off', isDayOff(day));
-    row.classList.toggle('is-today', day.date === todayIso);
 
     const label = make('span', 'day-label', day.weekday_text);
     label.prepend(make('b', null, day.day_number));
@@ -198,10 +199,8 @@ function buildDayRow(day, todayIso) {
     }
 
     const side = make('span', 'day-side');
-    if (day.weather) {
-        side.appendChild(weatherBadge(day.weather));
-    }
-    side.appendChild(busyBar(day));
+    side.append(busyBar(day), make('span', 'day-more', '\u203a'));
+    side.lastChild.setAttribute('aria-hidden', 'true');
 
     row.append(label, lane, items, side);
     return row;
@@ -215,7 +214,6 @@ function buildFreeBand(run) {
     const first = run[0];
     const last = run[run.length - 1];
     const band = make('div', 'free-band');
-    band.classList.toggle('is-week-start', first.is_week_start);
     if (run.length === 1) {
         band.append(make('b', null, 'Free'), ` ${first.weekday_text} ${first.day_number}`);
     } else {
@@ -240,9 +238,16 @@ function renderDays(payload) {
             i = j - 1;
             continue;
         }
-        fragment.appendChild(buildDayRow(days[i], todayIso));
+        fragment.appendChild(buildDayRow(days[i]));
     }
     dom.days.replaceChildren(fragment);
+    updateBoardMore();
+}
+
+function updateBoardMore() {
+    const board = dom.board;
+    const atEnd = board.scrollTop + board.clientHeight >= board.scrollHeight - 4;
+    show(dom.boardMore, app.activeTab === 'board' && !atEnd);
 }
 
 const WEATHER_SWITCH_HOUR = 15;
@@ -267,28 +272,11 @@ function renderWeather(payload) {
 }
 
 function renderDate() {
-    dom.todayDate.textContent = new Date().toLocaleDateString('en-GB',
+    const now = new Date();
+    dom.todayDate.textContent = now.toLocaleDateString('en-GB',
         { weekday: 'long', day: 'numeric', month: 'long' });
-}
-
-function renderStatus(payload) {
-    const status = payload.status;
-    dom.statusUpdated.textContent = `Updated ${status.updated_text}`;
-    dom.statusWifi.textContent = status.wifi_percent === null
-        ? 'WiFi --%'
-        : `WiFi ${status.wifi_percent}%`;
-    dom.statusLoad.textContent = status.load_average === null
-        ? 'Load --'
-        : `Load ${status.load_average}`;
-    dom.statusNext.textContent = `Refresh ${status.next_refresh_text}`;
-
-    const health = payload.health;
-    const bad = !health.ok;
-    dom.statusFlag.textContent = health.stale
-        ? 'STALE'
-        : (bad ? 'DEGRADED' : 'OK');
-    dom.statusFlag.classList.toggle('is-stale', health.stale);
-    dom.statusFlag.classList.toggle('is-bad', bad && !health.stale);
+    dom.clock.textContent = now.toLocaleTimeString('en-GB',
+        { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 function render(payload) {
@@ -297,7 +285,111 @@ function render(payload) {
     renderDate();
     renderDays(payload);
     renderWeather(payload);
-    renderStatus(payload);
+}
+
+const UNKNOWN = '--';
+
+function okText(value, good, bad) {
+    if (value === null || value === undefined) {
+        return [UNKNOWN, null];
+    }
+    return value ? [good, 'is-good'] : [bad, 'is-bad'];
+}
+
+function orUnknown(value, format) {
+    return value === null || value === undefined ? UNKNOWN : format(value);
+}
+
+function duration(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (days) {
+        return `${days} d ${hours} h`;
+    }
+    return hours ? `${hours} h ${mins} min` : `${mins} min`;
+}
+
+function diagFlag(board) {
+    if (!board || !board.health) {
+        return ['NO DATA', 'is-bad'];
+    }
+    if (board.health.stale) {
+        return ['STALE', 'is-stale'];
+    }
+    return board.health.ok ? ['OK', 'is-good'] : ['DEGRADED', 'is-bad'];
+}
+
+function diagSections(d) {
+    const board = d.board;
+    const health = (board && board.health) || {};
+    const envelopes = d.envelopes;
+    const panel = d.controller;
+    return [
+        ['Calendar', [
+            ['Updated', board ? [board.updated_text] : [UNKNOWN]],
+            ['Next refresh', board ? [board.next_refresh_text] : [UNKNOWN]],
+            ['Events', board ? [String(board.event_count)] : [UNKNOWN]],
+            ['Google Calendar', okText(health.calendar_ok, 'OK', 'Failing')],
+            ['Weather', okText(health.weather_ok, 'OK', 'Failing')],
+            ['Home server', okText(health.upstream_ok, 'Reachable', 'Unreachable')],
+            ['Source', board ? (health.from_cache ? ['Saved copy', 'is-stale'] : ['Live'])
+                : [UNKNOWN]],
+        ]],
+        ['Money', [
+            ['Reconciled', envelopes
+                ? [envelopes.age_days === 0 ? 'Today' : `${envelopes.age_days} days ago`,
+                    envelopes.stale ? 'is-stale' : null]
+                : ['No summary', 'is-bad']],
+        ]],
+        ['Panel', panel ? [
+            ['Screen', [panel.screen_on ? 'On' : 'Off']],
+            ['Backlight', okText(panel.backlight_available, 'OK', 'Missing')],
+            ['Touchscreen', okText(panel.touch_available, 'OK', 'Missing')],
+            ['Idle', [orUnknown(panel.idle_seconds, (s) => duration(s))]],
+        ] : [['Controller', ['Not running (dev)']]]],
+        ['Device', [
+            ['WiFi', [orUnknown(d.wifi_percent, (v) => `${v}%`)]],
+            ['Load', [orUnknown(d.load_average, String)]],
+            ['CPU temperature', [orUnknown(d.cpu_temp_c, (v) => `${v} \u00b0C`),
+                d.cpu_temp_c >= 75 ? 'is-bad' : null]],
+            ['Memory free', [orUnknown(d.memory_available_percent, (v) => `${v}%`),
+                d.memory_available_percent !== null && d.memory_available_percent < 15
+                    ? 'is-bad' : null]],
+            ['SD card free', [orUnknown(d.disk_free_bytes,
+                (v) => `${(v / 1e9).toFixed(1)} GB`)]],
+            ['Under-voltage', okText(d.under_voltage === null ? null : !d.under_voltage,
+                'None', 'Detected')],
+            ['Uptime', [orUnknown(d.uptime_seconds, duration)]],
+        ]],
+    ];
+}
+
+function renderDiagnostics(d) {
+    const [flagText, flagClass] = diagFlag(d.board);
+    dom.diagFlag.textContent = flagText;
+    dom.diagFlag.className = `diag-flag ${flagClass}`;
+
+    const fragment = document.createDocumentFragment();
+    for (const [heading, rows] of diagSections(d)) {
+        fragment.appendChild(make('h2', 'money-heading', heading));
+        const list = make('dl', 'diag-list');
+        for (const [label, [value, cls]] of rows) {
+            list.append(make('dt', null, label), make('dd', cls || null, value));
+        }
+        fragment.appendChild(list);
+    }
+    dom.diagBody.replaceChildren(fragment);
+}
+
+async function loadDiagnostics() {
+    try {
+        renderDiagnostics(await getJson('/api/diagnostics'));
+    } catch (err) {
+        console.warn('diagnostics load failed', err);
+        dom.diagFlag.textContent = 'NO ANSWER';
+        dom.diagFlag.className = 'diag-flag is-bad';
+    }
 }
 
 async function loadBoard() {
@@ -334,6 +426,7 @@ async function manualRefresh() {
         // or the same payload comes back.
         await new Promise((resolve) => setTimeout(resolve, REFRESH_SETTLE_MS));
         await loadBoard();
+        await loadDiagnostics();
     } catch (err) {
         console.warn('refresh failed', err);
     } finally {
@@ -403,8 +496,8 @@ function setActiveTab(name) {
     }
     const onBoard = name === 'board';
     show(dom.topbar, onBoard);
+    updateBoardMore();
     show(dom.weather, onBoard);
-    show(dom.status, onBoard);
     // Report the active tab, so the device knows whether a revert applies.
     postJson('/api/page', { page: name }).catch(() => {});
 }
@@ -415,24 +508,74 @@ function hideAllFrames() {
     }
 }
 
+function showSection(visible) {
+    for (const section of [dom.board, dom.money, dom.diag]) {
+        show(section, section === visible);
+    }
+}
+
 function showBoard() {
     closeOverlays();
     setActiveTab('board');
-    show(dom.money, false);
-    show(dom.board, true);
+    showSection(dom.board);
     dom.board.scrollTop = 0;
+    updateBoardMore();
     hideAllFrames();
     show(dom.frameError, false);
 }
 
-function loadFrame(name) {
+function frameUrl(name) {
     const url = app.tabUrls[name];
+    if (!url || name !== 'graphs') {
+        return url;
+    }
+    return `${url}${url.includes('?') ? '&' : '?'}theme=${app.theme}`;
+}
+
+function loadFrame(name) {
+    const url = frameUrl(name);
     const frame = dom.frames[name];
     if (!url || !frame || app.framesLoaded[name]) {
         return;
     }
     app.framesLoaded[name] = true;
     frame.src = url;
+}
+
+const THEMES = ['light', 'dark'];
+const THEME_KEY = 'kitchen-theme';
+
+function storedTheme() {
+    try {
+        const theme = localStorage.getItem(THEME_KEY);
+        return THEMES.includes(theme) ? theme : 'light';
+    } catch (err) {
+        return 'light';
+    }
+}
+
+function applyTheme(theme) {
+    app.theme = theme;
+    document.documentElement.dataset.theme = theme;
+    for (const button of dom.themeButtons) {
+        button.setAttribute('aria-pressed', String(button.dataset.theme === theme));
+    }
+}
+
+function setTheme(theme) {
+    if (!THEMES.includes(theme) || theme === app.theme) {
+        return;
+    }
+    try {
+        localStorage.setItem(THEME_KEY, theme);
+    } catch (err) {
+        console.warn('theme not saved', err);
+    }
+    applyTheme(theme);
+    if (app.framesLoaded.graphs) {
+        app.framesLoaded.graphs = false;
+        loadFrame('graphs');
+    }
 }
 
 function preloadFrames() {
@@ -446,8 +589,7 @@ function showEmbedded(name) {
     const alreadyLoaded = app.framesLoaded[name];
     closeOverlays();
     setActiveTab(name);
-    show(dom.board, false);
-    show(dom.money, false);
+    showSection(null);
     if (!url) {
         hideAllFrames();
         dom.frameErrorDetail.textContent = 'No address configured for this tab.';
@@ -512,7 +654,7 @@ function pace(envelope, clock) {
 }
 
 const PACE_ORDER = { over: 0, behind: 1, watch: 2, good: 3, none: 4 };
-const PACE_TEXT = { over: 'Overspent', behind: 'Behind', watch: 'Watch', good: 'On track', none: '' };
+const PACE_TEXT = { over: 'Overspent', behind: 'Behind', watch: 'Watch', good: '', none: '' };
 
 function buildMonthHeader(summary, clock) {
     const header = make('div', 'month');
@@ -552,18 +694,27 @@ function buildTransactions(envelope) {
     return table;
 }
 
-function buildEnvelope(envelope, state, clock) {
+function buildEnvelope(envelope, state, clock, withBar) {
     const item = make('details', `env is-${state}`);
     const summary = make('summary');
     const top = make('div', 'env-top');
-    const left = make('span', 'env-left', money(envelope.balance));
-    if (envelope.monthly_budget > 0) {
-        left.appendChild(make('small', null, ` of ${money(envelope.monthly_budget)}`));
+    const label = make('span', 'env-label');
+    label.appendChild(make('span', 'env-name', envelope.name));
+    if (PACE_TEXT[state]) {
+        label.appendChild(make('span', 'env-tag', PACE_TEXT[state]));
     }
-    top.append(make('span', 'env-name', envelope.name), left);
+    let per = '';
+    if (envelope.monthly_budget > 0) {
+        per = withBar ? `of ${money(envelope.monthly_budget)}`
+            : `+${money(envelope.monthly_budget)} a month`;
+    }
+    const chevron = make('span', 'env-chevron', '\u203a');
+    chevron.setAttribute('aria-hidden', 'true');
+    top.append(label, make('span', 'env-left', money(envelope.balance, true)),
+        make('span', 'env-per', per), chevron);
     summary.appendChild(top);
 
-    if (state !== 'none') {
+    if (withBar) {
         const meter = make('div', 'env-meter');
         const fill = make('div', 'env-fill');
         fill.style.width = `${envelope.pct_remaining * 100}%`;
@@ -573,14 +724,17 @@ function buildEnvelope(envelope, state, clock) {
         summary.appendChild(meter);
     }
 
-    const foot = make('div', 'env-foot');
-    foot.append(make('span', 'env-tag', PACE_TEXT[state]),
-        make('span', null, envelope.transactions.length
-            ? `${money(envelope.total_spend)} spent \u00b7 tap for detail`
-            : 'nothing spent yet'));
-    summary.appendChild(foot);
-    item.append(summary, buildTransactions(envelope));
+    item.appendChild(summary);
+    if (envelope.transactions.length) {
+        item.appendChild(make('p', 'env-spent',
+            `${money(envelope.total_spend)} out \u00b7 ${money(envelope.total_receive)} in`));
+    }
+    item.appendChild(buildTransactions(envelope));
     return item;
+}
+
+function hasBar(envelope) {
+    return envelope.frequency === 'Monthly' && envelope.monthly_budget > 0;
 }
 
 function renderMoney(summary) {
@@ -593,19 +747,15 @@ function renderMoney(summary) {
         .map((envelope) => ({ envelope, state: pace(envelope, clock) }))
         .sort((a, b) => PACE_ORDER[a.state] - PACE_ORDER[b.state]);
     for (const { envelope, state } of key) {
-        fragment.appendChild(buildEnvelope(envelope, state, clock));
+        fragment.appendChild(buildEnvelope(envelope, state, clock, hasBar(envelope)));
     }
 
     if (summary.longer_term.length) {
         fragment.appendChild(make('h2', 'money-heading', 'Longer term'));
-        const tiles = make('div', 'tiles');
         for (const envelope of summary.longer_term) {
-            const tile = make('div', 'tile');
-            tile.append(make('b', null, money(envelope.balance)),
-                make('span', null, envelope.name));
-            tiles.appendChild(tile);
+            const state = envelope.balance < 0 ? 'over' : 'none';
+            fragment.appendChild(buildEnvelope(envelope, state, clock, false));
         }
-        fragment.appendChild(tiles);
     }
     dom.moneyBody.replaceChildren(fragment);
 }
@@ -637,12 +787,21 @@ async function loadMoney() {
 function showMoney() {
     closeOverlays();
     setActiveTab('money');
-    show(dom.board, false);
     hideAllFrames();
     show(dom.frameError, false);
-    show(dom.money, true);
+    showSection(dom.money);
     dom.money.scrollTop = 0;
     loadMoney();
+}
+
+function showStatus() {
+    closeOverlays();
+    setActiveTab('status');
+    hideAllFrames();
+    show(dom.frameError, false);
+    showSection(dom.diag);
+    dom.diag.scrollTop = 0;
+    loadDiagnostics();
 }
 
 function reportFrameProblem(name, detail) {
@@ -669,12 +828,100 @@ async function screenOff() {
     }
 }
 
+function renderPin(message) {
+    dom.lockDots.textContent = '\u25cf'.repeat(app.pin.length);
+    if (message !== undefined) {
+        dom.lockMessage.textContent = message;
+    }
+}
+
+function hidePad() {
+    clearTimeout(app.padTimer);
+    app.pin = '';
+    show(dom.lockPad, false);
+    show(dom.lockPrompt, true);
+}
+
+function touchPad() {
+    clearTimeout(app.padTimer);
+    app.padTimer = setTimeout(hidePad, LOCK_PAD_IDLE_MS);
+}
+
+function showPad() {
+    app.pin = '';
+    renderPin('');
+    show(dom.lockPrompt, false);
+    show(dom.lockPad, true);
+    touchPad();
+}
+
+function setLocked(locked) {
+    app.locked = locked;
+    hidePad();
+    show(dom.lock, locked);
+}
+
+async function lockScreen() {
+    closeOverlays();
+    app.lockEpoch++;
+    setLocked(true);
+    try {
+        await postJson('/api/lock');
+    } catch (err) {
+        console.warn('lock failed', err);
+    }
+}
+
+async function submitPin() {
+    const pin = app.pin;
+    app.pin = '';
+    renderPin('Checking\u2026');
+    let resp;
+    try {
+        resp = await postJson('/api/unlock', { pin });
+    } catch (err) {
+        renderPin('No answer, try again');
+        return;
+    }
+    if (resp.ok) {
+        app.lockEpoch++;
+        setLocked(false);
+        showBoard();
+    } else if (resp.status === 429) {
+        renderPin('Wait a moment');
+    } else if (resp.status === 403) {
+        renderPin('Wrong PIN');
+    } else {
+        renderPin('Try again');
+    }
+}
+
+function pressKey(key) {
+    touchPad();
+    if (key === 'clear') {
+        app.pin = '';
+        renderPin('');
+    } else if (key === 'ok') {
+        if (app.pin) {
+            submitPin();
+        }
+    } else if (app.pin.length < PIN_MAX) {
+        app.pin += key;
+        renderPin('');
+    }
+}
+
 async function pollState() {
+    const epoch = app.lockEpoch;
     let state;
     try {
         state = await getJson('/api/state');
     } catch (err) {
         return;
+    }
+
+    if (epoch === app.lockEpoch && state.locked !== app.locked) {
+        setLocked(state.locked);
     }
 
     if (state.screen_on !== app.screenOn) {
@@ -693,6 +940,7 @@ async function pollState() {
 
 function wire() {
     dom.refresh.addEventListener('click', manualRefresh);
+    dom.board.addEventListener('scroll', updateBoardMore, { passive: true });
 
     dom.days.addEventListener('click', (evt) => {
         const row = evt.target.closest('.day');
@@ -721,6 +969,10 @@ function wire() {
                 showBoard();
             } else if (name === 'money') {
                 showMoney();
+            } else if (name === 'status') {
+                showStatus();
+            } else if (name === 'lock') {
+                lockScreen();
             } else if (name === 'screenoff') {
                 screenOff();
             } else {
@@ -738,7 +990,7 @@ function wire() {
 
         show(dom.frameError, false);
         frame.classList.add('is-front');
-        frame.src = app.tabUrls[name];
+        frame.src = frameUrl(name);
     });
 
     for (const [name, frame] of Object.entries(dom.frames)) {
@@ -751,6 +1003,21 @@ function wire() {
             }
         });
     }
+
+    dom.themePicker.addEventListener('click', (evt) => {
+        const button = evt.target.closest('button');
+        if (button && dom.themePicker.contains(button)) {
+            setTheme(button.dataset.theme);
+        }
+    });
+
+    dom.lockPrompt.addEventListener('click', showPad);
+    dom.lockKeys.addEventListener('click', (evt) => {
+        const button = evt.target.closest('[data-key]');
+        if (button) {
+            pressKey(button.dataset.key);
+        }
+    });
 
     dom.wakeShield.addEventListener('pointerdown', (evt) => {
         evt.preventDefault();
@@ -771,7 +1038,10 @@ async function loadUi() {
 }
 
 async function start() {
+    applyTheme(storedTheme());
     wire();
+    renderDate();
+    await pollState();
     await loadUi();
     preloadFrames();
     await loadBoard();
@@ -782,6 +1052,12 @@ async function start() {
         loadMoney();
     }, BOARD_POLL_MS);
     setInterval(pollState, STATE_POLL_MS);
+    setInterval(renderDate, CLOCK_TICK_MS);
+    setInterval(() => {
+        if (app.activeTab === 'status') {
+            loadDiagnostics();
+        }
+    }, DIAG_POLL_MS);
 }
 
 start();

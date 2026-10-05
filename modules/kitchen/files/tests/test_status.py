@@ -48,5 +48,41 @@ class LoadAverageTests(unittest.TestCase):
             self.assertIsNone(status.load_average())
 
 
+MEMINFO = """MemTotal:        3884512 kB
+MemFree:          512000 kB
+MemAvailable:    1942256 kB
+"""
+
+
+class DeviceParseTests(unittest.TestCase):
+    def test_uptime(self):
+        self.assertEqual(status.parse_uptime("12345.67 40000.00\n"), 12345)
+        self.assertIsNone(status.parse_uptime(None))
+        self.assertIsNone(status.parse_uptime(""))
+
+    def test_cpu_temp(self):
+        self.assertEqual(status.parse_cpu_temp("51634\n"), 51.6)
+        self.assertIsNone(status.parse_cpu_temp(None))
+        self.assertIsNone(status.parse_cpu_temp("hot"))
+
+    def test_memory_available(self):
+        self.assertEqual(status.parse_memory_available(MEMINFO), 50)
+        self.assertIsNone(status.parse_memory_available("MemTotal: 10 kB\n"))
+        self.assertIsNone(status.parse_memory_available(None))
+
+    def test_alarm(self):
+        self.assertTrue(status.parse_alarm("1\n"))
+        self.assertFalse(status.parse_alarm("0\n"))
+        self.assertIsNone(status.parse_alarm(None))
+        self.assertIsNone(status.parse_alarm("x"))
+
+    def test_under_voltage_without_a_sensor_is_unknown(self):
+        self.assertIsNone(status.under_voltage("/nonexistent/hwmon*/alarm"))
+
+    def test_disk_free_is_a_number_of_bytes(self):
+        self.assertGreater(status.disk_free_bytes("/"), 0)
+        self.assertIsNone(status.disk_free_bytes("/nonexistent/path"))
+
+
 if __name__ == "__main__":
     unittest.main()

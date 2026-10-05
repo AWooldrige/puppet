@@ -55,6 +55,7 @@ hosts:
       - example.bins@group.calendar.google.com
     kitchen_weather_latitude: 51.5
     kitchen_weather_longitude: -0.12
+    kitchen_lock_pin: "1234"
     kitchen_service_account_json: |
       {
         "type": "service_account",

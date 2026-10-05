@@ -20,7 +20,7 @@ port = 5273
 
 [calendar]
 timezone = "Europe/London"
-lookahead_days = 35
+lookahead_days = 62
 calendar_ids = ["a@example.com", "b@example.com"]
 service_account_file = "{state_dir}/service-account.json"
 
@@ -71,6 +71,9 @@ on_hour = 6
 off_hour = 21
 overnight_hold_minutes = 5
 revert_after_seconds = 120
+
+[lock]
+pin = "1234"
 
 [backlight]
 device_glob = "/sys/class/backlight/panel_backlight*"

@@ -33,7 +33,8 @@ server {
 
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Any X-Forwarded-For makes HA 400 unless its UI-only proxy settings are set.
+        proxy_set_header X-Forwarded-For "";
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";

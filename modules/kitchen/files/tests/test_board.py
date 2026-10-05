@@ -22,10 +22,6 @@ from . import support
 FRONTEND_KEY_PATHS = [
     "generated_at",
     "days",
-    "status.updated_text",
-    "status.next_refresh_text",
-    "status.wifi_percent",
-    "status.load_average",
     "health.ok",
     "health.stale",
     "health.from_cache",
@@ -72,7 +68,7 @@ RAW_EVENTS = [
     support.raw_all_day("Private NODISP", "2026-07-24", "2026-07-25"),
     support.raw_all_day("Much later", "2026-08-20", "2026-08-21"),
     support.raw_all_day("Camping", "2026-07-30", "2026-08-03"),
-    support.raw_all_day("Beyond the board", "2026-09-01", "2026-09-02"),
+    support.raw_all_day("Beyond the board", "2026-09-28", "2026-09-29"),
 ]
 
 HOLIDAYS = {"2026-08-31": "Summer bank holiday", "2026-07-27": "Made-up holiday"}
@@ -132,7 +128,7 @@ class PayloadAssemblyTests(BoardTestCase):
         days = self.build()["days"]
         self.assertEqual(len(days), self.cfg["calendar"]["lookahead_days"])
         self.assertEqual(days[0]["date"], "2026-07-22")
-        self.assertEqual(days[-1]["date"], "2026-08-25")
+        self.assertEqual(days[-1]["date"], "2026-09-21")
         self.assertEqual(self.titles({"days": days}, "2026-07-29"), [])
 
     def test_only_today_is_flagged_today(self):
@@ -289,15 +285,6 @@ class StaleFallbackTests(BoardTestCase):
         self.assertTrue(cached["health"]["stale"])
         self.assertIn("Calendar may be out of date",
                       cached["health"]["messages"])
-
-    def test_status_is_refreshed_even_on_a_cached_payload(self):
-        payload = self.build()
-        self.state.save_success(payload)
-        later = dt.datetime.now() + dt.timedelta(minutes=90)
-        with mock.patch.object(board_mod, "check_upstream", return_value=True):
-            cached = board_mod.stale_payload(self.cfg, self.state, now=later)
-        self.assertEqual(cached["status"]["updated_text"],
-                         later.strftime("%H:%M"))
 
 
 class FrontendContractTests(BoardTestCase):

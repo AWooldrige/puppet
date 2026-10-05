@@ -98,15 +98,6 @@ def check_upstream(cfg):
         return False
 
 
-def build_status(cfg, now):
-    return {
-        "updated_text": now.strftime("%H:%M"),
-        "next_refresh_text": status_mod.next_refresh(cfg, now),
-        "wifi_percent": status_mod.wifi_percent(),
-        "load_average": status_mod.load_average(),
-    }
-
-
 def build(cfg, state, metrics=None, now=None):
     tzinfo = calendar_source._tz(cfg["calendar"]["timezone"])
     now = now or dt.datetime.now(tzinfo)
@@ -147,7 +138,6 @@ def build(cfg, state, metrics=None, now=None):
         "generated_at": now.timestamp(),
         "days": days,
         "event_count": len(occurrences),
-        "status": build_status(cfg, now),
         "health": {
             "calendar_ok": calendar_ok,
             "weather_ok": weather is not None,
@@ -164,7 +154,7 @@ def build(cfg, state, metrics=None, now=None):
         metrics.send("calendar_ok", 1 if calendar_ok else 0)
         metrics.send("upstream_ok", 1 if upstream_ok else 0)
         metrics.send("events_shown", payload["event_count"])
-        wifi = payload["status"]["wifi_percent"]
+        wifi = status_mod.wifi_percent()
         if wifi is not None:
             metrics.send("wifi_percent", wifi)
 
@@ -196,7 +186,6 @@ def stale_payload(cfg, state, now=None):
         return None
 
     now = now or dt.datetime.now()
-    snapshot["status"] = build_status(cfg, now)
     health = snapshot.setdefault("health", {})
     health["stale"] = state.is_stale(now)
     health["from_cache"] = True

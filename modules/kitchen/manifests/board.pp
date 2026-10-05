@@ -70,17 +70,19 @@ class kitchen::board {
     }
 
     file { '/etc/kitchen/config.toml':
-        ensure  => 'present',
-        owner   => 'root',
-        group   => 'kitchen',
-        mode    => '0640',
-        content => epp('kitchen/config.toml.epp', {
+        ensure    => 'present',
+        owner     => 'root',
+        group     => 'kitchen',
+        mode      => '0640',
+        show_diff => false,
+        content   => epp('kitchen/config.toml.epp', {
             'calendar_ids'      => $secure::kitchen_calendar_ids,
             'weather_latitude'  => $secure::kitchen_weather_latitude,
             'weather_longitude' => $secure::kitchen_weather_longitude,
+            'lock_pin'          => $secure::kitchen_lock_pin,
         }),
-        require => File['/etc/kitchen'],
-        notify  => Service['kitchen-board']
+        require   => File['/etc/kitchen'],
+        notify    => Service['kitchen-board']
     }
 
     # Read-only Google Calendar credentials

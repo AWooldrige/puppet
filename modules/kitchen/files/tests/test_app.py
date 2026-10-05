@@ -32,8 +32,6 @@ PAYLOAD = {
     "generated_at": 1.0,
     "event_count": 1,
     "days": [],
-    "status": {"updated_text": "09:00", "next_refresh_text": "09:30",
-               "wifi_percent": 90, "load_average": 0.5},
     "health": {"ok": True, "stale": False, "from_cache": False,
                "calendar_ok": True, "weather_ok": False, "upstream_ok": True,
                "messages": []},
@@ -162,6 +160,101 @@ class RoutingTests(ServerTestCase):
         status, _ = self.post("/api/nope")
         self.assertEqual(status, 404)
 
+    def test_diagnostics_answer_before_any_data(self):
+        with mock.patch.object(board_mod, "check_upstream", return_value=False):
+            status, body, headers = self.get("/api/diagnostics")
+        self.assertEqual(status, 200)
+        data = json.loads(body)
+        self.assertIsNone(data["board"])
+        self.assertIsNone(data["envelopes"])
+        self.assertIsNone(data["controller"])
+        self.assertIn("under_voltage", data)
+        self.assertEqual(headers.get("Cache-Control"), "no-store")
+
+    def test_diagnostics_describe_the_cached_board(self):
+        with mock.patch.object(board_mod, "build", return_value=PAYLOAD):
+            self.cache.refresh()
+        data = json.loads(self.get("/api/diagnostics")[1])
+        self.assertEqual(data["board"]["event_count"], 1)
+        self.assertTrue(data["board"]["health"]["ok"])
+        self.assertRegex(data["board"]["next_refresh_text"], r"\d\d:\d\d")
+
+
+class DiagnosticsTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.cfg = support.make_config(self.tmp.name)
+
+    def test_updated_and_next_refresh_come_from_the_payload_not_the_clock(self):
+        now = support.london_now(2026, 7, 22, hour=12)
+        generated = support.london_now(2026, 7, 22, hour=9)
+        payload = dict(PAYLOAD, generated_at=generated.timestamp())
+        board = app_mod.diagnostics(self.cfg, payload, None, None, now)["board"]
+        self.assertEqual(board["updated_text"], "09:00")
+        self.assertEqual(board["next_refresh_text"], "09:30")
+
+    def test_a_payload_from_another_day_shows_its_date(self):
+        now = support.london_now(2026, 7, 22, hour=12)
+        generated = support.london_now(2026, 7, 20, hour=9)
+        payload = dict(PAYLOAD, generated_at=generated.timestamp())
+        board = app_mod.diagnostics(self.cfg, payload, None, None, now)["board"]
+        self.assertEqual(board["updated_text"], "20 Jul 09:00")
+
+
+class KeepAliveTests(ServerTestCase):
+    def test_a_post_body_the_route_ignores_does_not_corrupt_the_next_request(self):
+        import http.client
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
+        self.addCleanup(conn.close)
+        for path in ("/api/lock", "/api/refresh"):
+            with mock.patch.object(board_mod, "build", return_value=PAYLOAD):
+                conn.request("POST", path, body=b"{}",
+                             headers={"Content-Type": "application/json"})
+                conn.getresponse().read()
+            conn.request("GET", "/health")
+            resp = conn.getresponse()
+            self.assertEqual(resp.status, 200, path)
+            resp.read()
+
+
+class LockTests(ServerTestCase):
+    def locked(self):
+        return json.loads(self.get("/api/state")[1])["locked"]
+
+    def test_starts_unlocked_and_locks(self):
+        self.assertFalse(self.locked())
+        self.assertEqual(self.post("/api/lock")[0], 200)
+        self.assertTrue(self.locked())
+
+    def test_the_right_pin_unlocks(self):
+        self.post("/api/lock")
+        self.assertEqual(self.post("/api/unlock", {"pin": "1234"})[0], 200)
+        self.assertFalse(self.locked())
+
+    def test_a_wrong_pin_is_refused_then_throttled(self):
+        self.post("/api/lock")
+        self.assertEqual(self.post("/api/unlock", {"pin": "0000"})[0], 403)
+        self.assertEqual(self.post("/api/unlock", {"pin": "1234"})[0], 429)
+        self.assertTrue(self.locked())
+
+    def test_a_malformed_unlock_is_400(self):
+        self.post("/api/lock")
+        for body in ({}, {"pin": 1234}, {"pin": "1" * 17}):
+            self.assertEqual(self.post("/api/unlock", body)[0], 400, body)
+        self.assertTrue(self.locked())
+
+
+class ScreenLockTests(unittest.TestCase):
+    def test_the_throttle_expires(self):
+        lock = app_mod.ScreenLock("1234", retry_seconds=0.05)
+        lock.lock()
+        self.assertEqual(lock.unlock("9999"), "wrong")
+        self.assertEqual(lock.unlock("1234"), "wait")
+        time.sleep(0.06)
+        self.assertEqual(lock.unlock("1234"), "ok")
+        self.assertFalse(lock.locked)
+
 
 class RefreshTests(ServerTestCase):
     def test_refresh_is_accepted_then_rate_limited(self):
@@ -184,6 +277,17 @@ class ScreenControlTests(ServerTestCase):
         status, _ = self.post("/api/screen", {"on": False})
         self.assertEqual(status, 200)
         self.assertEqual(self.controller.screen_requests, [False])
+
+    def test_state_carries_the_lock_alongside_the_controller(self):
+        self.post("/api/lock")
+        state = json.loads(self.get("/api/state")[1])
+        self.assertTrue(state["locked"])
+        self.assertEqual(state["page"], "board")
+
+    def test_diagnostics_include_the_controller_snapshot(self):
+        with mock.patch.object(board_mod, "check_upstream", return_value=False):
+            data = json.loads(self.get("/api/diagnostics")[1])
+        self.assertEqual(data["controller"]["page"], "board")
 
     def test_screen_needs_an_on_field(self):
         status, _ = self.post("/api/screen", {"nope": 1})

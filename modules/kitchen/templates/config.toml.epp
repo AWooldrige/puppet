@@ -2,6 +2,7 @@
     Array[String[1]] $calendar_ids,
     Numeric          $weather_latitude,
     Numeric          $weather_longitude,
+    Pattern[/\A\d{4,8}\z/] $lock_pin,
 | -%>
 #########################################################################
 ##   This file is controlled by Puppet - changes will be overwritten   ##
@@ -13,7 +14,7 @@ port = 5273
 
 [calendar]
 timezone = "Europe/London"
-lookahead_days = 35
+lookahead_days = 62
 calendar_ids = [
 <% $calendar_ids.each |$id| { -%>
     "<%= $id %>",
@@ -80,6 +81,9 @@ off_hour = 21
 overnight_hold_minutes = 5
 # Idle time on a non-board tab before reverting to the board.
 revert_after_seconds = 120
+
+[lock]
+pin = "<%= $lock_pin %>"
 
 [backlight]
 device_glob = "/sys/class/backlight/panel_backlight*"

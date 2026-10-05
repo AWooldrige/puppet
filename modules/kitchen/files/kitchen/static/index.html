@@ -9,7 +9,7 @@ Sized for a 516x917 CSS-pixel portrait viewport.
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>Kitchen board</title>
 <link rel="stylesheet" href="/board.css">
 </head>
@@ -24,12 +24,7 @@ Sized for a 516x917 CSS-pixel portrait viewport.
   <header id="topbar" class="topbar">
     <div class="topbar-text">
       <h1 id="today-date" class="today-date">&nbsp;</h1>
-    </div>
-    <div class="topbar-actions">
-      <button id="refresh" class="icon-button" type="button"
-              aria-label="Refresh now">
-        <span aria-hidden="true">&#8635;</span>
-      </button>
+      <span id="clock" class="clock"></span>
     </div>
   </header>
 
@@ -40,11 +35,25 @@ Sized for a 516x917 CSS-pixel portrait viewport.
     <section id="board" class="board" aria-label="Calendar board">
       <div id="days" class="days"></div>
     </section>
+    <div id="board-more" class="board-more" aria-hidden="true">more &#9660;</div>
 
     <section id="money" class="money" aria-label="Envelopes" hidden>
       <div id="money-body"></div>
       <p id="money-empty" class="money-empty" hidden>No envelope summary yet. It
         appears after the next reconciliation.</p>
+    </section>
+
+    <section id="diag" class="diag" aria-label="Status" hidden>
+      <div class="diag-head">
+        <span id="diag-flag" class="diag-flag">&hellip;</span>
+        <button id="refresh" class="diag-refresh" type="button">Refresh calendar now</button>
+      </div>
+      <h2 class="money-heading">Display</h2>
+      <div id="theme-picker" class="theme-picker" role="group" aria-label="Colour scheme">
+        <button type="button" data-theme="light" aria-pressed="true">Light</button>
+        <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+      </div>
+      <div id="diag-body"></div>
     </section>
 
     <!-- Home Assistant and Grafana. Cross-origin, so touches inside are invisible
@@ -67,27 +76,65 @@ Sized for a 516x917 CSS-pixel portrait viewport.
     <span class="weather-chevron" aria-hidden="true">&#9650;</span>
   </button>
 
-  <footer id="status" class="status">
-    <span id="status-updated">Updated --:--</span>
-    <span id="status-next">Refresh --:--</span>
-    <span id="status-wifi">WiFi --%</span>
-    <span id="status-load">Load --</span>
-    <span id="status-flag" class="status-flag"></span>
-  </footer>
-
   <!-- The data-tab values are the wire names the controller matches on
        (scheduler.BOARD_PAGE), so only the labels here are free to change. -->
   <nav class="tabs" aria-label="Screens">
-    <button class="tab is-active" type="button" data-tab="board"
-            aria-current="page">Calendar</button>
-    <button class="tab" type="button" data-tab="money">Money</button>
-    <button class="tab" type="button" data-tab="home">Control</button>
-    <button class="tab" type="button" data-tab="graphs">Graphs</button>
-    <button class="tab" type="button" data-tab="screenoff">Screen off</button>
+    <button class="tab is-active" type="button" data-tab="board" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span class="tab-label">Calendar</span>
+    </button>
+    <button class="tab" type="button" data-tab="money">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 14h2"/></svg>
+      <span class="tab-label">Money</span>
+    </button>
+    <button class="tab" type="button" data-tab="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9v12h14V9M10 21v-6h4v6"/></svg>
+      <span class="tab-label">Control</span>
+    </button>
+    <button class="tab" type="button" data-tab="graphs">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M7 15l4-5 4 3 5-7"/></svg>
+      <span class="tab-label">Graphs</span>
+    </button>
+    <button class="tab" type="button" data-tab="status">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+      <span class="tab-label">Status</span>
+    </button>
+    <button class="tab" type="button" data-tab="lock">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span class="tab-label">Lock</span>
+    </button>
+    <button class="tab" type="button" data-tab="screenoff">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+      <span class="tab-label">Screen off</span>
+    </button>
   </nav>
 
 </div>
 
+<div id="lock" class="lock" hidden role="dialog" aria-modal="true" aria-label="Screen locked">
+  <button id="lock-prompt" class="lock-prompt" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span>Tap to unlock</span>
+  </button>
+  <div id="lock-pad" class="lock-pad" hidden>
+    <p id="lock-dots" class="lock-dots" aria-live="polite"></p>
+    <p id="lock-message" class="lock-message" role="status"></p>
+    <div id="lock-keys" class="lock-keys">
+      <button type="button" data-key="1">1</button>
+      <button type="button" data-key="2">2</button>
+      <button type="button" data-key="3">3</button>
+      <button type="button" data-key="4">4</button>
+      <button type="button" data-key="5">5</button>
+      <button type="button" data-key="6">6</button>
+      <button type="button" data-key="7">7</button>
+      <button type="button" data-key="8">8</button>
+      <button type="button" data-key="9">9</button>
+      <button type="button" data-key="clear">Clear</button>
+      <button type="button" data-key="0">0</button>
+      <button type="button" data-key="ok">OK</button>
+    </div>
+  </div>
+</div>
 
 <div id="day-overlay" class="overlay" hidden role="dialog" aria-modal="true"
      aria-labelledby="day-title">
